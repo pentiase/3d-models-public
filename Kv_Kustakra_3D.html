@@ -1,0 +1,934 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kv Kuståkra 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D scene; a floating control sheet on the left (bottom sheet on phones), house card bottom-right. */
+:root{
+  --bg:#e9eeec; --panel:rgba(249,251,250,.94); --ink:#1b2729; --muted:#566667; --line:#d2dbd8;
+  --accent:#1d6c75; --accent-ink:#ffffff; --sun:#d99a17; --chip:#f0f4f2;
+  --sale:#2f8a5f; --sold:#8b8984; --hold:#b4874a;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --shadow:0 10px 30px rgba(20,40,42,.16);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1617; --panel:rgba(19,28,29,.93); --ink:#e4ecea; --muted:#93a4a3; --line:#2a393a;
+  --accent:#5fb1b9; --accent-ink:#0b1415; --sun:#f0bb45; --chip:#1c2a2b;
+  --sale:#4fb483; --sold:#8f8d88; --hold:#d0a466; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1617; --panel:rgba(19,28,29,.93); --ink:#e4ecea; --muted:#93a4a3; --line:#2a393a;
+  --accent:#5fb1b9; --accent-ink:#0b1415; --sun:#f0bb45; --chip:#1c2a2b;
+  --sale:#4fb483; --sold:#8f8d88; --hold:#d0a466; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hidden}
+#app{position:relative;width:100%;height:100%}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#panel{position:absolute;top:16px;left:16px;width:340px;max-height:calc(100% - 32px);overflow:auto;background:var(--panel);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+  padding:18px 18px 14px;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin}
+.eyebrow{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font:700 30px/1.02 var(--f-display);margin:4px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.facts span{font:500 11.5px/1 var(--f-mono);padding:6px 8px;border-radius:6px;background:var(--chip);color:var(--ink)}
+section{display:flex;flex-direction:column;gap:10px}
+h2{font:600 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink);display:flex;align-items:center;gap:8px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.seg button,.views button{font:500 12px/1 var(--f-body);padding:8px 4px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button small{display:block;font:400 10px/1.2 var(--f-mono);color:var(--muted);margin-top:3px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-direction:column;gap:4px}
+.row label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--muted)}
+.row label output{font:500 14px/1 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.playrow{display:flex;gap:8px;align-items:center}
+#play{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--f-body);padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+#nowBtn{font:500 12.5px/1 var(--f-body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px 12px;border-radius:10px;background:var(--chip)}
+.readout div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.readout dt{font-size:11px;color:var(--muted)}
+.readout dd{margin:0;font:500 13.5px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
+.sunbadge{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sun);margin-right:6px;vertical-align:1px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.chips button{position:relative;font:600 13px/1 var(--f-mono);padding:9px 0 8px;border-radius:7px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
+.chips button::after{content:"";position:absolute;left:6px;right:6px;bottom:3px;height:3px;border-radius:2px;background:var(--st)}
+.chips button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.toggles{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.toggles label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--accent);width:15px;height:15px}
+.views{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.note{font-size:11.5px;line-height:1.5;color:var(--muted);margin:0}
+.note a{color:var(--accent)}
+#card{position:absolute;right:16px;bottom:16px;width:320px;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:10px}
+#card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#card h3{font:700 24px/1 var(--f-display);margin:0}
+#card .type{font-size:13px;color:var(--muted);margin-top:4px}
+#closeCard{border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
+.pill{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:5px 8px;border-radius:999px;color:#fff;background:var(--st)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.deck{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line)}
+.deck .lbl{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.deck .lbl b{font:500 13px var(--f-mono);color:var(--ink)}
+#deckBar{width:100%;height:26px;display:block;border-radius:6px}
+.axis{display:flex;justify-content:space-between;font:400 10px/1 var(--f-mono);color:var(--muted)}
+.deckKey{display:flex;gap:10px;font-size:11px;color:var(--muted)}
+.deckKey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+#compass{position:absolute;top:16px;right:16px;width:54px;height:54px;border-radius:50%;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer}
+#compass svg{width:44px;height:44px;transition:transform .05s linear}
+#hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-size:12px;color:#fff;background:rgba(15,25,26,.55);padding:7px 12px;border-radius:999px;pointer-events:none;white-space:nowrap}
+#toggleSheet{display:none}
+.planbox{display:flex;flex-direction:column;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+.planbtn{font:600 12.5px/1 var(--f-body);padding:9px 12px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;text-align:center}
+.planbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.rooms{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:12px}
+.rooms li{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dotted var(--line);padding:2px 0}
+.rooms li span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.small{font-size:11.5px;line-height:1.45;color:var(--muted);margin:0}
+#loading{position:absolute;inset:0;display:grid;place-items:center;font:500 13px var(--f-mono);color:var(--muted);pointer-events:none}
+@media (max-width:760px){
+  #panel{top:auto;bottom:0;left:0;right:0;width:auto;max-height:52%;border-radius:16px 16px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));gap:14px}
+  #panel.collapsed{max-height:150px;overflow:hidden}
+  #toggleSheet{display:block;align-self:center;width:44px;height:5px;border-radius:3px;border:0;background:var(--line);cursor:pointer;margin:-4px 0 0;padding:0}
+  h1{font-size:24px}
+  #card{left:12px;right:12px;width:auto;top:12px;bottom:auto;max-height:46%;overflow:auto}
+  #compass{top:auto;bottom:calc(52% + 12px);right:12px;width:46px;height:46px}
+  #compass svg{width:38px;height:38px}
+  #hint{display:none}
+}
+@media (prefers-reduced-motion: reduce){#compass svg{transition:none}}
+</style>
+
+<div id="app">
+  <canvas id="c" tabindex="0" aria-label="3D-modell av kvarteret Kuståkra"></canvas>
+  <div id="loading">Laddar 3D-modellen…</div>
+
+  <aside id="panel" aria-label="Kontroller">
+    <button id="toggleSheet" aria-label="Visa eller dölj kontroller"></button>
+    <header>
+      <p class="eyebrow">Myresjöhus · Svarte, Ystad kommun</p>
+      <h1>Kv Kuståkra</h1>
+      <p class="lede">17 moderna enplanshus en kort promenad från stranden i Svarte. Följ solen över kvarteret under året och se när din uteplats ligger i sol.</p>
+      <div class="facts"><span>6 kedjehus · 100 m²</span><span>11 villor · 122 m²</span><span>Äganderätt</span></div>
+    </header>
+
+    <section aria-labelledby="h-sun">
+      <h2 id="h-sun">Sol och skugga</h2>
+      <div class="seg" role="group" aria-label="Årstid">
+        <button data-doy="355">Vinter<small>21 dec</small></button>
+        <button data-doy="79">Vår<small>20 mar</small></button>
+        <button data-doy="172">Sommar<small>21 jun</small></button>
+        <button data-doy="266">Höst<small>23 sep</small></button>
+        <button data-doy="today">Idag<small id="todayLbl">–</small></button>
+      </div>
+      <div class="row">
+        <label for="day">Datum <output id="dayOut">21 juni</output></label>
+        <input id="day" type="range" min="1" max="365" step="1" value="172">
+      </div>
+      <div class="row">
+        <label for="time">Klockslag <output id="timeOut">16:00</output></label>
+        <input id="time" type="range" min="0" max="1435" step="5" value="960">
+      </div>
+      <div class="playrow">
+        <button id="play" aria-pressed="false"><span id="playIcon">▶</span><span id="playTxt">Spela upp dagen</span></button>
+        <button id="nowBtn">Just nu</button>
+      </div>
+      <dl class="readout">
+        <div><dt>Solhöjd</dt><dd id="rAlt">–</dd></div>
+        <div><dt>Solens riktning</dt><dd id="rAz">–</dd></div>
+        <div><dt>Soluppgång</dt><dd id="rRise">–</dd></div>
+        <div><dt>Solnedgång</dt><dd id="rSet">–</dd></div>
+        <div><dt>Dagens längd</dt><dd id="rLen">–</dd></div>
+        <div><dt>Högst kl.</dt><dd id="rNoon">–</dd></div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="h-houses">
+      <h2 id="h-houses">Husen</h2>
+      <div class="legend">
+        <span><i style="background:var(--sale)"></i>Till salu</span>
+        <span><i style="background:var(--sold)"></i>Såld</span>
+        <span><i style="background:var(--hold)"></i>Ej till salu</span>
+      </div>
+      <div class="chips" id="chips"></div>
+      <button id="plan11" class="planbtn">Visa planlösning för hus 11</button>
+      <div class="toggles">
+        <label><input type="checkbox" id="tStatus"> Färga husen efter status</label>
+        <label><input type="checkbox" id="tNums" checked> Visa husnummer</label>
+        <label><input type="checkbox" id="tPath" checked> Visa solbanor</label>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-views">
+      <h2 id="h-views">Vy</h2>
+      <div class="views">
+        <button data-view="overview">Översikt</button>
+        <button data-view="top">Ovanifrån</button>
+        <button data-view="street">Gatuvy</button>
+        <button data-view="sea">Mot havet</button>
+      </div>
+    </section>
+
+    <p class="note">Illustration baserad på Myresjöhus kvartersskiss, planritning för villa 07–17 (skala 1:100) och illustrationsplan. Placering, mått, höjder, vegetation och omgivande bebyggelse är förenklade och ungefärliga. Solens läge är beräknat för Svarte (55,43° N, 13,71° Ö) i svensk tid. Priser och status enligt <a href="https://www.myresjohus.se/sok-tomt-bostad/kv-kustakra" target="_blank" rel="noopener">myresjohus.se</a>, oktober 2026.</p>
+  </aside>
+
+  <div id="card" hidden aria-live="polite">
+    <div class="top">
+      <div><h3 id="cTitle">Hus 8</h3><div class="type" id="cType">Villa</div></div>
+      <div style="display:flex;gap:6px;align-items:center"><span class="pill" id="cPill">Till salu</span><button id="closeCard" aria-label="Stäng">×</button></div>
+    </div>
+    <dl class="kv" id="cKv"></dl>
+    <div id="planBox" class="planbox" hidden>
+      <button id="planBtn" class="planbtn" aria-pressed="false">Visa planlösning i 3D</button>
+      <label class="small" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="tLightIn" style="accent-color:var(--accent)"> Visa solinsläpp genom fönstren (taket skuggar)</label>
+      <ul id="cRooms" class="rooms"></ul>
+      <p class="small">Rumshöjd 2,5 m, åstak över kök och matplats. Indragen uteplats och entré under skärmtak. Friliggande förråd ca 7 m² och carport ingår.</p>
+    </div>
+    <div class="deck">
+      <div class="lbl"><span>Sol på uteplatsen <span id="cDate"></span></span><b id="cSunH">–</b></div>
+      <canvas id="deckBar" width="576" height="52"></canvas>
+      <div class="axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      <div class="deckKey"><span><i style="background:#f1b52e"></i>Sol</span><span><i style="background:#7f8f9a"></i>Skugga</span><span><i style="background:#26334a"></i>Natt</span></div>
+      <div class="lbl"><span id="cNow">–</span></div>
+    </div>
+  </div>
+
+  <div id="compass" title="Vrid mot norr" role="button" aria-label="Vrid vyn mot norr">
+    <svg viewBox="-22 -22 44 44" id="compassSvg" aria-hidden="true">
+      <polygon points="0,-17 5,0 -5,0" fill="#c8452f"/>
+      <polygon points="0,17 5,0 -5,0" fill="currentColor" opacity=".35"/>
+      <text x="0" y="-9" font-size="0" fill="#fff">N</text>
+      <circle r="2" fill="currentColor"/>
+    </svg>
+  </div>
+  <div id="hint">Dra för att rotera · nyp eller scrolla för att zooma · klicka på ett hus</div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ---------------- Data from Myresjöhus (Kv Kuståkra, oktober 2026) ---------------- */
+const LAT=55.43078, LON=13.70606, YEAR=2026;
+// Pixel → meter conversion from kvartersskissen (north up). ~4.2 px per meter.
+const PX=4.2, OX=430, OY=450;
+const W=(px,py)=>[(px-OX)/PX,(py-OY)/PX];
+
+const HOUSES=[
+ {n:1,t:'K',b:[405,695,450,732],s:'sold',e:1},
+ {n:2,t:'K',b:[390,652,435,688],s:'sold',e:1},
+ {n:3,t:'K',b:[385,610,430,645],s:'sold',e:1},
+ {n:4,t:'K',b:[345,452,390,490],s:'sale',p:4800000,e:2},
+ {n:5,t:'K',b:[330,410,375,445],s:'sale',p:4600000,e:2},
+ {n:6,t:'K',b:[330,368,375,402],s:'sale',p:4500000,e:2},
+ {n:7,t:'V',b:[345,168,405,200],s:'hold'},
+ {n:8,t:'V',b:[372,222,432,258],s:'sale',p:5700000,e:2},
+ {n:9,t:'V',b:[400,275,460,312],s:'sale',p:5650000,e:2},
+ {n:10,t:'V',b:[400,337,460,372],s:'sale',p:5700000,e:2},
+ {n:11,t:'V',b:[428,393,488,430],s:'sale',p:5600000,e:2,tomt:501,fast:'Del av Versraden 1'},
+ {n:12,t:'V',b:[435,450,495,487],s:'sale',p:5600000,e:1},
+ {n:13,t:'V',b:[470,512,530,548],s:'sold',e:1},
+ {n:14,t:'V',b:[462,573,522,610],s:'sale',p:5650000,e:1},
+ {n:15,t:'V',b:[490,632,550,668],s:'sold',e:1},
+ {n:16,t:'V',b:[478,690,538,727],s:'sold',e:1},
+ {n:17,t:'V',b:[260,188,320,222],s:'hold',show:true},
+];
+const STATUS={sale:'Till salu',sold:'Såld',hold:'Ej till salu'};
+const STATUS_HEX={sale:0x3d9468,sold:0x9a9790,hold:0xc39456};
+const MONTHS=['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'];
+const DIRS=['N','NNÖ','NÖ','ÖNÖ','Ö','ÖSÖ','SÖ','SSÖ','S','SSV','SV','VSV','V','VNV','NV','NNV'];
+
+/* ---------------- Sun position (NOAA-style approximation) ---------------- */
+const rad=Math.PI/180;
+function sunPos(ms){
+  const n=ms/86400000+2440587.5-2451545.0;
+  const L=(280.460+0.9856474*n)%360, g=((357.528+0.9856003*n)%360)*rad;
+  const lam=(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*rad;
+  const eps=(23.439-0.0000004*n)*rad;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const gmst=((280.46061837+360.98564736629*n)%360+360)%360;
+  const H=(gmst+LON)*rad-ra, la=LAT*rad;
+  const alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(H));
+  let az=Math.atan2(-Math.cos(dec)*Math.sin(H),Math.sin(dec)*Math.cos(la)-Math.cos(dec)*Math.cos(H)*Math.sin(la));
+  az=(az/rad+360)%360;
+  return {alt:alt/rad, az};
+}
+function lastSunday(y,m){const d=new Date(Date.UTC(y,m+1,0));d.setUTCDate(d.getUTCDate()-d.getUTCDay());return d;}
+const DST_START=lastSunday(YEAR,2).getTime()+3600000, DST_END=lastSunday(YEAR,9).getTime()+3600000;
+function doyToMD(doy){const d=new Date(Date.UTC(YEAR,0,doy));return [d.getUTCMonth(),d.getUTCDate()];}
+function localToUTC(doy,min){
+  const [m,d]=doyToMD(doy);
+  const guess=Date.UTC(YEAR,m,d)+min*60000-3600000;
+  const off=(guess-3600000>=DST_START && guess-3600000<DST_END)?2:1;
+  return Date.UTC(YEAR,m,d)+min*60000-off*3600000;
+}
+function sunAt(doy,min){return sunPos(localToUTC(doy,min));}
+function sunDir(alt,az,out=new THREE.Vector3()){
+  const a=alt*rad, z=az*rad;
+  return out.set(Math.sin(z)*Math.cos(a),Math.sin(a),-Math.cos(z)*Math.cos(a));
+}
+const fmt=m=>{m=Math.round(m);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
+function dayInfo(doy){
+  let rise=null,set=null,maxAlt=-90,noon=720,prev=sunAt(doy,0).alt;
+  for(let m=2;m<=1440;m+=2){
+    const a=sunAt(doy,m).alt;
+    if(prev<-0.833&&a>=-0.833&&rise===null)rise=m;
+    if(prev>=-0.833&&a<-0.833)set=m;
+    if(a>maxAlt){maxAlt=a;noon=m;}
+    prev=a;
+  }
+  return {rise,set,maxAlt,noon};
+}
+
+/* ---------------- Renderer / scene ---------------- */
+const canvas=document.getElementById('c');
+const small=Math.min(innerWidth,innerHeight)<700;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.0;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xbcd4e6);
+scene.fog=new THREE.Fog(0xbcd4e6,700,2600);
+
+const camera=new THREE.PerspectiveCamera(42,1,0.5,6000);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.08;
+controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=8; controls.maxDistance=1400;
+controls.screenSpacePanning=false;
+
+const CENTER=new THREE.Vector3(8,0,5);
+const hemi=new THREE.HemisphereLight(0xdfeaf5,0x6f7f55,0.8); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff1dc,2.6);
+sun.castShadow=true;
+sun.shadow.mapSize.set(small?2048:4096,small?2048:4096);
+const SC=sun.shadow.camera; SC.left=-175;SC.right=175;SC.top=175;SC.bottom=-175;SC.near=1;SC.far=900;
+sun.shadow.bias=-0.0003; sun.shadow.normalBias=0.04;
+sun.target.position.copy(CENTER); scene.add(sun,sun.target);
+
+/* ---------------- Materials ---------------- */
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.95,metalness:0},o));
+const overlay=(c,k=1)=>M(c,{polygonOffset:true,polygonOffsetFactor:-k,polygonOffsetUnits:-k*2});
+const mat={
+  grass:M(0x86a862), field:overlay(0xa9b46d,1), field2:overlay(0x9cb36a,1), field3:overlay(0xc2b778,1),
+  lawn:overlay(0x97bd6c,2), slope:overlay(0x7f9f5b,2),
+  asphalt:overlay(0x55595b,3), paving:overlay(0xb9b7b0,4), gravel:M(0x8a8278),
+  rail:M(0x3a3634,{metalness:.4,roughness:.5}), pole:M(0x6c6e70),
+  hedge:M(0x3f6b3a), wood:M(0xb28a5e), darkwood:M(0x4c4640), glass:M(0x26323a,{roughness:.25,metalness:.2}),
+  cap:M(0x8e9294), shed:M(0x5a524a),
+  planned:M(0xeeebe5), plannedRoof:M(0x8d9194),
+  sand:overlay(0xe3d3a8,1), sea:new THREE.MeshStandardMaterial({color:0x4f7f99,roughness:.35,metalness:.1}),
+  trunk:M(0x6b5440), crown:M(0x4f7a3e),
+  vglass:new THREE.MeshStandardMaterial({color:0x9db5c2,roughness:.08,metalness:.1,transparent:true,opacity:.32,depthWrite:false}),
+  frame:M(0xa6a8aa,{metalness:.3,roughness:.5}), door:M(0x3d3b39), porch:M(0xb9b7b0),
+  oak:M(0xe2d6c0,{roughness:.8}), tile:M(0xb8b4ac,{roughness:.6}), iwall:M(0xf7f6f3), cab:M(0xf3f3f1,{roughness:.6}),
+  counter:M(0x7d7f80,{roughness:.5}), table:M(0xb08d63,{roughness:.7}), fabric:M(0x8f938a), bed:M(0xece8e0),
+};
+
+/* ---------------- Helpers ---------------- */
+function addBox(parent,w,h,d,m,x,y,z,cast=true){
+  const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;parent.add(o);return o;
+}
+function flatPoly(pts,y,m){
+  const s=new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],-p[1])));
+  const g=new THREE.ShapeGeometry(s);g.rotateX(-Math.PI/2);
+  const o=new THREE.Mesh(g,m);o.position.y=y;o.receiveShadow=true;scene.add(o);return o;
+}
+function smoothPts(pts,n){
+  const c=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],0,p[1])),false,'centripetal');
+  return c.getSpacedPoints(n).map(v=>[v.x,v.z]);
+}
+function ribbon(P,w,y,m,parent=scene){
+  const pos=[],nor=[],idx=[];
+  for(let i=0;i<P.length;i++){
+    const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)];
+    let dx=b[0]-a[0],dz=b[1]-a[1];const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+    const nx=-dz,nz=dx;
+    pos.push(P[i][0]+nx*w/2,y,P[i][1]+nz*w/2, P[i][0]-nx*w/2,y,P[i][1]-nz*w/2);
+    nor.push(0,1,0,0,1,0);
+    if(i<P.length-1){const k=i*2;idx.push(k,k+2,k+1,k+1,k+2,k+3);}
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setIndex(idx);
+  const o=new THREE.Mesh(g,m);o.receiveShadow=true;m.side=THREE.DoubleSide;parent.add(o);return o;
+}
+function textSprite(text,{size=6,color='#1b2729',bg='rgba(255,255,255,.88)',font='600 54px "IBM Plex Sans", sans-serif',pad=22,border=null}={}){
+  const c=document.createElement('canvas'),x=c.getContext('2d');
+  x.font=font;const w=Math.ceil(x.measureText(text).width)+pad*2,h=88;
+  c.width=w;c.height=h;x.font=font;
+  if(bg){x.fillStyle=bg;const r=h/2;x.beginPath();x.roundRect(0,0,w,h,r);x.fill();if(border){x.lineWidth=5;x.strokeStyle=border;x.stroke();}}
+  x.fillStyle=color;x.textBaseline='middle';x.textAlign='center';x.fillText(text,w/2,h/2+3);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthWrite:false,fog:false}));
+  s.scale.set(size*w/h,size,1);return s;
+}
+
+/* ---------------- Ground, sea, fields ---------------- */
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000),mat.grass);
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const sea=new THREE.Mesh(new THREE.PlaneGeometry(8000,3000),mat.sea);
+sea.rotation.x=-Math.PI/2;sea.position.set(0,0.15,505+1500);scene.add(sea);
+flatPoly([[-3000,488],[3000,488],[3000,506],[-3000,506]],0.05,mat.sand);
+// Agricultural fields north and east
+flatPoly([[95,-420],[600,-420],[600,120],[110,120],[90,0]],0.02,mat.field);
+flatPoly([[110,130],[600,130],[600,300],[100,300]],0.02,mat.field3);
+flatPoly([[-460,-420],[50,-420],[48,-215],[-460,-215]],0.02,mat.field2);
+flatPoly([[-900,-420],[-470,-420],[-470,120],[-900,120]],0.02,mat.field3);
+flatPoly([[-460,-900],[600,-900],[600,-430],[-460,-430]],0.02,mat.field);
+
+/* ---------------- Railway (Ystadbanan) ---------------- */
+const RAIL=smoothPts([[50,-900],[52,-400],[56,-100],[66,20],[78,110],[72,220],[40,320],[-20,390],[-150,432],[-500,452],[-1200,470]],400);
+const railGroup=new THREE.Group();scene.add(railGroup);
+const emb=ribbon(RAIL,9,0.7,mat.gravel,railGroup);emb.castShadow=false;
+// embankment sides
+(function(){const P=RAIL,pos=[],idx=[];for(let i=0;i<P.length;i++){const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)];let dx=b[0]-a[0],dz=b[1]-a[1];const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;const nx=-dz,nz=dx;
+ pos.push(P[i][0]+nx*4.5,0.7,P[i][1]+nz*4.5,P[i][0]+nx*8,0,P[i][1]+nz*8,P[i][0]-nx*4.5,0.7,P[i][1]-nz*4.5,P[i][0]-nx*8,0,P[i][1]-nz*8);
+ if(i<P.length-1){const k=i*4;idx.push(k,k+4,k+1,k+1,k+4,k+5, k+2,k+3,k+6,k+3,k+7,k+6);}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();
+ const o=new THREE.Mesh(g,M(0x7c9a58,{side:THREE.DoubleSide}));o.receiveShadow=true;railGroup.add(o);})();
+ribbon(RAIL.map(p=>p),0.12,0.86,mat.rail,railGroup);
+// two rails: offset copies
+function offsetPts(P,d){return P.map((p,i)=>{const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)];let dx=b[0]-a[0],dz=b[1]-a[1];const L=Math.hypot(dx,dz)||1;return [p[0]-dz/L*d,p[1]+dx/L*d];});}
+ribbon(offsetPts(RAIL,0.75),0.12,0.86,mat.rail,railGroup);ribbon(offsetPts(RAIL,-0.75),0.12,0.86,mat.rail,railGroup);
+// catenary poles
+(function(){const pts=[];let acc=0;for(let i=1;i<RAIL.length;i++){acc+=Math.hypot(RAIL[i][0]-RAIL[i-1][0],RAIL[i][1]-RAIL[i-1][1]);if(acc>45){acc=0;pts.push(RAIL[i]);}}
+ const op=offsetPts(RAIL,3.2);const g=new THREE.CylinderGeometry(0.12,0.15,7.5,6);const im=new THREE.InstancedMesh(g,mat.pole,pts.length);
+ const m4=new THREE.Matrix4();let k=0;acc=0;for(let i=1;i<RAIL.length;i++){acc+=Math.hypot(RAIL[i][0]-RAIL[i-1][0],RAIL[i][1]-RAIL[i-1][1]);if(acc>45){acc=0;m4.makeTranslation(op[i][0],0.7+3.75,op[i][1]);im.setMatrixAt(k++,m4);}}
+ im.count=k;im.castShadow=true;railGroup.add(im);})();
+const railDist=(x,z)=>{let d=1e9;for(let i=0;i<RAIL.length;i+=2){const dd=Math.hypot(RAIL[i][0]-x,RAIL[i][1]-z);if(dd<d)d=dd;}return d;};
+const railXat=z=>{let best=RAIL[0],bd=1e9;for(const p of RAIL){if(p[1]<0&&z>0)continue;const d=Math.abs(p[1]-z);if(d<bd&&p[1]<330){bd=d;best=p;}}return best[0];};
+
+/* ---------------- Streets ---------------- */
+const STREET_PX=[[331,-400],[331,100],[338,200],[372,300],[398,400],[418,500],[450,600],[466,700],[474,800],[478,1038]];
+const STREET=smoothPts(STREET_PX.map(p=>W(p[0],p[1])),220);
+ribbon(STREET,7,0.03,mat.asphalt);
+const streetX=z=>{let best=STREET[0],bd=1e9;for(const p of STREET){const d=Math.abs(p[1]-z);if(d<bd){bd=d;best=p;}}return best[0];};
+// side roads to the west (planned area) and village road
+ribbon(smoothPts([W(20,322),W(200,318),W(352,312)],40),6,0.03,mat.asphalt);
+ribbon(smoothPts([W(40,612),W(200,598),W(330,585),W(440,560)],40),6,0.03,mat.asphalt);
+ribbon(smoothPts([W(40,-400),W(40,300),W(42,700),W(44,1038)],60),6,0.03,mat.asphalt);
+const VILLAGE_ROAD=smoothPts([[-900,140],[-300,141],[0,140],[48,140]],80);
+ribbon(VILLAGE_ROAD,7,0.03,mat.asphalt);
+// Road to Ystad crossing the railway further east
+ribbon(smoothPts([[95,140],[300,135],[900,120]],40),7,0.03,mat.asphalt);
+
+/* ---------------- Site: lawns, slope, hedges, paving ---------------- */
+const EAST_PX=[[420,160],[485,213],[505,268],[515,325],[520,385],[535,442],[548,500],[565,562],[575,622],[580,680],[580,745]];
+const EAST=smoothPts(EAST_PX.map(p=>W(p[0],p[1])),120);
+const eastX=z=>{let best=EAST[0],bd=1e9;for(const p of EAST){const d=Math.abs(p[1]-z);if(d<bd){bd=d;best=p;}}return best[0];};
+{ // lawn east side: from street edge to east boundary
+  const left=EAST.map(p=>[streetX(p[1])+3.6,p[1]]).reverse();
+  flatPoly(EAST.concat(left),0.02,mat.lawn);
+  const out=EAST.map(p=>[p[0]+3.2,p[1]]);
+  flatPoly(EAST.concat(out.slice().reverse()),0.02,mat.slope);
+}
+// west blocks (kedjehus + hus 17)
+const rectPx=(x0,y0,x1,y1)=>[W(x0,y0),W(x1,y0),W(x1,y1),W(x0,y1)];
+flatPoly(rectPx(282,350,392,500),0.02,mat.lawn);
+flatPoly(rectPx(342,600,452,745),0.02,mat.lawn);
+flatPoly(rectPx(222,175,325,240),0.02,mat.lawn);
+const hedges=new THREE.Group();scene.add(hedges);
+function hedge(a,b){const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);const o=addBox(hedges,L,1.1,0.6,mat.hedge,(a[0]+b[0])/2,0.55,(a[1]+b[1])/2);o.rotation.y=-Math.atan2(dz,dx);}
+[213,268,325,385,442,500,562,622,680,740].forEach(py=>{const z=W(0,py)[1];hedge([streetX(z)+5.5,z],[eastX(z)-0.3,z]);});
+// west-side hedges (rear + dividers)
+[[282,350,282,500],[282,500,392,500],[282,405,370,405],[282,448,385,448],[282,350,330,350],
+ [342,600,342,745],[342,745,452,745],[342,648,385,648],[342,690,392,690],[342,600,385,600],
+ [222,175,222,240],[222,240,325,240],[222,175,325,175]].forEach(r=>hedge(W(r[0],r[1]),W(r[2],r[3])));
+
+/* ---------------- Houses ---------------- */
+const houseGroup=new THREE.Group();scene.add(houseGroup);
+const pickables=[], occluders=[];
+const FACADE=[0xf2f0eb,0xd3c6b1];
+function windowsOn(g,len,d,h,xs,y){xs.forEach(x=>{addBox(g,1.2,1.3,0.08,mat.glass,x,y,d/2+0.02,false);addBox(g,1.2,1.3,0.08,mat.glass,x,y,-d/2-0.02,false);});}
+/* Villa 07–17 built from Myresjöhus planritning "Bostad 07-17, 4 rok 122 kvm" (skala 1:100).
+   Drawing coords: u = across the house 0–9.06 m (drawing left→right), v = along the house 0–18.06 m
+   (drawing top = garden/uteplats, bottom = entré). Local house space: +x toward garden, +z = drawing right. */
+const VL=18.06, VW=9.06;
+const VILLA_ROOMS=[
+  ['Matplats',12.6,2.4,2.3],['Kök',19.7,2.4,6.6],['Vardagsrum',18.3,6.9,5.6],['Sovrum 1',13.2,2.3,10.4],
+  ['Sovrum 2',9.6,1.4,14.0],['Sovrum 3',9.0,2.3,17.0],['Bad',6.4,7.4,9.9],['Tvätt',6.5,7.4,12.4],
+  ['WC/D',3.5,7.9,14.8],['Hall',6.3,5.3,11.5],['Entré',5.2,5.8,14.9],['Kapprum',4.2,3.7,14.9],['Klk',3.4,3.6,13.0],
+  ['Uteplats',null,7.0,1.7],
+];
+const ghostMat=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});
+function buildVilla(h){
+  const fm=M(h.n%2?FACADE[0]:FACADE[1]);h.mat=fm;h.base=fm.color.getHex();
+  const ext={},int={},roof={};
+  const LX=v=>VL/2-v, LZ=u=>u-VW/2;
+  const put=(bag,key,u0,u1,v0,v1,y0,y1)=>{if(u1-u0<0.005||v1-v0<0.005||y1-y0<0.005)return;
+    const x0=LX(v1),x1=LX(v0),z0=LZ(u0),z1=LZ(u1);const g=new THREE.BoxGeometry(x1-x0,y1-y0,z1-z0);
+    g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);(bag[key]??=[]).push(g);};
+  // wall along axis 'u' (fixed v=c) or 'v' (fixed u=c); openings [from,to,sill,head,kind]
+  function wall(bag,key,axis,c,a0,a1,t,H,ops=[]){
+    const seg=(s0,s1,y0,y1,k=key,tt=t)=>axis==='u'?put(bag,k,s0,s1,c-tt/2,c+tt/2,y0,y1):put(bag,k,c-tt/2,c+tt/2,s0,s1,y0,y1);
+    let cur=a0;
+    for(const [o0,o1,sill,head,kind] of ops.slice().sort((p,q)=>p[0]-q[0])){
+      seg(cur,o0,0,H); if(sill>0)seg(o0,o1,0,sill); seg(o0,o1,head,H);
+      if(kind==='g'){seg(o0,o1,sill,head,'glass',0.04);seg(o0,o1,sill,sill+0.06,'frame',t*0.6);seg(o0,o1,head-0.06,head,'frame',t*0.6);}
+      else if(kind==='door')seg(o0,o1,sill,head,'door',0.06);
+      cur=o1;}
+    seg(cur,a1,0,H);
+  }
+  const H1=4.2,H2=3.0,T=0.3,IH=2.5,IT=0.12;
+  // --- Exterior walls (puts) ---
+  wall(ext,'facade','u',0.15,0,4.95,T,H1,[[0.75,1.65,0,2.1,'g'],[1.95,4.35,0.4,2.1,'g']]);   // kök/matplats mot uteplats
+  wall(ext,'facade','v',4.95,0,3.55,T,H1,[[0.6,2.6,0.4,2.1,'g']]);                            // matplats mot indragen uteplats
+  wall(ext,'facade','u',3.55,4.8,VW,T,H1,[[5.45,6.25,0,2.1,'g'],[6.4,8.55,0.3,2.1,'g']]);    // vardagsrum mot uteplats
+  wall(ext,'facade','v',VW-0.15,3.4,8.5,T,H1,[[4.5,7.6,0.3,2.1,'g']]);                        // vardagsrum, långsida
+  wall(ext,'facade','v',VW-0.15,8.5,15.9,T,H2,[[12.75,13.65,0,2.1,'door']]);                  // groventré tvätt
+  wall(ext,'facade','u',15.75,4.6,VW,T,H2,[[4.95,5.9,0,2.1,'door'],[6.05,6.75,0.3,2.1,'g']]); // entrédörr under skärmtak
+  wall(ext,'facade','v',4.75,15.9,VL,T,H2);
+  wall(ext,'facade','u',VL-0.15,0,4.9,T,H2,[[1.25,3.0,0.9,2.1,'g']]);                         // sovrum 3
+  wall(ext,'facade','v',0.15,0,8.5,T,H1,[[6.1,7.4,0.9,2.1,'g']]);                             // kök
+  wall(ext,'facade','v',0.15,8.5,VL,T,H2,[[10.2,11.2,0.9,2.1,'g'],[12.9,14.0,0.9,2.1,'g']]); // sovrum 1, 2
+  put(ext,'facade',0,VW,8.35,8.65,H2,H1);                     // step between high and low volume
+  put(ext,'facade',VW-0.25,VW,0,0.25,0,H1);                   // corner post, uteplats
+  put(ext,'facade',VW-0.25,VW,VL-0.25,VL,0,H2);               // corner post, entré
+  // dark wood cladding in the recessed uteplats and entré
+  wall(ext,'darkwood','u',3.38,5.1,VW-0.3,0.04,H1,[[5.45,6.25,0,2.1,'x'],[6.4,8.55,0.3,2.1,'x']]);
+  wall(ext,'darkwood','v',5.12,0.3,3.4,0.04,H1,[[0.6,2.6,0.4,2.1,'x']]);
+  wall(ext,'darkwood','u',15.58,4.9,VW-0.3,0.04,H2,[[4.95,5.9,0,2.1,'x'],[6.05,6.75,0.3,2.1,'x']]);
+  wall(ext,'darkwood','v',4.92,15.9,VL-0.3,0.04,H2);
+  put(ext,'deck',0,VW,-2.3,0,0,0.18);                         // altan
+  put(ext,'deck',5.1,VW,0,3.4,0,0.18);                        // indragen uteplats
+  put(ext,'paveH',4.9,VW,15.9,VL,0,0.06);                     // entré under skärmtak
+  // --- Roofs (papptak with fascia) ---
+  put(roof,'cap',-0.05,VW+0.05,-0.05,8.65,H1,H1+0.3);
+  put(roof,'cap',-0.05,VW+0.05,8.5,VL+0.05,H2,H2+0.3);
+  // --- Interior ---
+  put(int,'floor',0.3,4.8,0.3,VL-0.3,0.02,0.15); put(int,'floor',4.8,VW-0.3,3.7,8.5,0.02,0.15); put(int,'floor',4.6,6.0,8.5,13.95,0.02,0.15);
+  put(int,'tile',6.0,VW-0.3,8.5,15.75,0.02,0.155); put(int,'tile',4.6,6.9,13.95,15.75,0.02,0.155);
+  wall(int,'iwall','u',8.45,0.3,4.85,IT,IH);
+  wall(int,'iwall','u',8.5,6.0,VW-0.3,IT,IH);
+  wall(int,'iwall','v',4.6,8.45,13.95,IT,IH,[[11.0,11.85,0,2.1,'open']]);
+  wall(int,'iwall','v',6.0,8.5,13.65,IT,IH,[[10.0,10.8,0,2.1,'open'],[12.55,13.35,0,2.1,'open']]);
+  wall(int,'iwall','u',11.15,6.0,VW-0.3,IT,IH);
+  wall(int,'iwall','u',13.65,6.9,VW-0.3,IT,IH);
+  wall(int,'iwall','v',6.9,13.65,15.75,IT,IH,[[13.9,14.7,0,2.1,'open']]);
+  wall(int,'iwall','u',11.95,0.3,2.75,IT,IH);
+  wall(int,'iwall','v',2.75,11.95,15.85,IT,IH,[[14.1,14.9,0,2.1,'open']]);
+  wall(int,'iwall','u',12.0,2.75,4.6,IT,IH);
+  wall(int,'iwall','u',13.95,2.75,4.6,IT,IH,[[3.6,4.3,0,2.1,'open']]);
+  wall(int,'iwall','u',15.85,0.3,4.6,IT,IH,[[3.5,4.3,0,2.1,'open']]);
+  // kök
+  put(int,'cab',0.3,3.3,7.8,8.4,0.15,1.05); put(int,'counter',0.3,3.3,7.76,8.4,1.05,1.09); put(int,'cab',3.3,4.55,7.8,8.4,0.15,2.3);
+  put(int,'cab',1.15,3.7,4.75,5.6,0.15,1.05); put(int,'counter',1.1,3.75,4.7,5.65,1.05,1.09);
+  // matplats + uteplats
+  const dining=(u0,u1,v0,v1)=>{put(int,'table',u0,u1,v0,v1,0.85,0.9);put(int,'table',(u0+u1)/2-0.25,(u0+u1)/2+0.25,v0+0.2,v1-0.2,0.15,0.85);
+    for(let u=u0+0.35;u<u1-0.2;u+=0.7){put(int,'chair',u-0.22,u+0.22,v0-0.5,v0-0.06,0.15,0.6);put(int,'chair',u-0.22,u+0.22,v1+0.06,v1+0.5,0.15,0.6);}};
+  dining(1.4,3.6,1.25,2.2); dining(6.2,8.1,1.15,2.1);
+  // vardagsrum
+  put(int,'fabric',5.9,8.1,4.0,4.85,0.15,0.6); put(int,'fabric',5.9,8.1,3.8,4.05,0.15,0.95);
+  put(int,'fabric',5.9,8.1,6.9,7.7,0.15,0.6);  put(int,'fabric',5.9,8.1,7.65,7.9,0.15,0.95);
+  put(int,'table',6.4,7.6,5.4,6.4,0.15,0.5);
+  // sovrum
+  put(int,'bed',0.7,2.5,8.75,10.8,0.15,0.6); put(int,'table',0.7,2.5,8.58,8.75,0.15,1.1); put(int,'cab',3.95,4.5,8.6,10.7,0.15,2.3);
+  put(int,'bed',0.4,2.4,12.1,13.0,0.15,0.55); put(int,'cab',0.4,1.5,15.2,15.75,0.15,2.3);
+  put(int,'bed',0.4,1.3,16.0,17.75,0.15,0.55); put(int,'table',1.6,3.0,17.2,17.75,0.72,0.77); put(int,'cab',4.0,4.5,16.0,17.2,0.15,2.3);
+  // våtrum, tvätt, förvaring
+  put(int,'cab',7.9,VW-0.35,8.6,9.5,0.15,0.2); put(int,'cab',6.4,6.8,8.7,9.3,0.15,0.55); put(int,'cab',6.4,7.4,10.5,11.05,0.15,0.85);
+  put(int,'cab',6.15,7.4,11.3,11.9,0.15,0.95); put(int,'counter',6.15,VW-0.35,13.05,13.55,0.15,0.9);
+  put(int,'cab',8.2,VW-0.35,15.0,15.7,0.15,0.2); put(int,'cab',7.9,8.4,13.75,14.3,0.15,0.55);
+  put(int,'cab',2.85,3.3,12.1,13.85,0.15,2.0); put(int,'cab',2.85,3.4,14.1,15.75,0.15,1.8);
+
+  const g=new THREE.Group(),interior=new THREE.Group();interior.visible=false;
+  const matFor={facade:fm,glass:mat.vglass,frame:mat.frame,door:mat.door,darkwood:mat.darkwood,deck:mat.wood,paveH:mat.porch,cap:mat.cap,
+    floor:mat.oak,tile:mat.tile,iwall:mat.iwall,cab:mat.cab,counter:mat.counter,table:mat.table,chair:mat.table,fabric:mat.fabric,bed:mat.bed};
+  const mk=(bag,parent,flags={})=>{const out=[];for(const k in bag){const geo=BufferGeometryUtils.mergeGeometries(bag[k]);bag[k].forEach(x=>x.dispose());
+    const m=new THREE.Mesh(geo,matFor[k]);m.castShadow=k!=='glass'&&k!=='paveH'&&k!=='deck';m.receiveShadow=k!=='glass';
+    if(k==='glass')m.userData.skip=true;Object.assign(m.userData,flags);parent.add(m);out.push(m);}return out;};
+  mk(ext,g);
+  h.roofs=mk(roof,g);
+  mk(int,interior,{skip:true});
+  VILLA_ROOMS.forEach(([n,a,u,v])=>{const s=textSprite(a?`${n} · ${String(a).replace('.',',')} m²`:n,{size:0.85,bg:'rgba(255,255,255,.92)',font:'600 46px "IBM Plex Sans", sans-serif',pad:18});
+    s.position.set(LX(v),1.6,LZ(u));s.userData.skip=true;interior.add(s);});
+  g.add(interior);h.interior=interior;h.detailed=true;
+  return g;
+}
+function buildChain(h){
+  const g=new THREE.Group(),L=10.6,D=8.6,fm=M(h.n%2?FACADE[1]:FACADE[0]);h.mat=fm;h.base=fm.color.getHex();
+  addBox(g,6.4,3.0,D,fm,-L/2+3.2,1.5,0);
+  addBox(g,4.2,3.6,D,fm,L/2-2.1,1.8,0);
+  addBox(g,6.5,0.14,D+0.1,mat.cap,-L/2+3.2,3.07,0);
+  addBox(g,4.3,0.14,D+0.1,mat.cap,L/2-2.1,3.67,0);
+  addBox(g,1.8,3.0,0.12,mat.darkwood,-L/2+1.5,1.5,-D/2-0.04,false);
+  windowsOn(g,L,D,3,[-2.2,1.6],1.6);
+  addBox(g,0.08,2.3,3.0,mat.glass,L/2+0.02,1.5,0.8,false);
+  addBox(g,3.2,0.22,6.0,mat.wood,L/2+1.6,0.11,0.5,false);
+  return g;
+}
+const tmpV=new THREE.Vector3();
+HOUSES.forEach(h=>{
+  const [x0,y0,x1,y1]=h.b;const c=W((x0+x1)/2,(y0+y1)/2);h.c=c;
+  h.garden=(h.t==='K'||h.n===17)?'W':'E';
+  if(h.t==='V'){ // keep the 18 m villa clear of the street (front yard >= 2.5 m)
+    const se=streetX(c[1]);
+    if(h.garden==='E')c[0]=Math.max(c[0]+1.0,se+3.5+2.5+VL/2); else c[0]=Math.min(c[0]-1.0,se-3.5-2.5-VL/2);
+  }
+  const g=h.t==='V'?buildVilla(h):buildChain(h);
+  g.position.set(c[0],0,c[1]);g.rotation.y=h.garden==='E'?0:Math.PI;
+  g.traverse(o=>{if(o.isMesh){o.userData.house=h;if(!o.userData.skip){pickables.push(o);occluders.push(o);}}});
+  houseGroup.add(g);h.group=g;
+  // altan sample point (seated eye height) in world space
+  const local=h.t==='V'?new THREE.Vector3(VL/2+1.1,1.1,0):new THREE.Vector3(10.6/2+1.6,1.1,0.5);
+  g.updateMatrixWorld(true);h.deck=local.applyMatrix4(g.matrixWorld);
+  // shed (förråd ca 7 m²) + parking/carport on the street side
+  const sx=streetX(c[1]);const toStreet=Math.sign(sx-c[0]);const side=h.garden==='E'?1:-1;
+  let fx,fz;
+  if(h.t==='V'){fz=c[1]+side*(VW/2+1.45);fx=c[0]+toStreet*(VL/2-2.2);}
+  else{fz=c[1]-(8.6/2+1.4);fx=c[0]+toStreet*2.2;}
+  const shed=addBox(houseGroup,3.0,2.4,2.3,mat.shed,fx,1.2,fz);shed.userData.house=h;pickables.push(shed);occluders.push(shed);
+  const px=fx+toStreet*4.2;
+  flatPoly([[px-2.6,fz-2.6],[px+2.6,fz-2.6],[px+2.6,fz+2.6],[px-2.6,fz+2.6]],0.04,mat.paving);
+  if(h.t==='V'){ // pergola carport like the renderings
+    for(const dx of [-2.2,2.2])for(const dz of [-2.3,2.3])addBox(houseGroup,0.14,2.5,0.14,mat.darkwood,px+dx,1.25,fz+dz);
+    for(const dz of [-2.3,2.3])addBox(houseGroup,4.7,0.2,0.1,mat.darkwood,px,2.5,fz+dz);
+    for(let k=-2;k<=2;k+=0.45)addBox(houseGroup,0.06,0.12,4.8,mat.darkwood,px+k,2.66,fz);
+  }
+  // entrance path
+  const ex=c[0]+toStreet*(h.t==='V'?VL/2:5.3), pz=h.t==='V'?c[1]+side*2.4:c[1]-0.4;
+  flatPoly([[Math.min(ex,sx-toStreet*3.5),pz-0.8],[Math.max(ex,sx-toStreet*3.5),pz-0.8],[Math.max(ex,sx-toStreet*3.5),pz+0.8],[Math.min(ex,sx-toStreet*3.5),pz+0.8]],0.04,mat.paving);
+  // number label
+  const lab=textSprite(String(h.n).padStart(2,'0')+(h.show?' · Visningshus':''),{size:h.show?2.8:3.2,font:'600 56px "IBM Plex Mono", monospace'});
+  lab.position.set(c[0],h.t==='V'?7.5:7,c[1]);lab.renderOrder=10;lab.userData.base=lab.scale.clone();h.label=lab;scene.add(lab);
+});
+
+/* ---------------- Planned neighbours (from kvartersskiss + illustrationsplan) ---------------- */
+const plannedBoxes=[];
+[[85,290,120,332],[140,283,175,327],[192,276,227,320],[247,270,282,314],
+ [55,395,90,440],[108,388,143,432],[160,381,195,425],[215,375,250,418],
+ [55,545,90,585],[130,535,165,578],[212,525,247,568],
+ [120,655,155,700],[180,648,215,692],[240,640,275,683],[298,630,333,673]].forEach(r=>{
+  const a=W(r[0],r[1]),b=W(r[2],r[3]);plannedBoxes.push([(a[0]+b[0])/2,(a[1]+b[1])/2,Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1])]);});
+for(let z=-92;z>-260;z-=24)for(let x=-120;x<-55;x+=17)plannedBoxes.push([x+(Math.random()-.5)*2,z,8.4,10.5]);
+for(let z=-92;z>-260;z-=21)plannedBoxes.push([-8,z,13,8.6],[-39,z,13,8.6]);
+for(let z=-20;z<120;z+=22)for(let x=-150;x<-110;x+=17)plannedBoxes.push([x,z,8.4,10.5]);
+{
+  const box=new THREE.BoxGeometry(1,1,1);
+  const im=new THREE.InstancedMesh(box,mat.planned,plannedBoxes.length);
+  const cap=new THREE.InstancedMesh(box,mat.plannedRoof,plannedBoxes.length);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3();
+  plannedBoxes.forEach((b,i)=>{p.set(b[0],1.6,b[1]);s.set(b[2],3.2,b[3]);m4.compose(p,q,s);im.setMatrixAt(i,m4);p.y=3.25;s.set(b[2]+.1,0.14,b[3]+.1);m4.compose(p,q,s);cap.setMatrixAt(i,m4);});
+  im.castShadow=im.receiveShadow=cap.castShadow=true;scene.add(im,cap);occluders.push(im);
+}
+
+/* ---------------- Existing village of Svarte (generic) ---------------- */
+{
+  const lots=[];const rnd=(()=>{let s=7;return()=>(s=(s*16807)%2147483647)/2147483647;})();
+  for(let z=168;z<482;z+=25)for(let x=-560;x<300;x+=23){
+    if([250,360].some(r=>Math.abs(z-r)<12))continue;
+    if([-380,-240,-100].some(r=>Math.abs(x-r)<10))continue;
+    if(railDist(x,z)<24)continue;
+    if(z<330&&x>railXat(z)-14)continue;
+    if(rnd()>0.82)continue;
+    lots.push([x+(rnd()-.5)*4,z+(rnd()-.5)*4,8+rnd()*4,7+rnd()*2.5,(rnd()<.5?0:Math.PI/2)+(rnd()-.5)*.15,rnd()]);
+  }
+  [250,360].forEach(z=>ribbon(smoothPts([[-600,z],[0,z],[30,z]],20).filter(p=>railDist(p[0],p[1])>10),6,0.03,mat.asphalt));
+  [-380,-240,-100].forEach(x=>ribbon(smoothPts([[x,140],[x,486]],20),6,0.03,mat.asphalt));
+  // gable prism
+  const pg=new THREE.BufferGeometry();
+  const v=[-.5,0,-.5, .5,0,-.5, .5,1,0, -.5,0,-.5, .5,1,0, -.5,1,0,  -.5,0,.5, -.5,1,0, .5,1,0, -.5,0,.5, .5,1,0, .5,0,.5,
+           -.5,0,-.5, -.5,1,0, -.5,0,.5,  .5,0,-.5, .5,0,.5, .5,1,0];
+  pg.setAttribute('position',new THREE.Float32BufferAttribute(v,3));pg.computeVertexNormals();
+  const walls=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),M(0xffffff),lots.length);
+  const roofs=new THREE.InstancedMesh(pg,M(0xffffff,{side:THREE.DoubleSide}),lots.length);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3(),col=new THREE.Color();
+  const wallC=[0xf3efe6,0xeee3c8,0xe9e4dc,0xd9c9a8,0xf6f4ef],roofC=[0xa5432f,0x8f3a2a,0x4b4d50,0xb4583c,0x3e3f42];
+  lots.forEach((l,i)=>{q.setFromAxisAngle(new THREE.Vector3(0,1,0),l[4]);
+    p.set(l[0],1.5,l[1]);s.set(l[2],3,l[3]);m4.compose(p,q,s);walls.setMatrixAt(i,m4);walls.setColorAt(i,col.setHex(wallC[Math.floor(l[5]*5)]));
+    p.y=3;s.set(l[2]+.6,3.2,l[3]+.8);m4.compose(p,q,s);roofs.setMatrixAt(i,m4);roofs.setColorAt(i,col.setHex(roofC[Math.floor((l[5]*13)%5)]));});
+  walls.castShadow=walls.receiveShadow=roofs.castShadow=roofs.receiveShadow=true;scene.add(walls,roofs);
+  window.__lots=lots;
+}
+
+/* ---------------- Trees ---------------- */
+{
+  const T=[];const rnd=(()=>{let s=11;return()=>(s=(s*16807)%2147483647)/2147483647;})();
+  T.push([...W(382,296),5.5],[...W(452,526),5.5]);                        // planteringar på gatan
+  const inner=offsetPts(RAIL,-11);
+  for(let i=0;i<inner.length;i+=3){const p=inner[i];if(p[1]>-260&&p[1]<300&&rnd()<.55)T.push([p[0]+(rnd()-.5)*4,p[1],5+rnd()*3]);}
+  window.__lots.forEach(l=>{if(rnd()<.45)T.push([l[0]+(rnd()<.5?-1:1)*(7+rnd()*3),l[1]+(rnd()-.5)*8,6+rnd()*5]);});
+  for(let x=-460;x<50;x+=9)if(rnd()<.6)T.push([x,-212+(rnd()-.5)*3,6+rnd()*4]);   // åkerholme/häckrad
+  for(let z=-420;z<120;z+=10)if(rnd()<.5)T.push([-466+(rnd()-.5)*3,z,6+rnd()*4]);
+  for(let i=0;i<40;i++)T.push([-90+rnd()*70,-15+rnd()*-60,4+rnd()*3]);          // grönytan i väster
+  const tg=new THREE.CylinderGeometry(.18,.25,1,6);tg.translate(0,.5,0);
+  const cg=new THREE.IcosahedronGeometry(1,1);
+  const trunks=new THREE.InstancedMesh(tg,mat.trunk,T.length),crowns=new THREE.InstancedMesh(cg,mat.crown,T.length);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3(),col=new THREE.Color();
+  T.forEach((t,i)=>{const h=t[2];p.set(t[0],0,t[1]);s.set(1,h*.45,1);m4.compose(p,q,s);trunks.setMatrixAt(i,m4);
+    p.y=h*.62;const r=h*.32;s.set(r,r*1.1,r);m4.compose(p,q,s);crowns.setMatrixAt(i,m4);crowns.setColorAt(i,col.setHSL(.26+rnd()*.05,.35,.3+rnd()*.08));});
+  trunks.castShadow=crowns.castShadow=true;crowns.receiveShadow=true;scene.add(trunks,crowns);occluders.push(crowns);
+}
+
+/* ---------------- Area labels ---------------- */
+const areaLabels=[
+  ['Östersjön',[-60,4,640],16,'rgba(255,255,255,.75)'],
+  ['Svarte',[-200,26,300],11],
+  ['Ystadbanan',[86,10,40],6],
+  ['Planerad bebyggelse',[-70,12,-120],6],
+  ['Ystad 5 km →',[330,10,130],8],
+  ['← Malmö',[-560,10,130],8],
+  ['Stranden',[-120,8,496],7],
+];
+areaLabels.forEach(([t,p,sz,bg])=>{const s=textSprite(t,{size:sz,bg:bg||'rgba(255,255,255,.82)',font:'600 50px "IBM Plex Sans", sans-serif'});s.position.set(...p);scene.add(s);});
+const compassLabels=new THREE.Group();scene.add(compassLabels);
+[['N',0,-1],['S',0,1],['Ö',1,0],['V',-1,0]].forEach(([t,x,z])=>{const s=textSprite(t,{size:9,color:t==='N'?'#ffffff':'#1b2729',bg:t==='N'?'rgba(200,69,47,.92)':'rgba(255,255,255,.85)',font:'700 56px "IBM Plex Mono", monospace',pad:26});s.position.set(CENTER.x+x*190,4,CENTER.z+z*190);compassLabels.add(s);});
+
+/* ---------------- Selection ring ---------------- */
+const ring=new THREE.Mesh(new THREE.RingGeometry(10.5,11.6,64),new THREE.MeshBasicMaterial({color:0x1d6c75,transparent:true,opacity:.9,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-6,polygonOffsetUnits:-12}));
+ring.rotation.x=-Math.PI/2;ring.position.y=0.08;ring.visible=false;scene.add(ring);
+
+/* ---------------- Sun paths (dome) ---------------- */
+const DOME_R=170;
+const pathGroup=new THREE.Group();scene.add(pathGroup);
+const sunBall=new THREE.Mesh(new THREE.SphereGeometry(5.5,24,16),new THREE.MeshBasicMaterial({color:0xffd257,fog:false}));
+const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,220,120,.9)');g.addColorStop(.35,'rgba(255,200,90,.35)');g.addColorStop(1,'rgba(255,200,90,0)');x.fillStyle=g;x.fillRect(0,0,128,128);const t=new THREE.CanvasTexture(c);return t;})(),depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));
+sunGlow.scale.set(40,40,1);sunBall.add(sunGlow);pathGroup.add(sunBall);
+function pathPoints(doy,step=6){const pts=[];for(let m=0;m<=1440;m+=step){const s=sunAt(doy,m);if(s.alt>-1.5){pts.push(sunDir(Math.max(s.alt,-1.5),s.az).multiplyScalar(DOME_R).add(CENTER));}}return pts;}
+function pathLine(doy,color,opacity,dashed){
+  const g=new THREE.BufferGeometry().setFromPoints(pathPoints(doy));
+  const m=dashed?new THREE.LineDashedMaterial({color,dashSize:5,gapSize:4,transparent:true,opacity,fog:false}):new THREE.LineBasicMaterial({color,transparent:true,opacity,fog:false});
+  const l=new THREE.Line(g,m);if(dashed)l.computeLineDistances();return l;
+}
+const refPaths=new THREE.Group();pathGroup.add(refPaths);
+[[172,'21 jun'],[79,'20 mar · 23 sep'],[355,'21 dec']].forEach(([d,t])=>{
+  refPaths.add(pathLine(d,0xffffff,.55,true));
+  const info=dayInfo(d),s=sunAt(d,info.noon);const lab=textSprite(t,{size:5,bg:'rgba(20,30,32,.55)',color:'#ffffff',font:'500 46px "IBM Plex Mono", monospace'});
+  lab.position.copy(sunDir(s.alt,s.az).multiplyScalar(DOME_R+9).add(CENTER));refPaths.add(lab);
+});
+// horizon ring
+{const pts=[];for(let a=0;a<=360;a+=3)pts.push(new THREE.Vector3(CENTER.x+Math.sin(a*rad)*DOME_R,0.3,CENTER.z-Math.cos(a*rad)*DOME_R));
+ refPaths.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.35})));}
+let curPath=null;const hourGroup=new THREE.Group();pathGroup.add(hourGroup);
+const hourTex={};
+function hourSprite(h){const k=String(h).padStart(2,'0');if(!hourTex[k]){hourTex[k]=textSprite(k,{size:3.6,bg:'rgba(255,210,90,.95)',color:'#3a2a05',font:'600 52px "IBM Plex Mono", monospace',pad:16});}return hourTex[k].clone();}
+function buildCurrentPath(doy){
+  if(curPath){pathGroup.remove(curPath);curPath.geometry.dispose();}
+  curPath=pathLine(doy,0xffc83d,1,false);curPath.material.linewidth=2;pathGroup.add(curPath);
+  hourGroup.clear();
+  for(let h=0;h<24;h++){const s=sunAt(doy,h*60);if(s.alt>0.5){const p=sunDir(s.alt,s.az).multiplyScalar(DOME_R).add(CENTER);
+    const dot=new THREE.Mesh(new THREE.SphereGeometry(1.4,10,8),new THREE.MeshBasicMaterial({color:0xffc83d,fog:false}));dot.position.copy(p);hourGroup.add(dot);
+    const sp=hourSprite(h);sp.position.copy(p).add(new THREE.Vector3(0,4.5,0));hourGroup.add(sp);}}
+}
+
+/* ---------------- Sky + light update ---------------- */
+const skyDay=new THREE.Color(0xa9cbe6),skyLow=new THREE.Color(0xf0c9a0),skyNight=new THREE.Color(0x1b2638),skyTw=new THREE.Color(0x56607e);
+const sunWarm=new THREE.Color(0xffb26b),sunWhite=new THREE.Color(0xfff4e2);
+const SS=x=>Math.min(1,Math.max(0,x));
+let state={doy:172,min:960};
+function applySun(){
+  const s=sunAt(state.doy,state.min);state.sun=s;
+  const d=sunDir(s.alt,s.az);state.dir=d.clone();
+  sun.position.copy(CENTER).addScaledVector(d,420);
+  const day=SS(s.alt/10),tw=SS((s.alt+8)/8);
+  sun.intensity=s.alt>0?3.4*SS(s.alt/6)*(0.55+0.45*SS(s.alt/25)):0;
+  sun.visible=s.alt>0;
+  sun.color.copy(sunWarm).lerp(sunWhite,SS(s.alt/18));
+  hemi.intensity=0.1+0.42*tw*(0.75+0.25*day);
+  const sky=skyNight.clone().lerp(skyTw,tw).lerp(skyLow,SS(s.alt/2+1)*(1-day)).lerp(skyDay,day);
+  if(s.alt<-1)sky.copy(skyNight).lerp(skyTw,tw);
+  scene.background.copy(sky);scene.fog.color.copy(sky);
+  hemi.color.copy(sky).lerp(new THREE.Color(0xffffff),.4);
+  mat.sea.color.setHex(0x4f7f99).multiplyScalar(0.35+0.65*tw);
+  renderer.toneMappingExposure=0.9+0.25*(1-day)*tw;
+  sunBall.position.copy(d).multiplyScalar(DOME_R).add(CENTER);sunBall.visible=s.alt>-1.5;
+  // readout
+  document.getElementById('rAlt').textContent=s.alt>-0.833?s.alt.toFixed(1).replace('.',',')+'°':'Under horisonten';
+  document.getElementById('rAz').textContent=Math.round(s.az)+'° '+DIRS[Math.round(s.az/22.5)%16];
+  updateCardNow();requestRender();
+}
+function applyDay(){
+  const [m,d]=doyToMD(state.doy);
+  document.getElementById('dayOut').textContent=d+' '+MONTHS[m];
+  const info=dayInfo(state.doy);state.info=info;
+  document.getElementById('rRise').textContent=info.rise!=null?fmt(info.rise):'–';
+  document.getElementById('rSet').textContent=info.set!=null?fmt(info.set):'–';
+  const len=(info.set??0)-(info.rise??0);
+  document.getElementById('rLen').textContent=Math.floor(len/60)+' h '+String(len%60).padStart(2,'0')+' min';
+  document.getElementById('rNoon').textContent=fmt(info.noon)+' · '+info.maxAlt.toFixed(0)+'°';
+  buildCurrentPath(state.doy);
+  document.querySelectorAll('.seg button').forEach(b=>{const v=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;b.setAttribute('aria-pressed',String(v===state.doy));});
+  computeDeck();applySun();
+}
+
+/* ---------------- Sun on patio (ray test) ---------------- */
+const ray=new THREE.Raycaster();ray.far=600;
+function sunlit(origin,dir){ray.set(origin,dir);return ray.intersectObjects(occluders,false).length===0;}
+let selected=null,deckSamples=null;
+function computeDeck(){
+  if(!selected){deckSamples=null;return;}
+  scene.updateMatrixWorld(true);
+  const out=[];const dv=new THREE.Vector3();
+  for(let m=0;m<1440;m+=10){const s=sunAt(state.doy,m+5);if(s.alt<=0){out.push(0);continue;}
+    sunDir(s.alt,s.az,dv);out.push(sunlit(selected.deck,dv)?2:1);}
+  deckSamples=out;drawDeck();
+}
+function drawDeck(){
+  const cv=document.getElementById('deckBar'),x=cv.getContext('2d'),w=cv.width,h=cv.height;
+  x.clearRect(0,0,w,h);if(!deckSamples)return;
+  const cw=w/deckSamples.length;const cols=['#26334a','#7f8f9a','#f1b52e'];
+  deckSamples.forEach((v,i)=>{x.fillStyle=cols[v];x.fillRect(Math.floor(i*cw),0,Math.ceil(cw)+1,h);});
+  x.fillStyle='rgba(255,255,255,.35)';for(let k=1;k<4;k++)x.fillRect(Math.round(w*k/4)-1,0,2,h);
+  const nx=state.min/1440*w;x.fillStyle='#111';x.fillRect(nx-2,0,4,h);x.fillStyle='#fff';x.fillRect(nx-1,0,2,h);
+  const sunMin=deckSamples.filter(v=>v===2).length*10;
+  document.getElementById('cSunH').textContent=sunMin?`ca ${Math.floor(sunMin/60)} h ${String(sunMin%60).padStart(2,'0')} min`:'Ingen direkt sol';
+  const [m,d]=doyToMD(state.doy);document.getElementById('cDate').textContent=`${d} ${MONTHS[m].slice(0,3)}`;
+}
+function updateCardNow(){
+  if(!selected)return;drawDeck();
+  const s=state.sun;let t;
+  if(s.alt<=0)t=`Kl. ${fmt(state.min)}: solen är nere`;
+  else t=`Kl. ${fmt(state.min)}: uteplatsen ligger i `+(sunlit(selected.deck,state.dir)?'sol':'skugga');
+  document.getElementById('cNow').textContent=t;
+}
+
+/* ---------------- House card ---------------- */
+const nf=new Intl.NumberFormat('sv-SE');
+function setCut(h,on){
+  if(!h||!h.detailed)return;h.cut=on;
+  const li=document.getElementById('tLightIn').checked;h.roofs.forEach(r=>{r.material=on?ghostMat:mat.cap;r.visible=!on||li;});h.interior.visible=on;h.label.visible=!on&&document.getElementById('tNums').checked;
+  const b=document.getElementById('planBtn');b.setAttribute('aria-pressed',String(on));b.textContent=on?'Visa taket igen':'Visa planlösning i 3D';
+  document.getElementById('plan11').setAttribute('aria-pressed',String(on&&h.n===11));
+  if(on){const side=h.garden==='E'?1:-1;flyTo(new THREE.Vector3(h.c[0]-side*9,40,h.c[1]+side*27),new THREE.Vector3(h.c[0]+side*2,0,h.c[1]+side*3),1200);}
+  requestRender();
+}
+function selectHouse(h,fly=true){
+  if(selected&&selected!==h&&selected.cut)setCut(selected,false);
+  selected=h;
+  document.querySelectorAll('#chips button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===h?.n)));
+  HOUSES.forEach(x=>x.mat.emissive.setHex(0x000000));
+  if(!h){document.getElementById('card').hidden=true;ring.visible=false;document.getElementById('plan11').setAttribute('aria-pressed','false');requestRender();return;}
+  h.mat.emissive.setHex(0x1d6c75);h.mat.emissiveIntensity=0.22;
+  ring.position.set(h.c[0],0.08,h.c[1]);ring.scale.setScalar(h.t==='V'?1.1:0.8);ring.visible=true;
+  const card=document.getElementById('card');card.hidden=false;
+  document.getElementById('cTitle').textContent='Hus '+h.n+(h.show?' · Visningshus':'');
+  document.getElementById('cType').textContent=h.t==='V'?'Villa · 4 rum och kök':'Kedjehus · 3 rum och kök';
+  const pill=document.getElementById('cPill');pill.textContent=STATUS[h.s];pill.style.setProperty('--st',`var(--${h.s})`);
+  const rows=[['Boarea',h.t==='V'?'122 m²':'100 m²']];
+  if(h.tomt)rows.push(['Tomtarea',h.tomt+' m² (prel.)']);
+  rows.push(['Pris',h.p?nf.format(h.p)+' kr':'–'],['Uteplats mot',h.garden==='E'?'öster':'väster'],['Etapp',h.e?String(h.e):'–']);
+  if(h.fast)rows.push(['Fastighet',h.fast]);
+  rows.push(['Upplåtelse','Äganderätt']);
+  document.getElementById('cKv').innerHTML=rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+  const pb=document.getElementById('planBox');pb.hidden=!h.detailed;
+  if(h.detailed){document.getElementById('cRooms').innerHTML=VILLA_ROOMS.filter(r=>r[1]).map(r=>`<li><span>${r[0]}</span><span>${String(r[1]).replace('.',',')} m²</span></li>`).join('');
+    const b=document.getElementById('planBtn');b.setAttribute('aria-pressed',String(!!h.cut));b.textContent=h.cut?'Visa taket igen':'Visa planlösning i 3D';}
+  computeDeck();updateCardNow();
+  if(fly){const off=h.garden==='E'?new THREE.Vector3(55,48,40):new THREE.Vector3(-55,48,40);
+    flyTo(new THREE.Vector3(h.c[0],0,h.c[1]).add(off),new THREE.Vector3(h.c[0],1,h.c[1]));}
+  requestRender();
+}
+document.getElementById('tLightIn').onchange=()=>{if(selected&&selected.cut){selected.roofs.forEach(r=>r.visible=document.getElementById('tLightIn').checked);computeDeck();requestRender();}};
+document.getElementById('planBtn').onclick=()=>{if(selected)setCut(selected,!selected.cut);};
+document.getElementById('plan11').onclick=()=>{const h=HOUSES.find(x=>x.n===11);if(selected===h&&h.cut){setCut(h,false);return;}selectHouse(h,false);setCut(h,true);};
+document.getElementById('closeCard').onclick=()=>selectHouse(null);
+
+/* ---------------- Status colouring / toggles ---------------- */
+function applyColours(){
+  const on=document.getElementById('tStatus').checked;
+  HOUSES.forEach(h=>h.mat.color.setHex(on?STATUS_HEX[h.s]:h.base));requestRender();
+}
+document.getElementById('tStatus').onchange=applyColours;
+document.getElementById('tNums').onchange=e=>{HOUSES.forEach(h=>h.label.visible=e.target.checked&&!h.cut);requestRender();};
+document.getElementById('tPath').onchange=e=>{refPaths.visible=curPath.visible=hourGroup.visible=e.target.checked;requestRender();};
+
+const chips=document.getElementById('chips');
+HOUSES.slice().sort((a,b)=>a.n-b.n).forEach(h=>{const b=document.createElement('button');b.textContent=String(h.n).padStart(2,'0');b.dataset.n=h.n;
+  b.style.setProperty('--st',`var(--${h.s})`);b.title=`Hus ${h.n} – ${h.t==='V'?'Villa':'Kedjehus'}, ${STATUS[h.s].toLowerCase()}`;b.setAttribute('aria-pressed','false');
+  b.onclick=()=>selectHouse(selected===h?null:h);chips.appendChild(b);});
+
+/* ---------------- Camera, views, tween ---------------- */
+let tween=null;
+function flyTo(pos,target,dur=1100){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){camera.position.copy(pos);controls.target.copy(target);requestRender();return;}
+  tween={t0:performance.now(),dur,p0:camera.position.clone(),t0v:controls.target.clone(),p1:pos,t1:target};requestRender();
+}
+const VIEWS={
+  overview:[new THREE.Vector3(-125,105,150),new THREE.Vector3(-4,0,8)],
+  top:[new THREE.Vector3(10,330,6),new THREE.Vector3(10,0,5)],
+  street:[new THREE.Vector3(W(331,40)[0],2.0,W(331,40)[1]),new THREE.Vector3(W(410,460)[0],1.5,W(410,460)[1])],
+  sea:[new THREE.Vector3(30,70,-160),new THREE.Vector3(-20,0,250)],
+};
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const v=VIEWS[b.dataset.view];flyTo(v[0].clone(),v[1].clone());});
+camera.position.copy(VIEWS.overview[0]);controls.target.copy(VIEWS.overview[1]);
+document.getElementById('compass').onclick=()=>{const t=controls.target.clone();const d=camera.position.distanceTo(t);const pol=controls.getPolarAngle();
+  flyTo(new THREE.Vector3(t.x,t.y+Math.cos(pol)*d,t.z+Math.sin(pol)*d),t,700);};
+
+/* ---------------- Picking ---------------- */
+const ndc=new THREE.Vector2();let down=null;
+canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
+canvas.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
+  const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);const hit=ray.intersectObjects(pickables,false)[0];ray.far=600;
+  selectHouse(hit?hit.object.userData.house:null,!!hit);
+});
+canvas.addEventListener('pointermove',e=>{
+  if(e.buttons)return;const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);canvas.style.cursor=ray.intersectObjects(pickables,false).length?'pointer':'grab';ray.far=600;
+});
+
+/* ---------------- Controls wiring ---------------- */
+const dayEl=document.getElementById('day'),timeEl=document.getElementById('time');
+const nowSthlm=()=>{const p=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Stockholm',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+  const g=k=>+p.find(x=>x.type===k).value;const doy=Math.round((Date.UTC(YEAR,g('month')-1,g('day'))-Date.UTC(YEAR,0,0))/86400000);return {doy:Math.min(365,Math.max(1,doy)),min:g('hour')*60+g('minute')};};
+const todayDoy=nowSthlm().doy;
+{const [m,d]=doyToMD(todayDoy);document.getElementById('todayLbl').textContent=d+' '+MONTHS[m].slice(0,3);}
+let dayTimer=null;
+dayEl.oninput=()=>{state.doy=+dayEl.value;const [m,d]=doyToMD(state.doy);document.getElementById('dayOut').textContent=d+' '+MONTHS[m];clearTimeout(dayTimer);dayTimer=setTimeout(applyDay,60);};
+timeEl.oninput=()=>{state.min=+timeEl.value;document.getElementById('timeOut').textContent=fmt(state.min);applySun();};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{state.doy=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;dayEl.value=state.doy;applyDay();});
+document.getElementById('nowBtn').onclick=()=>{const n=nowSthlm();state.doy=n.doy;state.min=Math.round(n.min/5)*5;dayEl.value=state.doy;timeEl.value=state.min;document.getElementById('timeOut').textContent=fmt(state.min);applyDay();};
+let playing=false,lastStep=0;
+const playBtn=document.getElementById('play');
+playBtn.onclick=()=>{playing=!playing;playBtn.setAttribute('aria-pressed',String(playing));document.getElementById('playIcon').textContent=playing?'❚❚':'▶';document.getElementById('playTxt').textContent=playing?'Pausa':'Spela upp dagen';
+  if(playing){const i=state.info;if(i.rise!=null&&(state.min<i.rise-30||state.min>i.set+20))state.min=Math.max(0,Math.floor((i.rise-30)/5)*5);}requestRender();};
+document.getElementById('toggleSheet').onclick=()=>document.getElementById('panel').classList.toggle('collapsed');
+
+/* ---------------- Render loop (on demand) ---------------- */
+let need=true;function requestRender(){need=true;}
+controls.addEventListener('change',requestRender);
+const compassSvg=document.getElementById('compassSvg');
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();requestRender();}
+addEventListener('resize',resize);
+function loop(t){
+  requestAnimationFrame(loop);
+  if(playing&&t-lastStep>45){lastStep=t;state.min+=5;const i=state.info;
+    if(state.min>=1440||(i.set!=null&&state.min>i.set+25)){state.min=i.rise!=null?Math.max(0,Math.floor((i.rise-30)/5)*5):0;}
+    timeEl.value=state.min;document.getElementById('timeOut').textContent=fmt(state.min);applySun();}
+  if(tween){const k=Math.min(1,(t-tween.t0)/tween.dur),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0v,tween.t1,e);if(k>=1)tween=null;need=true;}
+  if(controls.update())need=true;
+  if(!need)return;need=false;
+  HOUSES.forEach(h=>{const d=camera.position.distanceTo(h.label.position);h.label.scale.copy(h.label.userData.base).multiplyScalar(Math.min(1.5,Math.max(0.18,d/90)));});
+  compassSvg.style.transform=`rotate(${controls.getAzimuthalAngle()*180/Math.PI}deg)`;
+  renderer.render(scene,camera);
+}
+resize();applyColours();applyDay();
+document.getElementById('loading').remove();
+requestAnimationFrame(loop);
+window.__k={state,applyDay,applySun,selectHouse,HOUSES,sunAt,dayInfo};
+</script>
+
+</body></html>
