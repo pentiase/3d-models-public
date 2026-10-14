@@ -1,0 +1,1130 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nord-Lock 3D-koncept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Nord-Lock Group, mörkt tema (från nord-lock.com): grafit, Nord-Lock-blå, ljusblå, marin */
+  --bg:#191a1d; --surface:#202226; --surface-2:#26282d; --line:#34373d;
+  --ink:#ffffff; --ink-2:#d0d3d8; --muted:#8b919a;
+  --accent:#0091d0; --accent-bright:#1ba6e8; --accent-soft:#b2d8f6; --navy:#164063; --grey-series:#6e7682;
+  --cms-bg:#f3f4f7; --cms-panel:#fff; --cms-line:#e3e5ea; --cms-ink:#1c2029; --cms-muted:#687083;
+  --cms-accent:#5b45e6; --cms-accent-soft:#eeebfd;
+  --top:56px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none !important}
+
+/* ---------- Top bar ---------- */
+.topbar{position:fixed;inset:0 0 auto 0;height:var(--top);z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:0 20px;background:rgba(25,26,29,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2);white-space:nowrap;min-width:0}
+.brand b{font-family:Oswald;font-weight:500;letter-spacing:.12em;color:var(--ink);font-size:15px}
+.brand .sep{width:1px;height:18px;background:var(--line)}
+.brand .short{display:none;font:500 10px 'Roboto Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:3px 8px}
+.top-right{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--ink-2);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.seg.views button{padding:7px 18px}
+.chip-btn{border:1px solid var(--line);background:transparent;color:var(--ink-2);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.chip-btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+body[data-view="cms"] #btnFields{display:none}
+
+/* ---------- Site ---------- */
+#site{padding-top:var(--top)}
+.story{display:grid;grid-template-columns:minmax(360px,42%) 1fr}
+.steps{padding:0 clamp(20px,4vw,72px)}
+.step{min-height:100vh;display:flex;flex-direction:column;justify-content:center;max-width:540px;padding:12vh 0;opacity:.28;transition:opacity .5s}
+.step.active{opacity:1}
+.eyebrow{font:500 12px 'Roboto Mono',monospace;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:24px}
+.gr{text-transform:none;font-family:Roboto,sans-serif;font-weight:500}
+.hero h1{font-family:Oswald;font-weight:600;text-transform:uppercase;font-size:clamp(44px,5.6vw,86px);line-height:1.08;margin:0 0 26px;letter-spacing:.005em}
+.hero p{font-size:19px}
+.step-num{font:500 13px 'Roboto Mono',monospace;color:var(--accent);letter-spacing:.12em;margin-bottom:14px}
+.step h2{font-family:Oswald;font-weight:500;text-transform:uppercase;font-size:clamp(28px,3.1vw,44px);line-height:1.05;margin:0 0 18px}
+.step p{font-size:17px;line-height:1.6;color:var(--ink-2);margin:0}
+.scroll-hint{margin-top:44px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.scroll-hint i{width:1px;height:38px;background:linear-gradient(var(--accent),transparent);animation:drip 1.8s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(1);opacity:0}}
+.controls{margin-top:26px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--accent-bright)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-bright)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ab-card{margin-top:26px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px}
+.ab-card svg{display:block;width:100%;height:auto}
+.ab-read{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:8px;font-size:14px;color:var(--ink-2)}
+.ab-read b{font:500 14px 'Roboto Mono',monospace;color:var(--ink)}
+.ab-status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);width:100%}
+.ab-status .ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:12px;font-weight:700}
+.ab-status.ok .ico{background:#1f7a4a;color:#fff}
+.ab-status.bad .ico{background:#c2410c;color:#fff}
+
+.stage{position:sticky;top:var(--top);height:calc(100vh - var(--top));background:radial-gradient(ellipse at 55% 42%,#2a2d33 0%,#1d1e22 45%,#151619 78%);overflow:hidden}
+#canvasHost,#previewHost{position:absolute;inset:0}
+canvas.gl{display:block;width:100%;height:100%}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lbl{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;transition:opacity .35s;will-change:transform}
+.lbl::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(27,166,232,.25)}
+.lbl::after{content:"";position:absolute;left:4px;top:50%;width:26px;height:1px;background:rgba(27,166,232,.55);z-index:-1}
+.lbl span{margin-left:18px;background:rgba(25,26,29,.85);border:1px solid var(--line);padding:5px 11px;border-radius:999px}
+.labels.on .lbl{opacity:1}
+
+.hud{position:absolute;left:24px;right:24px;bottom:24px;display:flex;gap:14px;align-items:flex-end;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+.hud.on{opacity:1;transform:none}
+.panel{background:rgba(20,23,28,.84);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.gauge{padding:14px 18px;min-width:180px}
+.gauge-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.gauge-val{font-family:Oswald;font-size:46px;line-height:1.1;font-variant-numeric:tabular-nums}
+.gauge-val small{font-size:20px;color:var(--ink-2);margin-left:3px}
+.gauge-bar{position:relative;height:4px;background:var(--line);border-radius:2px;margin-top:6px}
+.gauge-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.gauge-bar::after{content:"";position:absolute;left:66.6%;top:-4px;width:1px;height:12px;background:var(--ink-2)}
+.chart-card{flex:1;max-width:560px;padding:12px 14px 10px;pointer-events:auto;position:relative;display:none}
+.chart-card.on{display:block}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;font-size:12px;color:var(--ink-2)}
+.chart-head .t{font-weight:500;color:var(--ink)}
+.legend{display:flex;gap:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:0;border-top:2px solid}
+#chart{width:100%;height:150px;display:block;cursor:crosshair}
+.chart-tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--ink);white-space:nowrap;opacity:0;transition:opacity .12s}
+.chart-tip .row{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.chart-tip .row b{color:var(--ink);font-weight:500;margin-left:auto;padding-left:10px;font-variant-numeric:tabular-nums}
+.chart-tip i{width:10px;height:0;border-top:2px solid}
+.sim-note{font-size:11px;color:var(--muted);margin-top:4px}
+.sc-badge{position:absolute;top:16px;right:16px;font:500 11px/1.6 'Roboto Mono',monospace;color:var(--navy);background:var(--accent-soft);border-radius:8px;padding:8px 11px;display:none;max-width:290px}
+.sc-badge b{display:block;font-weight:500;opacity:.7}
+.show-fields .sc-badge{display:block}
+
+.show-fields [data-sc]{outline:1px dashed var(--accent-soft);outline-offset:6px;position:relative}
+.show-fields [data-sc]::after{content:attr(data-sc);position:absolute;left:-6px;top:-26px;font:500 10px/1.4 'Roboto Mono',monospace;background:var(--accent-soft);color:var(--navy);padding:2px 6px;border-radius:4px;letter-spacing:0;text-transform:none;white-space:nowrap}
+
+.cta{border-top:1px solid var(--line);padding:120px clamp(20px,6vw,96px);background:linear-gradient(180deg,var(--bg),#141518)}
+.cta h2{font-family:Oswald;font-weight:500;text-transform:uppercase;font-size:clamp(30px,3.6vw,52px);line-height:1.05;margin:0 0 18px;max-width:900px}
+.cta > p{font-size:18px;line-height:1.6;color:var(--ink-2);max-width:720px;margin:0 0 40px}
+.cta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:40px}
+.cta-grid div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.cta-grid h3{font-family:Oswald;font-weight:500;text-transform:uppercase;font-size:20px;margin:0 0 8px;color:var(--accent-soft)}
+.cta-grid p{margin:0;color:var(--ink-2);line-height:1.55;font-size:15px}
+footer{padding:28px clamp(20px,6vw,96px);font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+
+/* ---------- CMS mockup ---------- */
+#cms{color-scheme:light;padding-top:var(--top);background:var(--cms-bg);color:var(--cms-ink);min-height:100vh}
+.cms{display:grid;grid-template-columns:240px minmax(380px,1fr) minmax(420px,46%);grid-template-rows:54px minmax(0,1fr);height:calc(100vh - var(--top))}
+.cms-head{grid-column:1/-1;display:flex;align-items:center;gap:18px;padding:0 16px;background:#fff;border-bottom:1px solid var(--cms-line)}
+.cms-logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;white-space:nowrap}
+.cms-logo i{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#7b61ff,#e8467c)}
+.cms-logo em{font-style:normal;font-size:11px;font-weight:500;color:var(--cms-muted);border:1px solid var(--cms-line);border-radius:4px;padding:1px 6px}
+.cms-nav{display:flex;gap:2px}
+.cms-nav span{padding:6px 10px;border-radius:6px;font-size:13px;color:var(--cms-muted)}
+.cms-nav .on{background:var(--cms-accent-soft);color:var(--cms-accent);font-weight:500}
+.cms-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.saved{font-size:12px;color:var(--cms-muted);white-space:nowrap}
+.cbtn{border:1px solid var(--cms-line);background:#fff;color:var(--cms-ink);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;white-space:nowrap}
+.cbtn:hover{border-color:#c9cdd6}
+.cbtn.primary{background:var(--cms-accent);border-color:var(--cms-accent);color:#fff}
+.cms-tree{background:#fff;border-right:1px solid var(--cms-line);overflow:auto;padding:12px 8px;font-size:13px}
+.tree-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cms-muted);padding:6px 8px 8px}
+.ti{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;white-space:nowrap;color:var(--cms-ink)}
+.ti svg{flex:none;color:#9aa1ae}
+.ti.sel{background:var(--cms-accent-soft);color:var(--cms-accent);font-weight:500}
+.ti.sel svg{color:var(--cms-accent)}
+.cms-form{overflow:auto;padding:22px 24px 48px;min-height:0}
+.f-crumb{font-size:12px;color:var(--cms-muted)}
+.f-title{font-size:22px;font-weight:700;margin:6px 0 10px}
+.f-meta{display:flex;flex-wrap:wrap;gap:6px}
+.f-meta span{font-size:12px;background:#fff;border:1px solid var(--cms-line);border-radius:999px;padding:3px 10px;color:var(--cms-muted)}
+.f-group{background:#fff;border:1px solid var(--cms-line);border-radius:12px;margin-top:16px;overflow:hidden}
+.f-group>summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.f-group>summary::-webkit-details-marker{display:none}
+.f-group>summary .chev{display:inline-block;transition:transform .2s;color:var(--cms-muted);font-size:16px;width:10px}
+.f-group[open]>summary .chev{transform:rotate(90deg)}
+.f-group>summary .tag{margin-left:auto;font-weight:500;font-size:11px;color:var(--cms-accent);background:var(--cms-accent-soft);padding:3px 9px;border-radius:999px}
+.f-group.hl{border-color:var(--cms-accent);box-shadow:0 0 0 3px var(--cms-accent-soft)}
+.f-body{padding:2px 16px 18px;display:grid;gap:16px}
+.fld label{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:500;margin-bottom:6px}
+.fld label code{font:11px 'Roboto Mono',monospace;color:var(--cms-muted)}
+.fld .hint{font-size:12px;color:var(--cms-muted);margin-top:6px}
+.fld input[type=text],.fld textarea,.fld select{width:100%;border:1px solid var(--cms-line);border-radius:8px;padding:8px 10px;font:14px Roboto,sans-serif;color:var(--cms-ink);background:#fff}
+.fld textarea{resize:vertical;min-height:70px;line-height:1.45}
+.fld input:focus,.fld textarea:focus,.fld select:focus{outline:3px solid var(--cms-accent-soft);border-color:var(--cms-accent)}
+.range{display:flex;align-items:center;gap:12px}
+.range input{flex:1;accent-color:var(--cms-accent)}
+.range output{font:500 13px 'Roboto Mono',monospace;min-width:70px;text-align:right}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}
+.switch input{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:999px;background:#d5d8df;position:relative;cursor:pointer;transition:background .2s;margin:0}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked{background:var(--cms-accent)}
+.switch input:checked::after{transform:translateX(16px)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ab-chip{display:flex;align-items:center;gap:10px;font-size:13px;padding:10px 12px;border-radius:8px;background:#eefaf3;color:#14532d}
+.ab-chip .ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#1f7a4a;color:#fff;font-size:12px;font-weight:700;flex:none}
+.ab-chip.bad{background:#fff3e8;color:#7a2e0a}
+.ab-chip.bad .ico{background:#c2410c}
+.ab-chip code{font:500 12px 'Roboto Mono',monospace;margin-left:auto;white-space:nowrap}
+.seg.light{background:#f1f2f5;border-color:var(--cms-line)}
+.seg.light button{color:var(--cms-muted)}
+.seg.light button[aria-pressed="true"]{background:#fff;color:var(--cms-accent);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pers-badge{font-size:10px;font-weight:600;color:#9a3412;background:#ffedd5;border-radius:4px;padding:1px 6px;margin-left:6px}
+pre.json{margin:0;max-height:420px;overflow:auto;background:#14161c;color:#c9ced6;border-radius:8px;padding:14px;font:12px/1.55 'Roboto Mono',monospace}
+pre.json .k{color:#a5b4fc} pre.json .s{color:#fde68a} pre.json .n{color:#86efac}
+.cms-preview{background:#151619;display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--cms-line)}
+.pv-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;font-size:12px;color:#9aa1ad;border-bottom:1px solid #22262e}
+.pv-bar .live{width:8px;height:8px;border-radius:50%;background:#3ccf7a;box-shadow:0 0 0 3px rgba(60,207,122,.18)}
+.pv-bar .sp{margin-left:auto}
+.pv-bar button{border:1px solid #2a2f38;background:transparent;color:#d6dae1;border-radius:6px;padding:4px 10px;font-size:12px}
+.pv-stage{position:relative;flex:1;min-height:340px;background:radial-gradient(ellipse at 50% 55%,#2a2d33 0%,#1d1e22 50%,#151619 80%)}
+.pv-text{position:absolute;left:22px;top:20px;right:22px;pointer-events:none;z-index:1}
+.pv-eyebrow{color:var(--accent);font:500 11px 'Roboto Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+.pv-h{font-family:Oswald;font-weight:500;text-transform:uppercase;font-size:26px;line-height:1.05;color:#fff;max-width:75%;margin-top:6px}
+.pv-ab{padding:12px 16px 14px;border-top:1px solid #22262e;color:#c9ced6}
+.pv-ab svg{display:block;width:100%;max-height:150px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:#17151f;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;display:flex;gap:10px;align-items:center;opacity:0;transition:.3s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast i{width:8px;height:8px;border-radius:50%;background:#3ccf7a}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1100px){
+  .cms{grid-template-columns:1fr;grid-template-rows:auto auto auto;height:auto}
+  .cms-tree{display:none}
+  .cms-preview{order:-1;min-height:62vh}
+  .cms-head{grid-column:auto;flex-wrap:wrap;padding:10px 16px}
+  .cms-nav{display:none}
+}
+@media (max-width:900px){
+  .topbar{grid-template-columns:auto 1fr;padding:0 16px}
+  .brand .long,.brand .sep{display:none}
+  .brand .short{display:inline-block}
+  .top-right{gap:6px}
+  .topbar .views{justify-self:end}
+  .top-right{display:none}
+  .story{grid-template-columns:1fr}
+  .stage{grid-row:1;height:50vh;z-index:2}
+  .steps{grid-row:2}
+  .step{min-height:78vh;padding:6vh 0}
+  .hud{left:10px;right:10px;bottom:10px;gap:8px}
+  .gauge{min-width:0;padding:10px 12px}
+  .gauge-val{font-size:28px}
+  #chart{height:96px}
+  .chart-head .legend{display:none}
+  .cta-grid{grid-template-columns:1fr}
+  .cta{padding:72px 20px}
+  .two{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.scroll-hint i{animation:none}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<header class="topbar">
+  <div class="brand"><b>PENTIA</b><span class="sep"></span><span class="long" data-ui="brandSub"></span><span class="short">Koncept</span></div>
+  <div class="seg views" role="group" aria-label="Vy">
+    <button data-view-btn="site" aria-pressed="true" data-ui="viewSite"></button>
+    <button data-view-btn="cms" aria-pressed="false">SitecoreAI</button>
+  </div>
+  <div class="top-right">
+    <button class="chip-btn" id="btnFields" aria-pressed="false" data-ui="showFields"></button>
+    <div class="seg" role="group" aria-label="Språk">
+      <button data-lang="sv" aria-pressed="true">SV</button>
+      <button data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<!-- =================== WEBBPLATS =================== -->
+<main id="site">
+  <section class="story">
+    <div class="steps">
+      <article class="step hero active" data-step="0">
+        <div class="eyebrow" data-field="eyebrow"></div>
+        <h1 data-field="heading"></h1>
+        <p data-field="intro"></p>
+        <div class="scroll-hint"><i></i><span data-ui="scroll"></span></div>
+      </article>
+      <article class="step" data-step="1">
+        <div class="step-num">01</div>
+        <h2 data-field="steps.0.title"></h2>
+        <p data-field="steps.0.body"></p>
+      </article>
+      <article class="step" data-step="2">
+        <div class="step-num">02</div>
+        <h2 data-field="steps.1.title"></h2>
+        <p data-field="steps.1.body"></p>
+        <div class="controls"><button class="btn" data-replay>↻ <span data-ui="replay"></span></button></div>
+      </article>
+      <article class="step" data-step="3">
+        <div class="step-num">03</div>
+        <h2 data-field="steps.2.title"></h2>
+        <p data-field="steps.2.body"></p>
+        <div class="controls">
+          <div class="seg" role="group">
+            <button data-vib="nl" aria-pressed="true">Nord-Lock</button>
+            <button data-vib="flat" aria-pressed="false" data-ui="plain"></button>
+          </div>
+          <button class="btn" data-replay>↻ <span data-ui="replay"></span></button>
+        </div>
+      </article>
+      <article class="step" data-step="4">
+        <div class="step-num">04</div>
+        <h2 data-field="steps.3.title"></h2>
+        <p data-field="steps.3.body"></p>
+        <div class="controls"><button class="btn" data-replay>↻ <span data-ui="replay"></span></button></div>
+      </article>
+      <article class="step" data-step="5">
+        <div class="step-num">05</div>
+        <h2 data-field="steps.4.title"></h2>
+        <p data-field="steps.4.body"></p>
+        <div class="ab-card"><div class="ab-svg"></div><div class="ab-read"></div></div>
+        <div class="controls"><button class="btn primary" data-goto="cms"><span data-ui="tryCms"></span> →</button></div>
+      </article>
+    </div>
+
+    <div class="stage" id="stage">
+      <div id="canvasHost"></div>
+      <div class="labels" id="labels">
+        <div class="lbl" data-anchor="bolt"><span data-field="labels.bolt"></span></div>
+        <div class="lbl" data-anchor="upper"><span data-field="labels.upper"></span></div>
+        <div class="lbl" data-anchor="cams"><span data-field="labels.cams"></span></div>
+        <div class="lbl" data-anchor="serrations"><span data-field="labels.serrations"></span></div>
+        <div class="lbl" data-anchor="joint"><span data-field="labels.joint"></span></div>
+      </div>
+      <div class="hud" id="hud">
+        <div class="panel gauge">
+          <div class="gauge-label" data-ui="gauge"></div>
+          <div class="gauge-val"><span id="gaugeVal">100</span><small>%</small></div>
+          <div class="gauge-bar"><i id="gaugeBar"></i></div>
+        </div>
+        <div class="panel chart-card" id="chartCard">
+          <div class="chart-head"><span class="t" id="chartTitle"></span><span class="legend" id="legend"></span></div>
+          <canvas id="chart"></canvas>
+          <div class="sim-note" data-ui="simNote"></div>
+          <div class="chart-tip" id="chartTip"></div>
+        </div>
+      </div>
+      <div class="sc-badge" id="scBadge"></div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="eyebrow" data-ui="ctaEyebrow"></div>
+    <h2 data-ui="ctaTitle"></h2>
+    <p data-ui="ctaBody"></p>
+    <div class="cta-grid">
+      <div><h3 data-ui="cta1t"></h3><p data-ui="cta1b"></p></div>
+      <div><h3 data-ui="cta2t"></h3><p data-ui="cta2b"></p></div>
+      <div><h3 data-ui="cta3t"></h3><p data-ui="cta3b"></p></div>
+    </div>
+    <button class="btn primary" data-goto="cms"><span data-ui="ctaBtn"></span> →</button>
+  </section>
+  <footer data-ui="footer"></footer>
+</main>
+
+<!-- =================== SITECOREAI-MOCKUP =================== -->
+<main id="cms" hidden>
+  <div class="cms">
+    <div class="cms-head">
+      <div class="cms-logo"><i></i>SitecoreAI <em>mockup</em></div>
+      <nav class="cms-nav"><span>Sites</span><span class="on">Content</span><span>Pages</span><span>Personalize</span></nav>
+      <div class="cms-actions">
+        <span class="saved" id="savedState">Alla ändringar sparade</span>
+        <button class="cbtn" data-goto="site">Visa webbplats</button>
+        <button class="cbtn primary" id="btnPublish">Publicera</button>
+      </div>
+    </div>
+
+    <aside class="cms-tree">
+      <div class="tree-title">Innehållsträd</div>
+      <div class="ti"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>sitecore</div>
+      <div class="ti" style="padding-left:20px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>Nord-Lock Group</div>
+      <div class="ti" style="padding-left:32px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>Global</div>
+      <div class="ti" style="padding-left:44px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M3 2h7l3 3v9H3z"/></svg>Home</div>
+      <div class="ti" style="padding-left:56px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M3 2h7l3 3v9H3z"/></svg>Nord-Lock</div>
+      <div class="ti" style="padding-left:68px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M3 2h7l3 3v9H3z"/></svg>Wedge-locking technology</div>
+      <div class="ti" style="padding-left:44px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>Data</div>
+      <div class="ti" style="padding-left:56px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>Explainers</div>
+      <div class="ti sel" style="padding-left:68px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1l6 3.5v7L8 15l-6-3.5v-7z"/></svg>Wedge-locking explainer</div>
+      <div class="ti" style="padding-left:68px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1l6 3.5v7L8 15l-6-3.5v-7z"/></svg>Superbolt MJT explainer</div>
+      <div class="ti" style="padding-left:68px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M8 1l6 3.5v7L8 15l-6-3.5v-7z"/></svg>Expander pin explainer</div>
+      <div class="ti" style="padding-left:44px"><svg width="14" height="14" viewBox="0 0 16 16"><path fill="currentColor" d="M2 3h5l1 2h6v8H2z"/></svg>Media Library</div>
+    </aside>
+
+    <section class="cms-form">
+      <div class="f-crumb">sitecore / Nord-Lock Group / Global / Data / Explainers</div>
+      <div class="f-title">Wedge-locking explainer</div>
+      <div class="f-meta">
+        <span>Mall: Wedge Locking Explainer</span>
+        <span>Rendering: WedgeLockingExplainer</span>
+        <span>Version 3</span>
+        <span>Språk: <b id="metaLang">sv-SE</b></span>
+      </div>
+
+      <details class="f-group" open id="grpParams">
+        <summary><span class="chev">›</span>Renderingsparametrar · 3D-modell<span class="tag">Parametrar</span></summary>
+        <div class="f-body">
+          <div class="fld">
+            <label><span>Antal kammar</span><code>CamCount</code></label>
+            <div class="range"><input type="range" id="pCams" min="6" max="14" step="1"><output id="oCams"></output></div>
+          </div>
+          <div class="fld">
+            <label><span>Kamhöjd</span><code>CamHeightMm</code></label>
+            <div class="range"><input type="range" id="pCamH" min="0.20" max="0.80" step="0.01"><output id="oCamH"></output></div>
+          </div>
+          <div class="ab-chip" id="abChip"></div>
+          <div class="two">
+            <div class="fld">
+              <label><span>Material</span><code>Material</code></label>
+              <select id="pMat">
+                <option value="zinc">Stål, zinkflake</option>
+                <option value="stainless">Rostfritt stål</option>
+                <option value="smo">254 SMO®</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label><span>Visning</span><code>Cutaway · AutoRotate</code></label>
+              <div class="switch"><span>Genomskärning</span><input type="checkbox" id="pCut"></div>
+              <div class="switch" style="margin-top:8px"><span>Autorotation</span><input type="checkbox" id="pRot"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="f-group" open>
+        <summary><span class="chev">›</span>Personalisering<span class="tag">Målgrupp</span></summary>
+        <div class="f-body">
+          <div class="fld">
+            <label><span>Variant för besökare</span><code>Personalize · Industry</code></label>
+            <div class="seg light" role="group" id="pVariant">
+              <button data-variant="standard" aria-pressed="true">Standard</button>
+              <button data-variant="wind" aria-pressed="false">Vindkraft</button>
+              <button data-variant="mining" aria-pressed="false">Gruvdrift</button>
+            </div>
+            <div class="hint">Rubrik och ingress visas per målgrupp. Övriga fält ärvs från standardvarianten.</div>
+          </div>
+        </div>
+      </details>
+
+      <div id="contentGroups"></div>
+
+      <details class="f-group">
+        <summary><span class="chev">›</span>Layout Service-svar · Experience Edge<span class="tag">JSON</span></summary>
+        <div class="f-body"><pre class="json" id="json"></pre></div>
+      </details>
+    </section>
+
+    <section class="cms-preview">
+      <div class="pv-bar"><span class="live"></span>Förhandsvisning · <span id="pvMeta"></span><span class="sp"></span><button data-goto="site">Öppna webbplatsen ↗</button></div>
+      <div class="pv-stage">
+        <div class="pv-text"><div class="pv-eyebrow" data-field="eyebrow"></div><div class="pv-h" data-field="heading"></div></div>
+        <div id="previewHost"></div>
+      </div>
+      <div class="pv-ab"><div class="ab-svg"></div><div class="ab-read"></div></div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"><i></i><span></span></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+/* =====================================================================
+   INNEHÅLL — motsvarar ett datakälle-item i SitecoreAI (per språk)
+   ===================================================================== */
+const CONTENT = {
+  sv: {
+    eyebrow: 'Nord-Lock® kilbrickor',
+    heading: 'Spänning i stället för friktion',
+    intro: 'Nord-Lock-brickor säkrar skruvförband med kilverkan i stället för friktion. Scrolla vidare och se varför förbandet håller även under kraftig vibration.',
+    steps: [
+      { title: 'Två brickor. En kilverkan.', body: 'Brickorna monteras parvis med kammarna mot varandra. De radiella räfflorna griper i skruvskallen och i underlaget. Dra i modellen för att vrida den.' },
+      { title: 'Åtdragning', body: 'När skruven dras åt biter räfflorna i både skruvskalle och underlag. Brickparet låses på plats – den enda rörelse som är möjlig sker mellan kammarna.' },
+      { title: 'Vibrationstest', body: 'Ett simulerat Junker-test med kraftig tvärgående vibration. En vanlig bricka släpper efter hand och klämkraften försvinner. Med Nord-Lock står klämkraften kvar.' },
+      { title: 'Kilverkan vid lossning', body: 'Försöker skruven vrida sig lös måste den övre brickan klättra upp för kammarna. Lyftet är större än vad gängan backar ut, så klämkraften ökar först. Det är kilverkan som stoppar självlossning.' },
+      { title: 'Kamvinkeln α är större än gängans stigning β', body: 'Hela principen vilar på ett enda geometriskt villkor. Så länge α är större än β kan skruven inte lossna av sig själv. Prova att ändra kammarnas antal och höjd i SitecoreAI-vyn.' },
+    ],
+    labels: { bolt: 'Skruv', upper: 'Övre kilbricka', cams: 'Kammar mot kammar', serrations: 'Radiella räfflor', joint: 'Förband' },
+    variants: {
+      wind: { heading: 'Förband som står emot vinden', intro: 'Vindkraftverk vibrerar dygnet runt, ofta långt från närmaste servicetekniker. Kilverkan håller torn- och fundamentförband spända utan efterdragning.' },
+      mining: { heading: 'Byggt för gruvans vibrationer', intro: 'Krossar, siktar och dumprar skakar loss vanliga förband. Nord-Lock behåller klämkraften i de tuffaste miljöerna.' },
+    },
+  },
+  en: {
+    eyebrow: 'Nord-Lock® wedge-locking washers',
+    heading: 'Tension instead of friction',
+    intro: 'Nord-Lock washers secure bolted joints with a wedge effect instead of friction. Scroll on to see why the joint holds, even under severe vibration.',
+    steps: [
+      { title: 'Two washers. One wedge.', body: 'The washers are fitted in pairs with the cams facing each other. Radial teeth grip the bolt head and the mating surface. Drag the model to rotate it.' },
+      { title: 'Tightening', body: 'As the bolt is tightened, the teeth bite into both the bolt head and the mating surface. The pair locks in place – the only possible movement is across the face of the cams.' },
+      { title: 'Vibration test', body: 'A simulated Junker test with severe transverse vibration. A conventional washer gradually lets go and the clamp load disappears. With Nord-Lock, the clamp load stays.' },
+      { title: 'The wedge at work', body: 'If the bolt tries to rotate loose, the upper washer has to climb the cams. The lift is larger than the thread backs out, so the clamp load first increases. That wedge effect is what stops self-loosening.' },
+      { title: 'Cam angle α is larger than thread pitch β', body: 'The whole principle rests on one geometric condition. As long as α is larger than β, the bolt cannot loosen by itself. Try changing the number and height of the cams in the SitecoreAI view.' },
+    ],
+    labels: { bolt: 'Bolt', upper: 'Upper washer', cams: 'Cam to cam', serrations: 'Radial teeth', joint: 'Joint' },
+    variants: {
+      wind: { heading: 'Joints that stand up to the wind', intro: 'Wind turbines vibrate around the clock, often far from the nearest technician. The wedge effect keeps tower and foundation joints tight without re-tightening.' },
+      mining: { heading: 'Built for the vibrations of mining', intro: 'Crushers, screens and haul trucks shake ordinary joints loose. Nord-Lock keeps its clamp load in the harshest environments.' },
+    },
+  },
+};
+
+const UI = {
+  sv: {
+    brandSub: 'Konceptdemo för Nord-Lock Group', viewSite: 'Webbplats', showFields: 'Visa Sitecore-fält',
+    scroll: 'Scrolla', replay: 'Spela igen', plain: 'Vanlig bricka', gauge: 'Klämkraft',
+    chartVib: 'Klämkraft under vibration', chartUnt: 'Klämkraft när skruven vrids loss',
+    simNote: 'Illustrativ simulering – inte mätdata', tryCms: 'Ändra kammarna i SitecoreAI',
+    abOk: 'α > β – kilverkan låser förbandet', abBad: 'α ≤ β – ingen kilverkan, förbandet kan lossna',
+    ctaEyebrow: 'Byggt för SitecoreAI',
+    ctaTitle: 'Innehåll och 3D-modell styrs från ett och samma item',
+    ctaBody: 'Allt på sidan – texter, språkversioner, personalisering och modellens parametrar – ligger i ett innehållsitem i SitecoreAI. Redaktörerna ändrar själva, utan utvecklare.',
+    cta1t: 'Fält och språk', cta1b: 'Rubriker, brödtexter och etiketterna i 3D-scenen är vanliga fält med språkversioner.',
+    cta2t: 'Renderingsparametrar', cta2b: 'Antal kammar, kamhöjd, material och genomskärning är parametrar på komponenten. Ändra dem så byggs modellen om direkt.',
+    cta3t: 'Personalisering', cta3b: 'Samma komponent kan visa olika budskap för till exempel vindkraft och gruvdrift.',
+    ctaBtn: 'Öppna SitecoreAI-vyn',
+    footer: 'Konceptdemo av Pentia · Illustrativ simulering, inte mätdata · Nord-Lock® är ett varumärke som tillhör Nord-Lock Group',
+    seconds: 's', turn: '°',
+  },
+  en: {
+    brandSub: 'Concept demo for Nord-Lock Group', viewSite: 'Website', showFields: 'Show Sitecore fields',
+    scroll: 'Scroll', replay: 'Replay', plain: 'Conventional washer', gauge: 'Clamp load',
+    chartVib: 'Clamp load under vibration', chartUnt: 'Clamp load as the bolt is turned loose',
+    simNote: 'Illustrative simulation – not test data', tryCms: 'Change the cams in SitecoreAI',
+    abOk: 'α > β – the wedge locks the joint', abBad: 'α ≤ β – no wedge effect, the joint can loosen',
+    ctaEyebrow: 'Built for SitecoreAI',
+    ctaTitle: 'Content and 3D model driven by one single item',
+    ctaBody: 'Everything on this page – copy, language versions, personalisation and the model parameters – lives in one content item in SitecoreAI. Editors change it themselves, no developers needed.',
+    cta1t: 'Fields and languages', cta1b: 'Headings, body copy and the labels in the 3D scene are regular fields with language versions.',
+    cta2t: 'Rendering parameters', cta2b: 'Cam count, cam height, material and cutaway are component parameters. Change them and the model rebuilds instantly.',
+    cta3t: 'Personalisation', cta3b: 'The same component can show different messages for, say, wind power and mining.',
+    ctaBtn: 'Open the SitecoreAI view',
+    footer: 'Concept demo by Pentia · Illustrative simulation, not test data · Nord-Lock® is a trademark of Nord-Lock Group',
+    seconds: 's', turn: '°',
+  },
+};
+
+const PARAMS = { camCount: 10, camHeight: 0.45, material: 'zinc', cutaway: true, autoRotate: true, variant: 'standard' };
+const MATERIALS = {
+  zinc:      { color: 0xb3b8be, rough: 0.42, sc: 'zinc-flake' },
+  stainless: { color: 0xdfe2e5, rough: 0.18, sc: 'stainless-steel' },
+  smo:       { color: 0xd2c7b6, rough: 0.26, sc: '254-smo' },
+};
+const VARIANT_NAMES = { standard: 'Standard', wind: 'Vindkraft', mining: 'Gruvdrift' };
+const LOCALE = { sv: 'sv-SE', en: 'en-GB' };
+let lang = 'sv';
+
+const FIELD_DEFS = [
+  { g: 'hero', path: 'eyebrow', label: 'Överrubrik', sc: 'Eyebrow' },
+  { g: 'hero', path: 'heading', label: 'Rubrik', sc: 'Heading', personal: true },
+  { g: 'hero', path: 'intro', label: 'Ingress', sc: 'Intro', personal: true, area: true },
+  ...[0, 1, 2, 3, 4].flatMap(i => [
+    { g: 'steps', path: `steps.${i}.title`, label: `Steg ${i + 1} · Rubrik`, sc: `Steps[${i}].Title` },
+    { g: 'steps', path: `steps.${i}.body`, label: `Steg ${i + 1} · Brödtext`, sc: `Steps[${i}].Body`, area: true },
+  ]),
+  ...['bolt', 'upper', 'cams', 'serrations', 'joint'].map(k => ({ g: 'labels', path: `labels.${k}`, label: `Etikett · ${k}`, sc: `Labels.${k[0].toUpperCase() + k.slice(1)}` })),
+];
+const DEF_BY_PATH = Object.fromEntries(FIELD_DEFS.map(f => [f.path, f]));
+
+function fieldValue(path) {
+  const c = CONTENT[lang];
+  if (DEF_BY_PATH[path]?.personal && PARAMS.variant !== 'standard') return c.variants[PARAMS.variant][path];
+  return path.split('.').reduce((o, k) => o?.[k], c) ?? '';
+}
+function setField(path, value) {
+  const c = CONTENT[lang];
+  if (DEF_BY_PATH[path]?.personal && PARAMS.variant !== 'standard') { c.variants[PARAMS.variant][path] = value; return; }
+  const keys = path.split('.'); const last = keys.pop();
+  keys.reduce((o, k) => o[k], c)[last] = value;
+}
+const nf = (v, d = 1) => v.toLocaleString(LOCALE[lang], { minimumFractionDigits: d, maximumFractionDigits: d });
+
+function renderContent() {
+  $$('[data-field]').forEach(el => {
+    const esc = String(fieldValue(el.dataset.field)).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    el.innerHTML = esc.replace(/([αβ])/g, '<span class="gr">$1</span>');
+    const def = DEF_BY_PATH[el.dataset.field];
+    if (def && !el.closest('.labels') && !el.closest('#cms')) el.dataset.sc = def.sc + (def.personal && PARAMS.variant !== 'standard' ? ` · ${VARIANT_NAMES[PARAMS.variant]}` : '');
+  });
+}
+function renderUI() {
+  $$('[data-ui]').forEach(el => { el.textContent = UI[lang][el.dataset.ui] ?? ''; });
+  document.documentElement.lang = lang;
+}
+
+/* =====================================================================
+   GEOMETRI OCH FYSIK (1 enhet = 10 mm, M10-förband)
+   ===================================================================== */
+const G = { ri: 0.535, ro: 0.83, t: 0.13, serrH: 0.018, pitch: 0.15, headR: 0.924, headH: 0.6,
+            shankR: 0.47, shankLen: 1.3, threadLen: 0.8, plateT: 0.5, plateS: 1.6, holeR: 0.56 };
+const D_T = G.pitch * 0.3;                         // förlängning vid 100 % förspänning
+const PSI_END = -2 * Math.PI * D_T / G.pitch;      // skruvens vinkel när den är åtdragen
+const PSI0 = 5 * Math.PI;                          // 2,5 varv lös innan åtdragning
+const VIB_T = 10, T_LOOSE = 6;
+const EXPLODE = { lower: 0.45, upper: 0.95, bolt: 2.4 };
+
+const camHU = () => PARAMS.camHeight / 10;
+const camP = () => 2 * Math.PI / PARAMS.camCount;
+const stackTop0 = () => 2 * (G.serrH + G.t) + camHU();
+const lift = phi => phi <= 0 ? 0 : camHU() * ((phi % camP()) / camP());
+const wedgeOK = () => PARAMS.camCount * camHU() > G.pitch;
+const rotTotal = () => 4.6 * camP();
+const loadAtRot = r => Math.max(0, (D_T + lift(r) - G.pitch * r / (2 * Math.PI)) / D_T);
+const simConv = t => Math.max(0, 1 - Math.pow(t / T_LOOSE, 1.8));
+const simNL = t => wedgeOK() ? 1 - 0.035 * (1 - Math.exp(-t / 1.2)) + 0.004 * Math.sin(t * 19) : Math.max(0, 1 - Math.pow(t / 8.5, 1.8));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const easeInOut = u => u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+const deg = r => r * 180 / Math.PI;
+
+function angles() {
+  const N = PARAMS.camCount, h = camHU(), rm = (G.ri + G.ro) / 2, arc = 2 * Math.PI * rm / N;
+  return { alpha: deg(Math.atan(h / arc)), beta: deg(Math.atan((G.pitch / N) / arc)), ok: wedgeOK() };
+}
+
+/* ---------- Three.js ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.domElement.className = 'gl';
+$('#canvasHost').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableZoom = false; controls.enablePan = false;
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.autoRotateSpeed = 0.7;
+controls.minPolarAngle = 0.25; controls.maxPolarAngle = 1.7;
+renderer.domElement.style.touchAction = 'pan-y';
+if (matchMedia('(pointer: coarse)').matches) controls.enableRotate = false;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const key = new THREE.DirectionalLight(0xffffff, 2.3);
+key.position.set(3, 6, 2.5); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -2.6, right: 2.6, top: 2.6, bottom: -2.6, near: 1, far: 16 });
+key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xdcecff, 0.9); rim.position.set(-4, 2.5, -3); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1a1a, 0.25));
+
+const washerMat = new THREE.MeshStandardMaterial({ color: 0xb3b8be, metalness: 1, roughness: 0.42, side: THREE.DoubleSide, emissive: 0x1ba6e8, emissiveIntensity: 0 });
+const camMat = washerMat.clone();
+const boltMat = new THREE.MeshStandardMaterial({ color: 0x3b3f46, metalness: 0.85, roughness: 0.36 });
+const shankMat = new THREE.MeshStandardMaterial({ color: 0x3b3f46, metalness: 0.85, roughness: 0.36, emissive: 0x0091d0, emissiveIntensity: 0 });
+const plateMat = new THREE.MeshStandardMaterial({ color: 0x4d545e, metalness: 0.55, roughness: 0.55 });
+const plateMat2 = new THREE.MeshStandardMaterial({ color: 0x3e444d, metalness: 0.55, roughness: 0.6 });
+
+function washerGeometry(camOnTop) {
+  const N = PARAMS.camCount, S = 96, nT = N * S, T = 16;
+  const camH = camHU(), { serrH, t, ri, ro } = G;
+  const cam = i => camH * (1 - (i % S) / S);
+  const serr = i => { const u = (i % T) / T; return serrH * (1 - Math.abs(2 * u - 1)); };
+  const bot = camOnTop ? i => serrH - serr(i) : i => cam(i);
+  const top = camOnTop ? i => serrH + t + cam(i) : i => t + camH + serr(i);
+  const camArr = [], restArr = [];
+  const P = (r, i, y) => { const a = i / nT * Math.PI * 2; return [r * Math.cos(a), y, r * Math.sin(a)]; };
+  const quad = (arr, a, b, c, d) => arr.push(...a, ...b, ...c, ...a, ...c, ...d);
+  for (let i = 0; i < nT; i++) {
+    const j = i + 1, jw = j % nT;
+    const ti = top(i), tj = top(jw), bi = bot(i), bj = bot(jw);
+    quad(camOnTop ? camArr : restArr, P(ri, i, ti), P(ri, j, tj), P(ro, j, tj), P(ro, i, ti));
+    quad(camOnTop ? restArr : camArr, P(ri, i, bi), P(ro, i, bi), P(ro, j, bj), P(ri, j, bj));
+    quad(restArr, P(ro, i, bi), P(ro, i, ti), P(ro, j, tj), P(ro, j, bj));
+    quad(restArr, P(ri, i, bi), P(ri, j, bj), P(ri, j, tj), P(ri, i, ti));
+  }
+  const pos = new Float32Array(camArr.length + restArr.length);
+  pos.set(camArr, 0); pos.set(restArr, camArr.length);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.addGroup(0, camArr.length / 3, 0);
+  g.addGroup(camArr.length / 3, restArr.length / 3, 1);
+  g.computeVertexNormals();
+  return g;
+}
+function flatWasherGeometry() {
+  const h = stackTop0();
+  return new THREE.LatheGeometry([new THREE.Vector2(G.ri, 0), new THREE.Vector2(G.ro, 0), new THREE.Vector2(G.ro, h), new THREE.Vector2(G.ri, h), new THREE.Vector2(G.ri, 0)], 96);
+}
+function plateGeometry(cut) {
+  const s = G.plateS, rh = G.holeR, sh = new THREE.Shape();
+  if (cut) {
+    sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, 0); sh.lineTo(rh, 0);
+    for (let k = 1; k <= 54; k++) { const a = -k / 54 * 1.5 * Math.PI; sh.lineTo(rh * Math.cos(a), rh * Math.sin(a)); }
+    sh.lineTo(0, s); sh.lineTo(-s, s); sh.lineTo(-s, -s);
+  } else {
+    sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, s); sh.lineTo(-s, s); sh.lineTo(-s, -s);
+    const hole = new THREE.Path(); hole.absarc(0, 0, rh, 0, Math.PI * 2, true); sh.holes.push(hole);
+  }
+  const g = new THREE.ExtrudeGeometry(sh, { depth: G.plateT, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 2, curveSegments: 64 });
+  g.rotateX(Math.PI / 2);
+  return g;
+}
+class Helix extends THREE.Curve {
+  constructor(r, y0, len, turns) { super(); Object.assign(this, { r, y0, len, turns }); }
+  getPoint(u, target = new THREE.Vector3()) {
+    const a = u * this.turns * Math.PI * 2;
+    return target.set(this.r * Math.cos(a), this.y0 + u * this.len, -this.r * Math.sin(a));
+  }
+}
+
+const assembly = new THREE.Group(); scene.add(assembly);
+const lower = new THREE.Mesh(washerGeometry(true), [camMat, washerMat]);
+const upper = new THREE.Mesh(washerGeometry(false), [camMat, washerMat]);
+const flatW = new THREE.Mesh(flatWasherGeometry(), washerMat);
+[lower, upper, flatW].forEach(m => { m.castShadow = m.receiveShadow = true; assembly.add(m); });
+
+const bolt = new THREE.Group();
+{
+  const hex = new THREE.Shape();
+  for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; const p = [G.headR * Math.cos(a), G.headR * Math.sin(a)]; k ? hex.lineTo(...p) : hex.moveTo(...p); }
+  const headGeo = new THREE.ExtrudeGeometry(hex, { depth: G.headH - 0.08, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.035, bevelSegments: 3 });
+  headGeo.rotateX(-Math.PI / 2); headGeo.translate(0, 0.04, 0);
+  const head = new THREE.Mesh(headGeo, boltMat);
+  const shankGeo = new THREE.CylinderGeometry(G.shankR, G.shankR * 0.94, G.shankLen, 48); shankGeo.translate(0, -G.shankLen / 2, 0);
+  const shank = new THREE.Mesh(shankGeo, shankMat);
+  const turns = G.threadLen / G.pitch;
+  const thread = new THREE.Mesh(new THREE.TubeGeometry(new Helix(G.shankR + 0.005, -G.shankLen + 0.05, G.threadLen, turns), Math.round(turns * 64), 0.038, 8, false), shankMat);
+  [head, shank, thread].forEach(m => { m.castShadow = m.receiveShadow = true; bolt.add(m); });
+}
+assembly.add(bolt);
+
+const topPlate = new THREE.Mesh(plateGeometry(true), plateMat);
+const botPlate = new THREE.Mesh(plateGeometry(true), plateMat2);
+topPlate.position.y = -0.012; botPlate.position.y = -G.plateT - 0.04;
+[topPlate, botPlate].forEach(m => { m.receiveShadow = true; m.castShadow = true; assembly.add(m); });
+
+function rebuildWashers() {
+  [lower, upper, flatW].forEach(m => m.geometry.dispose());
+  lower.geometry = washerGeometry(true);
+  upper.geometry = washerGeometry(false);
+  flatW.geometry = flatWasherGeometry();
+}
+function rebuildPlates() {
+  [topPlate, botPlate].forEach(m => { m.geometry.dispose(); m.geometry = plateGeometry(PARAMS.cutaway); });
+}
+function applyMaterial() {
+  const m = MATERIALS[PARAMS.material];
+  [washerMat, camMat].forEach(x => { x.color.setHex(m.color); x.roughness = m.rough; });
+}
+
+/* ---------- Tillstånd + animation ---------- */
+const S = { e: 1, eTarget: 0, psi: PSI_END, phiU: 0, shake: 0, flat: false, camGlow: 0, glow: 0, flash: 0 };
+let view = 'site', step = 0, tau = 0, time = 0, vibMode = 'nl', camTween = null;
+
+function applyPose() {
+  const st0 = stackTop0();
+  const L = S.flat ? 0 : lift(S.phiU);
+  const stackTop = st0 + L;
+  const threadPos = st0 + G.pitch * S.psi / (2 * Math.PI);
+  const e = S.e;
+  lower.position.set(S.shake, e * EXPLODE.lower, 0);
+  upper.position.set(S.shake, G.serrH + G.t + L + e * EXPLODE.upper, 0);
+  upper.rotation.y = S.phiU;
+  flatW.position.set(S.shake, 0, 0);
+  bolt.position.set(S.shake, Math.max(stackTop, threadPos) + e * EXPLODE.bolt, 0);
+  bolt.rotation.y = S.psi;
+  topPlate.position.x = S.shake;
+  lower.visible = upper.visible = !S.flat; flatW.visible = S.flat;
+  return Math.max(0, (stackTop - threadPos) / D_T);
+}
+
+function stepLogic(dt) {
+  tau += dt;
+  const r = { load: null, hud: false, chart: null };
+  S.flat = false; S.shake = 0;
+  if (view === 'cms') { S.eTarget = 0.3; S.psi = PSI_END; S.phiU = 0; S.camGlow = 0.8; return r; }
+  switch (step) {
+    case 0: S.eTarget = 0; S.psi = PSI_END; S.phiU = 0; S.camGlow = 0; break;
+    case 1: S.eTarget = 1; S.psi = PSI_END; S.phiU = 0; S.camGlow = 0.6; break;
+    case 2: {
+      S.eTarget = 0; S.camGlow = 0; S.phiU = 0; r.hud = true;
+      const prev = S.psi;
+      S.psi = PSI0 + (PSI_END - PSI0) * easeInOut(clamp((tau - 0.6) / 3.6, 0, 1));
+      if (prev > 0 && S.psi <= 0) S.flash = 1;
+      break;
+    }
+    case 3: {
+      S.eTarget = 0; S.camGlow = 0; r.hud = true; r.chart = 'vib';
+      const tt = Math.min(tau, VIB_T), active = tau < VIB_T;
+      const wave = Math.sin(tt * 2 * Math.PI * 3.2);
+      S.shake = active ? 0.045 * wave : 0;
+      if (vibMode === 'flat') {
+        S.flat = true; r.load = simConv(tt);
+        S.psi = PSI_END + (1 - r.load) * -PSI_END + Math.max(0, tt - T_LOOSE) * 1.5; S.phiU = 0;
+      } else if (wedgeOK()) {
+        r.load = simNL(tt);
+        const j = active ? 0.05 * Math.max(0, wave) : 0;
+        S.psi = PSI_END + j; S.phiU = j;
+      } else {
+        r.load = simNL(tt);
+        const rr = (1 - r.load) * -PSI_END * 1.6 + Math.max(0, tt - 8.5) * 1.2;
+        S.psi = PSI_END + rr; S.phiU = rr;
+      }
+      break;
+    }
+    case 4: {
+      S.eTarget = 0; S.camGlow = 0.35; r.hud = true; r.chart = 'unt';
+      const rr = rotTotal() * easeInOut(clamp((tau - 0.8) / 7, 0, 1));
+      S.psi = PSI_END + rr; S.phiU = rr;
+      break;
+    }
+    case 5: S.eTarget = 0.3; S.psi = PSI_END; S.phiU = 0; S.camGlow = 1; break;
+  }
+  return r;
+}
+
+/* ---------- Kamera ---------- */
+const PRESETS = {
+  0: { p: [3.7, 2.4, 4.3], t: [0, 0.05, 0], f: 1.5 },
+  1: { p: [4.9, 3.1, 5.7], t: [0, 1.15, 0], f: 1.6 },
+  2: { p: [3.4, 2.1, 4.0], t: [0, -0.15, 0], f: 1.75 },
+  3: { p: [3.6, 1.7, 4.2], t: [0, -0.45, 0], f: 1.75 },
+  4: { p: [2.1, 1.2, 2.5], t: [0.1, -0.05, 0.1], f: 2.4 },
+  5: { p: [1.95, 1.0, 1.95], t: [0.25, 0.4, 0.25], f: 2.0 },
+  cms: { p: [3.4, 2.3, 3.9], t: [0, 0.6, 0], f: 1.6 },
+};
+function presetVecs(k) {
+  const pr = PRESETS[k], tp = new THREE.Vector3(...pr.p), tt = new THREE.Vector3(...pr.t);
+  tp.sub(tt).multiplyScalar(pr.f * (camera.aspect < 0.95 ? 1.2 : 1)).add(tt);
+  return { tp, tt };
+}
+function goCam(k) {
+  const { tp, tt } = presetVecs(k);
+  camTween = { fp: camera.position.clone(), ft: controls.target.clone(), tp, tt, t: 0 };
+}
+controls.addEventListener('start', () => { camTween = null; });
+function updateCamera(dt) {
+  if (camTween) {
+    camTween.t = Math.min(1, camTween.t + dt / 1.4);
+    const k = easeInOut(camTween.t);
+    camera.position.lerpVectors(camTween.fp, camTween.tp, k);
+    controls.target.lerpVectors(camTween.ft, camTween.tt, k);
+    if (camTween.t >= 1) camTween = null;
+  }
+  controls.autoRotate = !reduced && !camTween && PARAMS.autoRotate && (view === 'cms' || step <= 1);
+  controls.update();
+}
+
+/* ---------- Etiketter ---------- */
+const lblEls = Object.fromEntries($$('.lbl').map(el => [el.dataset.anchor, el]));
+const v3 = new THREE.Vector3();
+function updateLabels() {
+  const on = view === 'site' && step === 1 && S.e > 0.75 && !camTween;
+  $('#labels').classList.toggle('on', on);
+  if (!on) return;
+  const d = (r, y) => [r * Math.SQRT1_2, y, r * Math.SQRT1_2];
+  const ly = lower.position.y, uy = upper.position.y, by = bolt.position.y;
+  const A = {
+    bolt: d(G.headR * 0.9, by + G.headH * 0.55),
+    upper: d(G.ro, uy + G.t + camHU()),
+    cams: d(G.ro, ly + G.serrH + G.t + camHU() * 0.6),
+    serrations: d(G.ro, ly + 0.004),
+    joint: [G.plateS, -0.28, -0.7],
+  };
+  const host = renderer.domElement, w = host.clientWidth, h = host.clientHeight;
+  for (const [k, p] of Object.entries(A)) {
+    v3.set(...p).project(camera);
+    lblEls[k].style.transform = `translate(${((v3.x + 1) / 2 * w - 4).toFixed(1)}px, ${((-v3.y + 1) / 2 * h - 14).toFixed(1)}px)`;
+  }
+}
+
+/* ---------- HUD + diagram ---------- */
+const ACC = '#1BA6E8', GREY = '#6E7682';
+let chartKind = null, chartHover = null;
+function setChartKind(kind) {
+  if (kind === chartKind) return;
+  chartKind = kind;
+  $('#chartCard').classList.toggle('on', !!kind);
+  if (!kind) return;
+  $('#chartTitle').textContent = UI[lang][kind === 'vib' ? 'chartVib' : 'chartUnt'];
+  $('#legend').innerHTML = kind === 'vib'
+    ? `<span><i style="border-color:${ACC}"></i>Nord-Lock</span><span><i style="border-color:${GREY};border-top-style:dashed"></i>${UI[lang].plain}</span>`
+    : '';
+}
+function chartSpec() {
+  if (chartKind === 'vib') {
+    return { xMax: VIB_T, yMax: 1.25, prog: Math.min(tau, VIB_T), xTicks: [0, 2, 4, 6, 8, 10], xFmt: v => `${v} ${UI[lang].seconds}`,
+      series: [
+        { name: 'Nord-Lock', color: ACC, dash: [], fn: simNL },
+        { name: UI[lang].plain, color: GREY, dash: [6, 4], fn: simConv },
+      ] };
+  }
+  const R = deg(rotTotal());
+  let maxL = 1; for (let i = 0; i <= 300; i++) maxL = Math.max(maxL, loadAtRot(rotTotal() * i / 300));
+  const stepD = R > 200 ? 60 : R > 100 ? 30 : 15;
+  const xTicks = []; for (let v = 0; v <= R + 0.01; v += stepD) xTicks.push(v);
+  const rr = Math.max(0, S.psi - PSI_END);
+  return { xMax: R, yMax: Math.max(1.25, Math.ceil((maxL + 0.1) * 4) / 4), prog: Math.min(R, deg(rr)), xTicks, xFmt: v => `${Math.round(v)}°`, ghost: true,
+    series: [{ name: 'Nord-Lock', color: ACC, dash: [], fn: dg => loadAtRot(dg * Math.PI / 180) }] };
+}
+function drawChart() {
+  const cv = $('#chart'), ctx = cv.getContext('2d'), dpr = Math.min(window.devicePixelRatio, 2);
+  const W = cv.clientWidth, H = cv.clientHeight;
+  if (!W) return;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const sp = chartSpec(), pad = { l: 42, r: 14, t: 8, b: 20 };
+  const X = v => pad.l + v / sp.xMax * (W - pad.l - pad.r);
+  const Y = v => pad.t + (1 - v / sp.yMax) * (H - pad.t - pad.b);
+  ctx.font = '11px Roboto, sans-serif'; ctx.textBaseline = 'middle';
+  for (let v = 0; v <= sp.yMax + 1e-6; v += 0.5) {
+    ctx.strokeStyle = v === 1 ? '#42464e' : '#2c2f35'; ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(pad.l, Math.round(Y(v)) + 0.5); ctx.lineTo(W - pad.r, Math.round(Y(v)) + 0.5); ctx.stroke();
+    ctx.fillStyle = '#8b919a'; ctx.textAlign = 'right'; ctx.fillText(`${Math.round(v * 100)} %`, pad.l - 8, Y(v));
+  }
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  sp.xTicks.forEach(v => { ctx.fillStyle = '#8b919a'; ctx.fillText(sp.xFmt(v), clamp(X(v), pad.l + 8, W - pad.r - 12), H - pad.b + 6); });
+  const path = (fn, to) => { ctx.beginPath(); const n = 260; for (let i = 0; i <= n; i++) { const x = to * i / n; const y = fn(x); i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); } };
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  if (sp.ghost) sp.series.forEach(s => { ctx.globalAlpha = 0.22; ctx.strokeStyle = s.color; ctx.lineWidth = 2; ctx.setLineDash([]); path(s.fn, sp.xMax); ctx.stroke(); ctx.globalAlpha = 1; });
+  [...sp.series].reverse().forEach(s => { ctx.strokeStyle = s.color; ctx.lineWidth = 2; ctx.setLineDash(s.dash); path(s.fn, Math.max(sp.prog, 0.0001)); ctx.stroke(); });
+  ctx.setLineDash([]);
+  sp.series.forEach(s => {
+    const x = X(sp.prog), y = Y(s.fn(sp.prog));
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fillStyle = s.color; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = '#202226'; ctx.stroke();
+  });
+  const tip = $('#chartTip');
+  if (chartHover != null && chartHover >= pad.l && chartHover <= W - pad.r) {
+    const xv = clamp((chartHover - pad.l) / (W - pad.l - pad.r) * sp.xMax, 0, sp.prog);
+    ctx.strokeStyle = '#5c616a'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(Math.round(X(xv)) + 0.5, pad.t); ctx.lineTo(Math.round(X(xv)) + 0.5, H - pad.b); ctx.stroke();
+    tip.innerHTML = `<div style="margin-bottom:3px">${chartKind === 'vib' ? nf(xv, 1) + ' ' + UI[lang].seconds : Math.round(xv) + '°'}</div>` +
+      sp.series.map(s => `<div class="row"><i style="border-color:${s.color};${s.dash.length ? 'border-top-style:dashed' : ''}"></i>${s.name}<b>${Math.round(s.fn(xv) * 100)} %</b></div>`).join('');
+    const left = X(xv) + 14 + 14; tip.style.left = `${left > W - 120 ? left - 170 : left}px`; tip.style.top = '36px'; tip.style.opacity = 1;
+  } else tip.style.opacity = 0;
+}
+$('#chart').addEventListener('pointermove', e => { chartHover = e.offsetX; });
+$('#chart').addEventListener('pointerleave', () => { chartHover = null; });
+
+function updateHUD(r, load) {
+  $('#hud').classList.toggle('on', r.hud);
+  setChartKind(r.hud ? r.chart : null);
+  if (!r.hud) return;
+  $('#gaugeVal').textContent = Math.round(load * 100);
+  $('#gaugeBar').style.width = `${Math.min(load / 1.5, 1) * 100}%`;
+  if (chartKind) drawChart();
+}
+
+/* ---------- α/β-diagram ---------- */
+function abSVG() {
+  const W = 380, H = 170, x0 = 34, base = H - 30, per = 236, ext = 84, ky = 1400;
+  const h = camHU() * ky, tr = (G.pitch / PARAMS.camCount) * ky;
+  const aA = Math.atan2(h, per), aB = Math.atan2(tr, per);
+  const arc = (R, a) => `M${x0 + R},${base} A${R},${R} 0 0 0 ${(x0 + R * Math.cos(a)).toFixed(1)},${(base - R * Math.sin(a)).toFixed(1)}`;
+  const lab = (R, a) => [x0 + R * Math.cos(a / 2), base - R * Math.sin(a / 2)];
+  const [ax, ay] = lab(64, aA), [bx, by] = lab(132, aB);
+  const camEnd = base - h * ext / per, thrEnd = base - tr * (per + ext) / per;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kamvinkel alfa jämfört med gängstigning beta">
+    <line x1="${x0 - 12}" y1="${base}" x2="${W - 8}" y2="${base}" stroke="#42464e" stroke-dasharray="3 4"/>
+    <path d="M${x0},${base} L${x0 + per},${(base - h).toFixed(1)} L${x0 + per},${base} L${x0 + per + ext},${camEnd.toFixed(1)}" fill="none" stroke="${ACC}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M${x0},${base} L${x0 + per + ext},${thrEnd.toFixed(1)}" fill="none" stroke="${GREY}" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>
+    <path d="${arc(56, aA)}" fill="none" stroke="${ACC}" stroke-width="1.5"/>
+    <path d="${arc(124, aB)}" fill="none" stroke="${GREY}" stroke-width="1.5"/>
+    <text x="${(ax + 10).toFixed(1)}" y="${(ay + 2).toFixed(1)}" fill="#ffffff" font-size="15" font-family="Roboto" dominant-baseline="middle">α</text>
+    <text x="${(bx + 10).toFixed(1)}" y="${(by - 4).toFixed(1)}" fill="#ffffff" font-size="15" font-family="Roboto" dominant-baseline="middle">β</text>
+    <text x="${x0 + per - 6}" y="${(base - h - 10).toFixed(1)}" fill="#d0d3d8" font-size="11" font-family="Roboto" text-anchor="end">${lang === 'sv' ? 'Kam' : 'Cam'}</text>
+    <text x="${W - 10}" y="${(thrEnd - 10).toFixed(1)}" fill="#d0d3d8" font-size="11" font-family="Roboto" text-anchor="end">${lang === 'sv' ? 'Gänga' : 'Thread'}</text>
+    <text x="${x0}" y="${H - 8}" fill="#8b919a" font-size="11" font-family="Roboto">${lang === 'sv' ? 'Utvikt profil, en kamdelning (överdriven höjd)' : 'Unrolled profile, one cam pitch (height exaggerated)'}</text>
+  </svg>`;
+}
+function updateAB() {
+  const { alpha, beta, ok } = angles();
+  const svg = abSVG();
+  $$('.ab-svg').forEach(el => { el.innerHTML = svg; });
+  const status = `<div class="ab-status ${ok ? 'ok' : 'bad'}"><span class="ico">${ok ? '✓' : '!'}</span>${UI[lang][ok ? 'abOk' : 'abBad']}</div>`;
+  $$('.ab-read').forEach(el => { el.innerHTML = `<span>α <b>${nf(alpha)}°</b></span><span>β <b>${nf(beta)}°</b></span>${status}`; });
+  const chip = $('#abChip');
+  chip.className = `ab-chip ${ok ? '' : 'bad'}`;
+  chip.innerHTML = `<span class="ico">${ok ? '✓' : '!'}</span><span>${ok ? 'Kilverkan fungerar – kamvinkeln är större än gängans stigning' : 'Varning: kamvinkeln är för liten, förbandet kan självlossa'}</span><code>α ${nf(alpha)}° · β ${nf(beta)}°</code>`;
+}
+
+/* ---------- Sitecore: badge, formulär, JSON ---------- */
+function updateBadge() {
+  $('#scBadge').innerHTML = `<b>Rendering Parameters</b>CamCount: ${PARAMS.camCount}<br>CamHeightMm: ${PARAMS.camHeight.toFixed(2)}<br>Material: ${MATERIALS[PARAMS.material].sc}<br>Cutaway: ${PARAMS.cutaway}<br><b style="margin-top:6px">Datasource</b>/Data/Explainers/Wedge-locking explainer`;
+}
+function layoutJSON() {
+  const c = CONTENT[lang];
+  return {
+    sitecore: {
+      context: { language: LOCALE[lang], site: { name: 'nordlock-global' }, variant: PARAMS.variant },
+      route: {
+        name: 'wedge-locking-technology',
+        placeholders: {
+          'headless-main': [{
+            uid: '7d1c2f0a-58e3-4b9e-a0c4-2f6b1e9d3c71',
+            componentName: 'WedgeLockingExplainer',
+            dataSource: '{A3F1C2E4-6B7D-4E21-9C55-1F0E8D2B7A90}',
+            params: { CamCount: String(PARAMS.camCount), CamHeightMm: PARAMS.camHeight.toFixed(2), Material: MATERIALS[PARAMS.material].sc, Cutaway: PARAMS.cutaway ? '1' : '0', AutoRotate: PARAMS.autoRotate ? '1' : '0' },
+            fields: {
+              Eyebrow: { value: fieldValue('eyebrow') },
+              Heading: { value: fieldValue('heading') },
+              Intro: { value: fieldValue('intro') },
+              Steps: c.steps.map((s, i) => ({ id: `step-${i + 1}`, fields: { Title: { value: s.title }, Body: { value: s.body } } })),
+              Labels: Object.fromEntries(Object.entries(c.labels).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), { value: v }])),
+            },
+          }],
+        },
+      },
+    },
+  };
+}
+function updateJSON() {
+  if (view !== 'cms') return;
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  $('#json').innerHTML = esc(JSON.stringify(layoutJSON(), null, 2))
+    .replace(/"([^"\\]*(?:\\.[^"\\]*)*)":/g, '<span class="k">"$1"</span>:')
+    .replace(/: "([^"\\]*(?:\\.[^"\\]*)*)"/g, ': <span class="s">"$1"</span>');
+}
+function buildForm() {
+  const groups = { hero: 'Innehåll · Hero', steps: 'Innehåll · Steg 1–5', labels: 'Innehåll · Etiketter i 3D-scenen' };
+  $('#contentGroups').innerHTML = Object.entries(groups).map(([g, title]) => `
+    <details class="f-group"${g === 'hero' ? ' open' : ''}>
+      <summary><span class="chev">›</span>${title}<span class="tag">Fält · <span class="lang-tag"></span></span></summary>
+      <div class="f-body">${FIELD_DEFS.filter(f => f.g === g).map(f => `
+        <div class="fld">
+          <label><span>${f.label}${f.personal ? '<span class="pers-badge" hidden></span>' : ''}</span><code>${f.sc}</code></label>
+          ${f.area ? `<textarea data-path="${f.path}" rows="3"></textarea>` : `<input type="text" data-path="${f.path}">`}
+        </div>`).join('')}
+      </div>
+    </details>`).join('');
+  $$('#contentGroups [data-path]').forEach(el => el.addEventListener('input', () => {
+    setField(el.dataset.path, el.value); renderContent(); updateJSON(); markDirty();
+  }));
+}
+function populateForm() {
+  $$('#contentGroups [data-path]').forEach(el => { if (document.activeElement !== el) el.value = fieldValue(el.dataset.path); });
+  $$('.lang-tag').forEach(el => { el.textContent = LOCALE[lang]; });
+  $$('.pers-badge').forEach(el => { el.hidden = PARAMS.variant === 'standard'; el.textContent = VARIANT_NAMES[PARAMS.variant]; });
+  $('#metaLang').textContent = LOCALE[lang];
+  $('#pvMeta').textContent = `${LOCALE[lang]} · ${VARIANT_NAMES[PARAMS.variant]}`;
+  $('#pCams').value = PARAMS.camCount; $('#oCams').textContent = PARAMS.camCount;
+  $('#pCamH').value = PARAMS.camHeight; $('#oCamH').textContent = `${nf(PARAMS.camHeight, 2)} mm`;
+  $('#pMat').value = PARAMS.material; $('#pCut').checked = PARAMS.cutaway; $('#pRot').checked = PARAMS.autoRotate;
+  $$('#pVariant button').forEach(b => b.setAttribute('aria-pressed', b.dataset.variant === PARAMS.variant));
+}
+let dirtyTimer;
+function markDirty() {
+  $('#savedState').textContent = 'Sparar…';
+  clearTimeout(dirtyTimer);
+  dirtyTimer = setTimeout(() => { $('#savedState').textContent = 'Alla ändringar sparade'; }, 700);
+}
+function paramChanged(geometry) {
+  if (geometry) rebuildWashers();
+  updateAB(); updateBadge(); populateForm(); updateJSON(); markDirty();
+  const g = $('#grpParams'); g.classList.add('hl'); clearTimeout(g._t); g._t = setTimeout(() => g.classList.remove('hl'), 500);
+}
+$('#pCams').addEventListener('input', e => { PARAMS.camCount = +e.target.value; paramChanged(true); });
+$('#pCamH').addEventListener('input', e => { PARAMS.camHeight = +e.target.value; paramChanged(true); });
+$('#pMat').addEventListener('change', e => { PARAMS.material = e.target.value; applyMaterial(); paramChanged(false); });
+$('#pCut').addEventListener('change', e => { PARAMS.cutaway = e.target.checked; rebuildPlates(); paramChanged(false); });
+$('#pRot').addEventListener('change', e => { PARAMS.autoRotate = e.target.checked; paramChanged(false); });
+$$('#pVariant button').forEach(b => b.addEventListener('click', () => { PARAMS.variant = b.dataset.variant; renderContent(); paramChanged(false); }));
+$('#btnPublish').addEventListener('click', () => toast(`Publicerat till Experience Edge · ${LOCALE[lang]}`));
+function toast(msg) {
+  const t = $('#toast'); t.querySelector('span').textContent = msg; t.classList.add('on');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2400);
+}
+
+/* ---------- Vyer, steg, språk ---------- */
+let siteScroll = 0;
+function setView(v) {
+  if (v === view) return;
+  if (view === 'site') siteScroll = window.scrollY;
+  view = v; document.body.dataset.view = v;
+  $('#site').hidden = v !== 'site'; $('#cms').hidden = v !== 'cms';
+  $$('[data-view-btn]').forEach(b => b.setAttribute('aria-pressed', b.dataset.viewBtn === v));
+  (v === 'site' ? $('#canvasHost') : $('#previewHost')).appendChild(renderer.domElement);
+  resize();
+  if (v === 'cms') { window.scrollTo(0, 0); populateForm(); updateJSON(); goCam('cms'); }
+  else { window.scrollTo(0, siteScroll); goCam(step); }
+}
+function setStep(n) {
+  if (n === step) return;
+  step = n; tau = 0;
+  $$('.step').forEach(el => el.classList.toggle('active', +el.dataset.step === n));
+  if (n === 2) S.psi = PSI0;
+  goCam(n);
+}
+function setLang(l) {
+  lang = l;
+  $$('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === l));
+  renderUI(); renderContent(); updateAB(); populateForm(); updateJSON();
+  const k = chartKind; chartKind = null; setChartKind(k);
+}
+$$('[data-view-btn]').forEach(b => b.addEventListener('click', () => setView(b.dataset.viewBtn)));
+$$('[data-goto]').forEach(b => b.addEventListener('click', () => setView(b.dataset.goto)));
+$$('[data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+$$('[data-replay]').forEach(b => b.addEventListener('click', () => { tau = 0; if (step === 2) S.psi = PSI0; }));
+$$('[data-vib]').forEach(b => b.addEventListener('click', () => {
+  vibMode = b.dataset.vib; tau = 0;
+  $$('[data-vib]').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+$('#btnFields').addEventListener('click', e => {
+  const on = document.body.classList.toggle('show-fields');
+  e.currentTarget.setAttribute('aria-pressed', on);
+});
+
+const mobile = matchMedia('(max-width: 900px)').matches;
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting) setStep(+en.target.dataset.step); });
+}, { rootMargin: mobile ? '-72% 0px -26% 0px' : '-48% 0px -50% 0px' });
+$$('.step').forEach(el => io.observe(el));
+
+function resize() {
+  const host = renderer.domElement.parentElement;
+  const w = host.clientWidth, h = host.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+const ro = new ResizeObserver(resize);
+ro.observe($('#canvasHost')); ro.observe($('#previewHost'));
+
+/* ---------- Start ---------- */
+document.body.dataset.view = 'site';
+buildForm(); renderUI(); renderContent(); applyMaterial(); updateAB(); updateBadge(); populateForm();
+resize();
+{ const { tp, tt } = presetVecs(0); camera.position.copy(tp); controls.target.copy(tt); }
+
+const clock = new THREE.Clock();
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05); time += dt;
+  const r = stepLogic(dt);
+  const k = 1 - Math.exp(-dt * 4);
+  S.e += (S.eTarget - S.e) * k;
+  S.glow += (S.camGlow - S.glow) * k;
+  S.flash *= Math.exp(-dt * 2.5);
+  const computed = applyPose();
+  const load = r.load ?? computed;
+  camMat.emissiveIntensity = Math.max(S.glow * (0.32 + 0.22 * Math.sin(time * 3)), S.flash * 0.8);
+  washerMat.emissiveIntensity = S.flash * 0.45;
+  const glowOn = view === 'site' && step >= 2 && step <= 4 ? 1 : 0;
+  S.shankGlow = (S.shankGlow ?? 0) + (glowOn - (S.shankGlow ?? 0)) * k;
+  shankMat.emissiveIntensity = Math.min(load, 2) * 0.3 * S.shankGlow;
+  updateCamera(dt);
+  renderer.render(scene, camera);
+  if (view === 'site') { updateHUD(r, load); updateLabels(); }
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+
+</body></html>
