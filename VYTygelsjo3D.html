@@ -1,9 +1,15 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>VY Tygelsjö 3D</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
+body{margin:0}
+
 /* Layout: full-bleed 3D scene of the quarter; floating control sheet left (bottom sheet on phones), house card bottom-right. */
 :root{
   --bg:#e6e9e6; --panel:rgba(250,250,248,.95); --ink:#22252a; --muted:#5d636a; --line:#d5d8d4;
@@ -109,7 +115,9 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
   #hint{display:none}
 }
 </style>
-
+<script data-goatcounter="https://pentia3d.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
 <div id="app">
   <canvas id="c" tabindex="0" aria-label="3D-modell av VY Tygelsjö"></canvas>
   <div id="loading">Laddar 3D-modellen…</div>
@@ -237,6 +245,8 @@ const MONTHS=['januari','februari','mars','april','maj','juni','juli','augusti',
 const DIRS=['norr','nordnordost','nordost','ostnordost','öster','ostsydost','sydost','sydsydost','söder','sydsydväst','sydväst','västsydväst','väster','västnordväst','nordväst','nordnordväst'];
 const DIRS_S=['N','NNÖ','NÖ','ÖNÖ','Ö','ÖSÖ','SÖ','SSÖ','S','SSV','SV','VSV','V','VNV','NV','NNV'];
 const rad=Math.PI/180;
+// Besöksstatistik (GoatCounter): sidvisningen räknas av count.js, interaktioner skickas som händelser
+const track=(path,title)=>{try{window.goatcounter?.count?.({path:'vy-tygelsjo/'+path,title,event:true});}catch(e){}};
 
 // Site coordinates ("K"): metres in the bofaktablad key plan, x to the right (ca öst), z downwards (ca syd).
 // Fitted to the aerial photo: the plan is turned 13° and anchored at K(4.76, 45.0) = 20 m E, 1 m N of the map pin.
@@ -768,6 +778,7 @@ function setPlan(h,floor){ // null | 'G' | 'U'
   document.getElementById('planG').setAttribute('aria-pressed',String(floor==='G'));
   document.getElementById('planU').setAttribute('aria-pressed',String(floor==='U'));
   renderRooms(h);
+  if(on)track('planlosning-'+h.n+'-'+floor,`Planlösning ${TYPES[h.t].name} ${h.n} (${floor==='U'?'plan 2':'plan 1'})`);
   if(on){const c=h.centerW,F=h.frontDir;
     flyTo(c.clone().addScaledVector(F,5).add(new THREE.Vector3(F.z*2,25,-F.x*2)),c.clone().add(new THREE.Vector3(0,floor==='U'?FL:0,0)),1100);}
   computeDeck();updateCardNow();requestRender();
@@ -791,6 +802,7 @@ function selectHouse(h,fly=true){
   ring.position.set(h.centerW.x,0.1,h.centerW.z);ring.scale.setScalar(h.size*0.72+1.5);ring.visible=true;
   document.getElementById('card').hidden=false;
   const T=TYPES[h.t];
+  track('hus-'+h.n,T.name+' '+h.n);
   document.getElementById('cTitle').textContent=T.name+' '+h.n;
   document.getElementById('cType').textContent=`${T.sub} · ${T.rooms} · ${fmtA(h.a)} m²`;
   const pill=document.getElementById('cPill');pill.textContent=STATUS[h.s];pill.style.setProperty('--st',`var(--${h.s})`);
@@ -840,7 +852,7 @@ const VIEWS={
   street:[KW(-12,52.5,1.7),KW(60,50,2.5)],
   garden:[KW(8,104,1.7),KW(5,70,4)],
 };
-document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const v=VIEWS[b.dataset.view];flyTo(v[0].clone(),v[1].clone());});
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{track('vy-'+b.dataset.view,'Vy: '+b.textContent.trim());const v=VIEWS[b.dataset.view];flyTo(v[0].clone(),v[1].clone());});
 camera.position.copy(VIEWS.overview[0]);controls.target.copy(VIEWS.overview[1]);
 const compassEl=document.getElementById('compass');
 const toNorth=()=>{const t=controls.target.clone();const d=camera.position.distanceTo(t);const pol=controls.getPolarAngle();flyTo(new THREE.Vector3(t.x,t.y+Math.cos(pol)*d,t.z+Math.sin(pol)*d),t,700);};
@@ -870,10 +882,10 @@ state.doy=todayDoy;dayEl.value=todayDoy;
 let dayTimer=null;
 dayEl.oninput=()=>{state.doy=+dayEl.value;const [m,d]=doyToMD(state.doy);document.getElementById('dayOut').textContent=d+' '+MONTHS[m];clearTimeout(dayTimer);dayTimer=setTimeout(applyDay,60);};
 timeEl.oninput=()=>{state.min=+timeEl.value;document.getElementById('timeOut').textContent=fmt(state.min);applySun();};
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{state.doy=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;dayEl.value=state.doy;applyDay();});
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{track('sol-'+b.dataset.doy,'Solstudie: '+b.firstChild.textContent.trim());state.doy=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;dayEl.value=state.doy;applyDay();});
 document.getElementById('nowBtn').onclick=()=>{const n=nowSthlm();state.doy=n.doy;state.min=Math.round(n.min/5)*5;dayEl.value=state.doy;timeEl.value=state.min;document.getElementById('timeOut').textContent=fmt(state.min);applyDay();};
 let playing=false,lastStep=0;const playBtn=document.getElementById('play');
-playBtn.onclick=()=>{playing=!playing;playBtn.setAttribute('aria-pressed',String(playing));document.getElementById('playIcon').textContent=playing?'❚❚':'▶';document.getElementById('playTxt').textContent=playing?'Pausa':'Spela upp dagen';
+playBtn.onclick=()=>{playing=!playing;if(playing)track('spela-dag','Spela upp dagen');playBtn.setAttribute('aria-pressed',String(playing));document.getElementById('playIcon').textContent=playing?'❚❚':'▶';document.getElementById('playTxt').textContent=playing?'Pausa':'Spela upp dagen';
   if(playing){const i=state.info;if(i.rise!=null&&(state.min<i.rise-30||state.min>i.set+20))state.min=Math.max(0,Math.floor((i.rise-30)/5)*5);}requestRender();};
 document.getElementById('toggleSheet').onclick=()=>document.getElementById('panel').classList.toggle('collapsed');
 
@@ -901,5 +913,5 @@ document.getElementById('loading').remove();
 requestAnimationFrame(loop);
 window.__k={state,applyDay,applySun,selectHouse,setPlan,H,camera,controls,flyTo,requestRender,KW,VIEWS};
 </script>
-
-</body></html>
+</body>
+</html>
