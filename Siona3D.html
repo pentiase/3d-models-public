@@ -1,0 +1,864 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Siona 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 3D scene of the quarter; floating control sheet left (bottom sheet on phones), house card bottom-right. */
+:root{
+  --bg:#e6e9e6; --panel:rgba(250,250,248,.95); --ink:#22252a; --muted:#5d636a; --line:#d5d8d4;
+  --accent:#7a5a44; --accent-ink:#ffffff; --sun:#d99a17; --chip:#eef0ec;
+  --sale:#2f8a5f; --sold:#8b8984; --res:#c08a2e; --show:#3d6fa8; --soon:#4f7fb5;
+  --f-display:"Schibsted Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 10px 30px rgba(30,30,35,.16);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121417; --panel:rgba(24,26,30,.94); --ink:#e7e8ea; --muted:#9aa0a7; --line:#30343a;
+  --accent:#d9a98a; --accent-ink:#1a0f0a; --sun:#f0bb45; --chip:#22252a;
+  --sale:#4fb483; --sold:#8f8d88; --res:#d9a64d; --show:#6f9fd6; --soon:#7aa6d8; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121417; --panel:rgba(24,26,30,.94); --ink:#e7e8ea; --muted:#9aa0a7; --line:#30343a;
+  --accent:#d9a98a; --accent-ink:#1a0f0a; --sun:#f0bb45; --chip:#22252a;
+  --sale:#4fb483; --sold:#8f8d88; --res:#d9a64d; --show:#6f9fd6; --soon:#7aa6d8; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hidden}
+#app{position:relative;width:100%;height:100%}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#panel{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));width:350px;max-height:calc(100% - 32px);overflow:auto;background:var(--panel);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+  padding:18px 18px 14px;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin}
+.eyebrow{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font:800 32px/1 var(--f-display);margin:4px 0 6px;letter-spacing:-.02em;text-wrap:balance}
+.lede{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.facts span{font:500 11.5px/1 var(--f-mono);padding:6px 8px;border-radius:6px;background:var(--chip);color:var(--ink)}
+section{display:flex;flex-direction:column;gap:10px}
+h2{font:600 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink);display:flex;align-items:center;gap:8px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.seg button,.views button{font:500 12px/1 var(--f-body);padding:8px 4px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button small{display:block;font:400 10px/1.2 var(--f-mono);color:var(--muted);margin-top:3px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.85}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-direction:column;gap:4px}
+.row label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--muted)}
+.row label output{font:500 14px/1 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.playrow{display:flex;gap:8px;align-items:center}
+#play{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--f-body);padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+#nowBtn{font:500 12.5px/1 var(--f-body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px 12px;border-radius:10px;background:var(--chip);margin:0}
+.readout div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.readout dt{font-size:11px;color:var(--muted)}
+.readout dd{margin:0;font:500 13.5px/1.2 var(--f-mono);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chips{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.chips button{position:relative;font:600 11px/1 var(--f-mono);padding:7px 0 8px;border-radius:5px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;min-width:0}
+.chips button::after{content:"";position:absolute;left:4px;right:4px;bottom:2px;height:3px;border-radius:2px;background:var(--st)}
+.chips button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.toggles{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.toggles label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.toggles input{accent-color:var(--accent);width:15px;height:15px}
+.views{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.note{font-size:11.5px;line-height:1.5;color:var(--muted);margin:0}
+.note a{color:var(--accent)}
+#card{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:330px;max-height:calc(100% - 100px);overflow:auto;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:10px}
+#card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#card h3{font:800 26px/1 var(--f-display);margin:0;letter-spacing:-.01em}
+#card .type{font-size:13px;color:var(--muted);margin-top:4px}
+#closeCard{border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
+.pill{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:5px 8px;border-radius:999px;color:#fff;background:var(--st);white-space:nowrap}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.deck{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line)}
+.deck .lbl{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.deck .lbl b{font:500 13px var(--f-mono);color:var(--ink)}
+#deckBar{width:100%;height:26px;display:block;border-radius:6px}
+.axis{display:flex;justify-content:space-between;font:400 10px/1 var(--f-mono);color:var(--muted)}
+.deckKey{display:flex;gap:10px;font-size:11px;color:var(--muted)}
+.deckKey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.planbox{display:flex;flex-direction:column;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+.planbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.planbtn{font:600 12.5px/1 var(--f-body);padding:9px 10px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;text-align:center}
+.planbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.rooms{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:12px}
+.rooms li{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dotted var(--line);padding:2px 0;min-width:0}
+.rooms li span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.rooms li.h{grid-column:1/-1;border:0;font:600 10.5px/1.6 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+.small{font-size:11.5px;line-height:1.45;color:var(--muted);margin:0}
+#compass{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:54px;height:54px;border-radius:50%;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+#compass svg{width:44px;height:44px}
+#hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-size:12px;color:#fff;background:rgba(20,22,26,.6);padding:7px 12px;border-radius:999px;pointer-events:none;white-space:nowrap}
+#toggleSheet{display:none}
+#loading{position:absolute;inset:0;display:grid;place-items:center;font:500 13px var(--f-mono);color:var(--muted);pointer-events:none}
+@media (max-width:760px){
+  #panel{top:auto;bottom:0;left:0;right:0;width:auto;max-height:52%;border-radius:16px 16px 0 0;
+    padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));gap:14px}
+  #panel.collapsed{max-height:150px;overflow:hidden}
+  #toggleSheet{display:block;align-self:center;width:44px;height:5px;border-radius:3px;border:0;background:var(--line);cursor:pointer;margin:-4px 0 0;padding:0;flex:none}
+  h1{font-size:26px}
+  #card{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));width:auto;top:calc(12px + env(safe-area-inset-top,0px));bottom:auto;max-height:46%}
+  #compass{top:auto;bottom:calc(52% + 12px);width:46px;height:46px}
+  #compass svg{width:38px;height:38px}
+  #hint{display:none}
+}
+</style>
+
+<div id="app">
+  <canvas id="c" tabindex="0" aria-label="3D-modell av kvarteret Siona i Vellinge Parkby"></canvas>
+  <div id="loading">Laddar 3D-modellen…</div>
+
+  <aside id="panel" aria-label="Kontroller">
+    <button id="toggleSheet" aria-label="Visa eller dölj kontroller"></button>
+    <header>
+      <p class="eyebrow">Nordr · Vellinge Parkby</p>
+      <h1>Siona</h1>
+      <p class="lede">37 bostadsrättsradhus i ett och två plan runt en grön innergård, med parken och dungen i väster. Klicka på ett hus för fakta, planlösning och sol på uteplatsen.</p>
+      <div class="facts" id="facts"></div>
+    </header>
+
+    <section aria-labelledby="h-sun">
+      <h2 id="h-sun">Sol och skugga</h2>
+      <div class="seg" role="group" aria-label="Årstid">
+        <button data-doy="355">Vinter<small>21 dec</small></button>
+        <button data-doy="79">Vår<small>20 mar</small></button>
+        <button data-doy="172">Sommar<small>21 jun</small></button>
+        <button data-doy="266">Höst<small>23 sep</small></button>
+        <button data-doy="today">Idag<small id="todayLbl">–</small></button>
+      </div>
+      <div class="row">
+        <label for="day">Datum <output id="dayOut">–</output></label>
+        <input id="day" type="range" min="1" max="365" step="1" value="172">
+      </div>
+      <div class="row">
+        <label for="time">Klockslag <output id="timeOut">13:00</output></label>
+        <input id="time" type="range" min="0" max="1435" step="5" value="780">
+      </div>
+      <div class="playrow">
+        <button id="play" aria-pressed="false"><span id="playIcon">▶</span><span id="playTxt">Spela upp dagen</span></button>
+        <button id="nowBtn">Just nu</button>
+      </div>
+      <dl class="readout">
+        <div><dt>Solhöjd</dt><dd id="rAlt">–</dd></div>
+        <div><dt>Solens riktning</dt><dd id="rAz">–</dd></div>
+        <div><dt>Soluppgång</dt><dd id="rRise">–</dd></div>
+        <div><dt>Solnedgång</dt><dd id="rSet">–</dd></div>
+        <div><dt>Dagens längd</dt><dd id="rLen">–</dd></div>
+        <div><dt>Högst kl.</dt><dd id="rNoon">–</dd></div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="h-houses">
+      <h2 id="h-houses">Husen</h2>
+      <div class="legend">
+        <span><i style="background:var(--sale)"></i>Till salu</span>
+        <span><i style="background:var(--res)"></i>Reserverad</span>
+        <span><i style="background:var(--soon)"></i>Kommer snart</span>
+        <span><i style="background:var(--sold)"></i>Såld</span>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="toggles">
+        <label><input type="checkbox" id="tStatus"> Färga husen efter status</label>
+        <label><input type="checkbox" id="tNums" checked> Visa husnummer</label>
+        <label><input type="checkbox" id="tPath" checked> Visa solbanor</label>
+        <label><input type="checkbox" id="tCtx" checked> Visa grannhusen</label>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-views">
+      <h2 id="h-views">Vy</h2>
+      <div class="views">
+        <button data-view="overview">Översikt</button>
+        <button data-view="top">Ovanifrån</button>
+        <button data-view="street">Rönnbärs&shy;gatan</button>
+        <button data-view="court">Innergården</button>
+      </div>
+    </section>
+
+    <p class="note">Illustration byggd från kvartersplanen och planritningarna i Nordrs bostadsväljare för <a href="https://www.nordr.com/se/hitta-din-bostad/siona/till-salu" target="_blank" rel="noopener">Siona</a>. Kvarteret är placerat utifrån Nordrs kartnål och kvartersplanens nordpil, eftersom området ännu inte är byggt; läget kan avvika några meter. Höjder, takformer, fönster och rummens lägen är förenklade och husen visas inte spegelvända. Grannhus och befintliga vägar från OpenStreetMap. Solen beräknad för Vellinge Parkby (55,481° N, 13,028° Ö) i svensk tid. Status och priser enligt nordr.com 21 oktober 2026.</p>
+  </aside>
+
+  <div id="card" hidden aria-live="polite">
+    <div class="top">
+      <div><h3 id="cTitle">Radhus 1</h3><div class="type" id="cType">–</div></div>
+      <div style="display:flex;gap:6px;align-items:center"><span class="pill" id="cPill">Till salu</span><button id="closeCard" aria-label="Stäng">×</button></div>
+    </div>
+    <dl class="kv" id="cKv"></dl>
+    <div class="planbox">
+      <div class="planbtns" id="planBtns">
+        <button id="planG" class="planbtn" aria-pressed="false">Plan 1</button>
+        <button id="planU" class="planbtn" aria-pressed="false">Plan 2</button>
+      </div>
+      <ul id="cRooms" class="rooms"></ul>
+      <p class="small" id="cPlanNote"></p>
+    </div>
+    <div class="deck">
+      <div class="lbl"><span>Sol på uteplatsen <span id="cDate"></span></span><b id="cSunH">–</b></div>
+      <canvas id="deckBar" width="576" height="52"></canvas>
+      <div class="axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      <div class="deckKey"><span><i style="background:#f1b52e"></i>Sol</span><span><i style="background:#7f8f9a"></i>Skugga</span><span><i style="background:#26334a"></i>Natt</span></div>
+      <div class="lbl"><span id="cNow">–</span></div>
+    </div>
+  </div>
+
+  <div id="compass" title="Vrid mot norr" role="button" tabindex="0" aria-label="Vrid vyn mot norr">
+    <svg viewBox="-22 -22 44 44" id="compassSvg" aria-hidden="true">
+      <polygon points="0,-17 5,0 -5,0" fill="#c8452f"/>
+      <polygon points="0,17 5,0 -5,0" fill="currentColor" opacity=".35"/>
+      <circle r="2" fill="currentColor"/>
+    </svg>
+  </div>
+  <div id="hint">Dra för att rotera · nyp eller scrolla för att zooma · klicka på ett hus</div>
+</div>
+
+<script type="application/json" id="osm">{"b":["200,-36,211,-72,220,-69,222,-77,236,-73,233,-65,241,-63,238,-54,218,-60,212,-42,233,-36,220,9,200,3,203,-10,209,-8,216,-32,200,-36||","240,-25,250,-60,259,-57,250,-22,240,-25||","185,-24,197,-20,201,-34,189,-37,185,-24||","91,25,99,32,95,36,87,29,91,25||","83,49,92,38,99,44,90,54,83,49||","34,150,34,124,40,124,40,146,48,146,48,150,34,150||","46,140,47,134,50,134,50,140,46,140||","21,-270,28,-270,29,-287,22,-287,21,-270||","60,-309,60,-301,76,-300,77,-308,60,-309||","121,-265,128,-265,128,-282,122,-282,121,-265||","141,-264,148,-264,148,-281,142,-281,141,-264||","167,-263,174,-263,174,-280,167,-280,167,-263||","187,-263,194,-262,194,-279,187,-279,187,-263||","207,-261,213,-261,214,-278,207,-278,207,-261||","30,-332,30,-325,46,-324,46,-331,30,-332||","227,-260,234,-260,234,-277,227,-277,227,-260||","99,-361,99,-354,115,-353,116,-360,99,-361||","247,-258,253,-258,254,-275,247,-275,247,-258||","96,-343,96,-336,112,-335,112,-342,96,-343||","267,-259,273,-259,274,-276,267,-276,267,-259||","93,-325,93,-318,109,-317,109,-324,93,-325||","89,-307,89,-300,105,-299,105,-306,89,-307||","41,-269,48,-269,48,-286,42,-286,41,-269||","64,-327,63,-319,80,-319,80,-326,64,-327||","131,-345,131,-337,147,-336,147,-344,131,-345||","128,-325,127,-318,143,-317,144,-324,128,-325||","123,-306,123,-298,139,-298,139,-305,123,-306||","34,-353,34,-346,50,-345,50,-352,34,-353||","61,-267,68,-267,68,-284,62,-284,61,-267||","67,-345,67,-337,83,-336,83,-344,67,-345||","38,-374,38,-367,54,-366,54,-373,38,-374||","81,-266,88,-266,88,-283,81,-283,81,-266||","71,-363,70,-356,87,-355,87,-362,71,-363||","101,-265,108,-265,108,-282,102,-282,101,-265||","162,-257,162,-254,165,-254,165,-257,162,-257||","212,-306,212,-298,229,-297,229,-305,212,-306||","179,-308,178,-300,195,-299,195,-307,179,-308||","179,-327,179,-319,196,-319,196,-327,179,-327||","-270,-87,-270,-84,-274,-85,-275,-78,-271,-77,-272,-74,-254,-71,-254,-72,-249,-71,-246,-74,-245,-78,-247,-82,-252,-82,-252,-84,-270,-87||","-186,-275,-177,-274,-175,-284,-184,-285,-186,-275||","-92,-310,-92,-300,-83,-300,-83,-310,-92,-310||","-105,-238,-97,-237,-96,-247,-104,-248,-105,-238||","-100,-282,-93,-280,-90,-292,-96,-294,-100,-282||","-246,-276,-242,-268,-233,-272,-237,-280,-246,-276||","-125,-273,-128,-264,-119,-261,-116,-271,-125,-273||","-226,-285,-222,-277,-214,-281,-218,-289,-226,-285||","-134,-242,-127,-241,-125,-254,-133,-254,-134,-242||","-279,-202,-275,-193,-267,-196,-271,-205,-279,-202||","-91,-356,-83,-356,-83,-368,-91,-368,-91,-356||","-224,-263,-233,-259,-229,-251,-220,-256,-224,-263||","-238,-257,-246,-251,-241,-244,-233,-250,-238,-257||","-236,-281,-232,-273,-224,-277,-228,-285,-236,-281||","-281,-238,-282,-228,-274,-227,-272,-236,-281,-238||","-214,-269,-210,-261,-201,-265,-205,-273,-214,-269||","-196,-241,-194,-234,-183,-238,-185,-245,-196,-241||","-158,-296,-149,-296,-150,-305,-158,-305,-158,-296||","-228,-222,-224,-217,-217,-222,-221,-227,-228,-222||","-270,-280,-265,-273,-257,-279,-262,-286,-270,-280||","-111,-315,-103,-315,-103,-325,-111,-326,-111,-315||","-219,-228,-215,-223,-206,-230,-210,-235,-219,-228||","-246,-251,-254,-245,-249,-239,-241,-244,-246,-251||","-141,-328,-132,-328,-132,-337,-141,-337,-141,-328||","-167,-275,-158,-274,-157,-282,-165,-284,-167,-275||","-115,-301,-107,-299,-104,-308,-112,-311,-115,-301||","-155,-337,-155,-328,-145,-328,-145,-337,-155,-337||","-156,-306,-147,-306,-147,-316,-156,-316,-156,-306||","-119,-286,-112,-284,-109,-296,-116,-298,-119,-286||","-276,-263,-268,-261,-266,-270,-274,-272,-276,-263||","-280,-240,-272,-238,-270,-248,-278,-250,-280,-240||","-207,-304,-198,-304,-198,-313,-207,-313,-207,-304||","-245,-227,-241,-222,-234,-226,-238,-232,-245,-227||","-92,-319,-92,-310,-83,-310,-83,-319,-92,-319||","-209,-287,-199,-286,-199,-296,-208,-296,-209,-287||","-282,-228,-284,-219,-275,-217,-274,-227,-282,-228||","-227,-240,-223,-234,-214,-241,-218,-246,-227,-240||","-206,-237,-204,-231,-196,-234,-199,-240,-206,-237||","-237,-216,-233,-210,-226,-216,-230,-221,-237,-216||","-207,-314,-198,-314,-198,-324,-207,-324,-207,-314||","-183,-287,-175,-287,-175,-297,-184,-297,-183,-287||","-91,-326,-84,-326,-83,-338,-91,-338,-91,-326||","-236,-233,-232,-228,-225,-233,-229,-238,-236,-233||","-168,-265,-160,-263,-159,-273,-167,-274,-168,-265||","-168,-252,-159,-253,-160,-262,-168,-261,-168,-252||","-123,-282,-125,-273,-116,-271,-114,-280,-123,-282||","-214,-249,-212,-242,-201,-246,-203,-253,-214,-249||","-162,-285,-153,-285,-153,-295,-162,-295,-162,-285||","-192,-329,-192,-320,-183,-320,-183,-329,-192,-329||","-91,-343,-82,-342,-82,-352,-91,-352,-91,-343||","-250,-209,-247,-203,-237,-208,-240,-214,-250,-209||","-166,-241,-157,-242,-158,-251,-167,-251,-166,-241||","-157,-348,-149,-348,-149,-358,-157,-357,-157,-348||","-105,-268,-107,-259,-99,-257,-97,-266,-105,-268||","-102,-277,-105,-268,-97,-266,-94,-275,-102,-277||","-181,-329,-181,-320,-172,-320,-172,-329,-181,-329||","-283,-211,-279,-202,-271,-205,-275,-214,-283,-211||","-187,-263,-179,-262,-177,-272,-185,-273,-187,-263||","-278,-253,-269,-251,-268,-260,-276,-262,-278,-253||","-264,-229,-258,-221,-250,-227,-256,-235,-264,-229||","-108,-356,-116,-366,-122,-361,-114,-352,-108,-356||","-171,-329,-171,-320,-161,-320,-161,-329,-171,-329||","-216,-268,-224,-263,-220,-256,-212,-260,-216,-268||","-103,-330,-102,-342,-110,-342,-110,-336,-115,-336,-115,-330,-103,-330||","-140,-154,-150,-155,-151,-145,-142,-144,-140,-154||","-150,-155,-160,-157,-161,-147,-151,-145,-150,-155||","-194,-188,-196,-179,-187,-178,-185,-187,-194,-188||","-112,-207,-105,-205,-102,-217,-110,-219,-112,-207||","-135,-177,-134,-185,-137,-186,-139,-178,-135,-177||","-196,-179,-198,-170,-189,-168,-187,-178,-196,-179||","-121,-190,-123,-180,-114,-178,-112,-188,-121,-190||","-160,-174,-161,-168,-146,-166,-146,-173,-160,-174||","-130,-139,-123,-138,-122,-150,-129,-151,-130,-139||","-195,-211,-196,-204,-182,-201,-181,-208,-195,-211||","-140,-215,-133,-213,-131,-225,-137,-226,-140,-215||","-139,-192,-133,-191,-130,-203,-137,-204,-139,-192||","-126,-161,-120,-159,-117,-171,-124,-173,-126,-161||","-119,-199,-121,-190,-112,-188,-110,-197,-119,-199||","-162,-204,-170,-206,-171,-198,-160,-196,-158,-205,-162,-206,-162,-204||","-179,-158,-180,-151,-173,-150,-174,-148,-169,-147,-167,-157,-179,-158||","-194,-144,-191,-156,-198,-157,-200,-150,-203,-150,-204,-146,-194,-144||","-293,-110,-294,-104,-287,-102,-286,-108,-293,-110||","-133,-80,-135,-73,-121,-69,-119,-76,-133,-80||","-271,-179,-273,-174,-264,-172,-263,-177,-271,-179||","-307,-131,-300,-130,-297,-145,-304,-146,-307,-131||","-201,-62,-187,-60,-186,-67,-200,-69,-201,-62||","-168,-46,-169,-39,-157,-37,-156,-44,-168,-46||","-160,-90,-162,-83,-150,-80,-149,-87,-160,-90||","-325,-167,-318,-166,-315,-180,-322,-181,-325,-167||","-263,-33,-265,-27,-256,-24,-254,-30,-263,-33||","-222,-89,-223,-84,-213,-82,-212,-88,-222,-89||","-362,-146,-365,-140,-352,-133,-349,-140,-362,-146||","-186,-49,-187,-41,-176,-40,-174,-47,-186,-49||","-232,111,-219,113,-215,93,-228,91,-232,111||","-295,-150,-287,-149,-284,-164,-292,-166,-295,-150||","-328,-150,-332,-151,-333,-146,-322,-144,-320,-156,-327,-157,-328,-150||","-316,-103,-302,-101,-301,-106,-309,-107,-307,-118,-314,-119,-316,-103||","-202,-101,-192,-99,-191,-102,-195,-103,-194,-108,-200,-110,-202,-101||","-224,-72,-229,-73,-231,-67,-221,-64,-218,-80,-222,-81,-224,-72||","-327,-124,-323,-135,-330,-137,-332,-130,-335,-131,-336,-127,-327,-124||","-245,-17,-246,-14,-244,-13,-240,-22,-253,-27,-256,-21,-245,-17||","-199,-43,-199,-40,-194,-39,-192,-49,-204,-51,-206,-44,-199,-43||","-137,-22,-122,-13,-119,-18,-138,-30,-146,-19,-141,-16,-137,-22||","-242,102,-234,61,-263,55,-265,63,-243,67,-249,93,-270,89,-271,97,-242,102||","-233,-33,-225,-31,-223,-37,-226,-38,-224,-44,-222,-43,-221,-48,-228,-50,-233,-33||","-281,75,-278,75,-281,88,-272,89,-266,62,-275,61,-277,70,-280,70,-281,75||","-165,-67,-170,-67,-170,-62,-166,-61,-167,-58,-159,-57,-157,-72,-165,-73,-165,-67||","-363,-43,-334,-40,-334,-47,-363,-50,-363,-43||","-325,-69,-325,-62,-306,-62,-306,-68,-325,-69||","-342,-100,-346,-94,-340,-89,-332,-99,-344,-109,-347,-105,-342,-100||","-365,-100,-358,-115,-374,-122,-380,-109,-374,-107,-372,-113,-367,-111,-370,-103,-365,-100||","-203,-99,-206,-86,-200,-85,-199,-91,-193,-90,-192,-96,-203,-99||","-81,-369,-81,-364,-66,-364,-66,-369,-81,-369||","-170,9,-157,15,-154,8,-167,2,-170,9||","-171,-26,-171,-31,-176,-31,-177,-27,-171,-26||s","-176,1,-172,4,-167,-3,-171,-6,-176,1||","-184,2,-182,-3,-194,-9,-197,-4,-184,2||"],"r":["re|-56,-221,-69,-222,-117,-232,-151,-235,-170,-233,-178,-232,-189,-229,-199,-226,-217,-215,-237,-200,-252,-192,-258,-190,-260,-189,-275,-185,-292,-185,-304,-186,-333,-188,-341,-190,-346,-193,-352,-204,-356,-215,-374,-258,-376,-261,-392,-296,-398,-301,-458,-297","re|-322,-104,-318,-116,-310,-159","re|-234,3,-228,-15,-221,-33,-215,-57,-207,-93,-209,-97,-214,-100,-226,-103","re|-172,-164,-168,-189,-171,-192,-177,-194,-181,-191,-183,-169,-181,-165,-172,-164,-146,-160,-135,-166,-131,-175,-117,-232","se|-249,-7,-261,54","re|-42,-299,-26,-298,49,-295,113,-291,152,-289,203,-287,263,-284,325,-281,337,-280","re|263,-284,272,-431,328,-428,331,-422,325,-281","re|49,-295,53,-312,79,-441,136,-437,140,-432,113,-291","se|203,104,244,-57,245,-65,243,-72,230,-80,221,-82,214,-79,201,-68,90,63,73,83","cy|152,-289,175,-407,176,-436,178,-458","pa|-304,-193,-315,-197,-364,-303,-389,-358,-392,-367,-404,-391,-410,-393,-469,-387","pa|-398,-301,-364,-303,-285,-300,-253,-300,-202,-301,-193,-302","re|-260,-189,-270,-211,-272,-218,-268,-242,-265,-253,-263,-263,-259,-270,-253,-273,-249,-271,-245,-263,-259,-254,-265,-253","pa|-310,-159,-304,-186,-304,-193,-292,-258,-285,-300","se|-252,-192,-258,-207,-255,-212,-242,-218,-232,-224,-213,-236,-197,-245,-185,-249,-180,-246,-178,-232","fo|-197,-245,-200,-257,-197,-280,-196,-298,-193,-302","re|-215,-57,-162,-50,-157,-51,-147,-69","pa|-217,-215,-211,-202,-217,-176,-218,-170,-222,-144,-222,-138,-217,-131,-213,-123,-211,-114,-214,-100","cy|-265,-253,-242,-218","pa|-392,-367,-316,-369,-303,-368,-285,-369,-261,-373,-254,-374,-199,-373,-194,-373,-178,-373,-150,-373,-144,-370","cy|-114,112,-108,111,-105,110,-103,107,-98,94,-95,91,-93,90,-89,88,-88,87,-87,82,-85,75,-84,70,-84,68,-85,66,-87,63,-89,60,-90,56,-90,53,-90,52,-88,33,-87,22,-80,-15,-56,-143,-34,-259,-26,-298,-5,-418","cy|337,-280,366,-278,369,-281,371,-327,375,-427","re|-117,-232,-115,-256,-102,-296,-99,-309,-98,-320,-96,-360,-102,-367,-110,-372,-132,-373,-133,-351,-135,-347,-141,-347,-143,-350,-144,-370,-142,-373,-132,-373","re|-170,-233,-175,-262,-175,-265,-168,-300,-165,-307,-165,-313,-168,-316,-189,-317,-192,-315,-194,-314,-193,-302,-190,-301,-168,-300","re|272,-431,216,-434,211,-429,203,-287","re|-137,56,-151,49,-165,41,-234,3,-249,-7,-269,-24,-283,-50,-286,-55,-301,-77,-322,-104,-335,-116,-357,-128,-374,-136,-381,-140,-397,-148,-409,-162,-420,-176,-423,-179,-431,-186,-440,-192,-451,-193,-461,-193,-518,-177,-524,-178","te|-17,-443,-20,-422,-28,-379,-42,-299,-56,-221,-65,-166","te|1138,226,1072,222,838,188,805,183,769,179,738,177,680,175,597,163,203,104,73,83,64,83,32,83,-71,80","se|17,-313,53,-312","te|-113,109,-114,112,-136,235,-146,310,-153,380,-156,413,-163,509","te|-74,-119,-75,-134,-73,-149,-69,-158,-65,-166","pa|-194,-373,-189,-381,-175,-399,-161,-416,-128,-420,-85,-425,-81,-425,-67,-427,-51,-427,-34,-424,-20,-422,-5,-418","fo|-245,-263,-211,-280,-197,-280","pa|-211,-202,-185,-196,-181,-191","se|-258,-190,-251,-181,-226,-175","se|-356,-215,-360,-208,-362,-193,-357,-191,-346,-193","pa|-374,-136,-363,-160,-357,-191","pa|-43,-375,-64,-375,-93,-374,-102,-367","pa|-141,-110,-134,-154,-135,-166","pa|-217,-131,-205,-137,-180,-133,-162,-128,-141,-110,-143,-84,-147,-69","fo|-286,-55,-283,-62,-272,-111,-268,-133,-265,-144,-258,-173,-254,-174,-251,-181","te|-74,-119,-81,-76,-99,33","se|-228,-15,-151,24,-148,31,-148,40,-151,49","se|-148,31,-140,21,-131,-6","fo|-272,-111,-236,-100","se|64,83,62,121","te|-107,59,-104,60,-100,61,-97,63,-95,66,-94,70,-94,74,-95,77,-97,80,-99,83,-101,84,-105,85,-109,85,-113,83,-116,80,-118,76,-119,72,-118,68,-116,64,-113,61,-111,60,-107,59","te|-94,70,-91,73,-90,73,-90,74,-85,75,-82,76,-71,80","te|-101,84,-105,89,-108,95,-113,109","re|-137,56,-128,58,-120,59,-119,60,-113,61","te|-99,33,-99,41,-99,46,-99,47,-99,52,-99,54,-98,57,-97,63","cy|-90,53,-99,52,-106,50,-116,48","te|-71,80,-81,83,-82,83,-87,82,-89,82,-94,82,-99,83","re|-119,72,-123,67,-128,62,-137,56","te|-113,109,-113,94,-114,87,-116,80","te|-111,60,-109,56,-108,55,-106,50,-103,42,-99,33"],"l":["far|75,83,193,100,214,21,196,12,192,0,190,-13,168,-25,75,83","far|207,99,233,8,412,65,409,129,207,99","far|511,144,409,129,412,65,416,49,412,-82,275,-105,263,-101,274,-163,286,-248,348,-245,360,-248,365,-261,365,-276,400,-272,421,-269,543,-255,511,144","far|-108,91,-145,313,-162,487,-172,628,-600,628,-600,-110,-523,-110,-489,-112,-489,-77,-369,-80,-387,-45,-308,-36,-292,-7,-274,-17,-253,-1,-268,46,-276,47,-290,53,-310,65,-335,89,-302,105,-256,119,-242,122,-230,122,-221,120,-213,70,-212,56,-217,51,-224,49,-253,46,-246,4,-231,15,-118,77,-108,91","far|30,154,61,92,197,112,410,144,671,180,745,181,743,279,819,288,830,191,1070,231,1118,238,1021,382,600,600,-108,600,-108,91,31,91,30,154"]}</script>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ---------------- Data ---------------- */
+const OSM=JSON.parse(document.getElementById('osm').textContent);
+const LAT=55.4810, LON=13.0277, YEAR=2026;
+const STATUS={sale:'Till salu',sold:'Såld',res:'Reserverad',soon:'Kommer till försäljning'};
+const STATUS_HEX={sale:0x3d9468,sold:0x9a9790,res:0xc8953a,soon:0x5b86b8};
+const MONTHS=['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'];
+const DIRS=['norr','nordnordost','nordost','ostnordost','öster','ostsydost','sydost','sydsydost','söder','sydsydväst','sydväst','västsydväst','väster','västnordväst','nordväst','nordnordväst'];
+const DIRS_S=['N','NNÖ','NÖ','ÖNÖ','Ö','ÖSÖ','SÖ','SSÖ','S','SSV','SV','VSV','V','VNV','NV','NNV'];
+const rad=Math.PI/180;
+const track=(path,title)=>{try{window.goatcounter?.count?.({path:'siona/'+path,title,event:true});}catch(e){}};
+
+// The site plan (Kartvy in Nordr's bostadsväljare, 19,7 px/m, norr upp) is drawn on two grids:
+// the main grid turned 23° and the north-east blocks (hus 6–16) turned 12°. Both share one origin.
+// Frame coordinates: u along the rows (ca öst), v across (ca syd), metres.
+const FRAME_POS=[-5.52,6.35];   // world x/z of the frame origin; the plan centre sits ~4 m south of Nordr's map pin
+const TYPES={
+  F:{name:'Funktionella',sub:'Tvåplansradhus',area:104,rooms:'4 rok',floors:2,fac:'Ljus puts'},
+  R:{name:'Rymliga',sub:'Tvåplansradhus',area:122,rooms:'5 rok',floors:2,fac:'Ljus puts'},
+  S:{name:'Sociala',sub:'Tvåplansradhus',area:113,rooms:'4 rok',floors:2,fac:'Ljus puts'},
+  B:{name:'Bekväma',sub:'Enplansradhus',area:78,rooms:'3 rok',floors:1,fac:'Tegel'},
+  T:{name:'Smakfulla',sub:'Enplansradhus med egen uppfart',area:104,rooms:'4 rok',floors:1,fac:'Tegel'},
+};
+// Status, price (only shown for homes for sale), fee and plot from the bostadsväljare, 21 okt 2026
+const RAW=`1 F res 99 5053|2 F sold 95 5053|3 F sold 95 5053|4 F sold 95 5053|5 F sold 97 5053|6 R sold 115 5757|7 R sold 111 5757|8 R sale 115 5757 4295000|9 R res 116 5757|10 R sold 112 5757|11 R sold 112 5757|12 R sold 117 5757|13 S sold 123 5358|14 S sold 120 5358|15 S sold 120 5358|16 S sale 123 5358 4150000|17 S soon 152 5358|18 S soon 112 5358|19 S soon 112 5358|20 S soon 112 5358|21 F sale 93 5053 3695000|22 F sold 91 5053|23 F sold 91 5053|24 F sold 91 5053|25 F sold 95 5053|26 B sale 157 3807 3995000|27 B sold 148 3807|28 B sale 154 3807 3895000|29 T sale 208 4775 5295000|30 T sold 242 4775|31 T sold 315 4775|32 T sold 315 4775|33 T sold 237 4775|34 T sold 315 4775|35 T sold 315 4775|36 T sale 237 4775 5095000|37 T res 330 4775`;
+const H=RAW.split('|').map(s=>{const [n,t,st,pl,fee,p]=s.split(' ');return {n:+n,t,s:st,tomt:+pl,f:+fee,p:p?+p:0};});
+const HN=n=>H.find(h=>h.n===n);
+// Footprints traced from the site plan: [x0,x1,z0,z1] in frame metres, entrance side, frame
+for(let i=0;i<5;i++){Object.assign(HN(i+1),{fr:23,r:[-14.4+i*5.56,-14.4+(i+1)*5.56,-29.2,-18.5],ent:'N'});
+                    Object.assign(HN(25-i),{fr:23,r:[-14.4+i*5.56,-14.4+(i+1)*5.56,36.2,46.9],ent:'S'});}
+for(let i=0;i<4;i++)Object.assign(HN(20-i),{fr:23,r:[28.2+i*6.2,28.2+(i+1)*6.2,36.2,46.6],ent:'S'});
+for(let i=0;i<3;i++)Object.assign(HN(6+i),{fr:12,r:[13.5+i*6.2,13.5+(i+1)*6.2,-41.2,-30.0],ent:'N'});
+for(let i=0;i<4;i++)Object.assign(HN(9+i),{fr:12,r:[38.2+i*6.12,38.2+(i+1)*6.12,-40.6,-29.1],ent:'N'});
+[-8.2,-2.0,4.1,10.5,16.6].forEach((v,i,a)=>{if(i<4)Object.assign(HN(13+i),{fr:12,r:[50.1,60.8,v,a[i+1]],ent:'E'});});
+[[28,1.9,9.0],[27,9.0,16.0],[26,16.0,22.9]].forEach(([n,a,b])=>Object.assign(HN(n),{fr:23,r:[-11.4,1.25,a,b],ent:'W'}));
+[[37,-47.9],[36,-39.5],[35,-31.1],[34,-17.5],[33,-9.1],[32,-0.7],[31,12.9],[30,21.3],[29,29.7]].forEach(([n,v])=>Object.assign(HN(n),{fr:23,r:[-39.5,-24.1,v,v+8.4],ent:'E'}));
+
+// Room layouts read from the planritningar, drawn with the entrance at the top: [name, m², a0,a1 (across), t0,t1 (from the entrance)]
+const PLAN={
+  F:{G:[['Hall',null,0,.35,0,.29],['Kök',null,.35,1,0,.41],['WC/D',null,0,.35,.29,.64],['Trappa',null,.58,1,.41,.58],['',null,.35,.58,.41,.64],['',null,.58,1,.58,.64],['Vardagsrum',null,0,1,.64,1]],
+     U:[['Sov 2',8,0,.58,0,.3],['Sov 1',8,.58,1,0,.41],['WC/D/T',null,0,.4,.3,.6],['Hall',null,.4,.58,.3,.6],['Trappa',null,.58,1,.41,.6],['Sov 3',12,0,.58,.6,1],['Klk',8,.58,1,.6,1]],extra:[['Förråd',5]]},
+  R:{G:[['Kök',null,0,.64,0,.43],['Hall',null,.64,1,0,.17],['Tvätt',null,.64,1,.17,.37],['Trappa',null,.64,1,.37,.54],['WC/D',null,.64,1,.54,.78],['Förråd',null,.64,1,.78,1],['Vardagsrum',null,0,.64,.43,1]],
+     U:[['Sov 3',8,0,.38,0,.36],['',null,.38,.47,0,.36],['Sov 4',12,.47,1,0,.36],['Allrum',null,0,.64,.36,.67],['Trappa',null,.64,1,.36,.55],['WC/D',null,.64,1,.55,.75],['Sov 2',8,0,.45,.67,1],['Sov 1/Klk',9,.45,1,.75,1],['',null,.45,.64,.67,.75]],extra:[['Förråd',5]]},
+  S:{G:[['Hall',null,0,.38,0,.17],['Kök',null,.38,1,0,.47],['WC/D',null,0,.38,.17,.52],['Trappa',null,0,.38,.52,.67],['Vardagsrum',null,.38,1,.47,1],['',null,0,.38,.67,1]],
+     U:[['Klk',4,0,.38,0,.22],['Sov 3',12,.38,1,0,.35],['WC/D',null,0,.38,.22,.52],['Allrum',null,.38,1,.35,.7],['Trappa',null,0,.38,.52,.7],['Sov 1',8,0,.57,.7,1],['Sov 2',7,.57,1,.7,1]],extra:[['Förråd',5]]},
+  B:{G:[['Hall',null,.5,1,0,.19],['Sov 1',14,0,.5,0,.4],['Bad/T',null,.67,1,.19,.51],['',null,.5,.67,.19,.51],['Sov 2',8,0,.5,.4,.6],['Kök',null,.5,1,.51,.7],['',null,0,.5,.6,.7],['Vardagsrum',null,0,1,.7,1]],extra:[['Förråd',5]]},
+  T:{G:[['Sov 1',10,.55,1,0,.23],['Hall',null,.34,.83,.23,.35],['WC',null,.83,1,.23,.35],['',null,0,.34,.23,.35],['Bad/T',null,.55,1,.35,.51],['Matplats',null,0,.55,.35,.5],['Sov 2',8,.55,1,.51,.7],['Kök',null,0,.55,.5,.72],['Sov 3',15,.55,1,.7,1],['Vardagsrum',null,0,.55,.72,1]],extra:[['Förråd',5]]},
+};
+
+/* ---------------- Sun position ---------------- */
+function sunPos(ms){
+  const n=ms/86400000+2440587.5-2451545.0;
+  const L=(280.460+0.9856474*n)%360, g=((357.528+0.9856003*n)%360)*rad;
+  const lam=(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*rad;
+  const eps=(23.439-0.0000004*n)*rad;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const gmst=((280.46061837+360.98564736629*n)%360+360)%360;
+  const Hh=(gmst+LON)*rad-ra, la=LAT*rad;
+  const alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(Hh));
+  let az=Math.atan2(-Math.cos(dec)*Math.sin(Hh),Math.sin(dec)*Math.cos(la)-Math.cos(dec)*Math.cos(Hh)*Math.sin(la));
+  az=(az/rad+360)%360;
+  return {alt:alt/rad, az};
+}
+function lastSunday(y,m){const d=new Date(Date.UTC(y,m+1,0));d.setUTCDate(d.getUTCDate()-d.getUTCDay());return d;}
+const DST_START=lastSunday(YEAR,2).getTime()+3600000, DST_END=lastSunday(YEAR,9).getTime()+3600000;
+function doyToMD(doy){const d=new Date(Date.UTC(YEAR,0,doy));return [d.getUTCMonth(),d.getUTCDate()];}
+function localToUTC(doy,min){
+  const [m,d]=doyToMD(doy);
+  const guess=Date.UTC(YEAR,m,d)+min*60000-3600000;
+  const off=(guess-3600000>=DST_START && guess-3600000<DST_END)?2:1;
+  return Date.UTC(YEAR,m,d)+min*60000-off*3600000;
+}
+function sunAt(doy,min){return sunPos(localToUTC(doy,min));}
+function sunDir(alt,az,out=new THREE.Vector3()){const a=alt*rad,z=az*rad;return out.set(Math.sin(z)*Math.cos(a),Math.sin(a),-Math.cos(z)*Math.cos(a));}
+const fmt=m=>{m=Math.round(m);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
+function dayInfo(doy){
+  let rise=null,set=null,maxAlt=-90,noon=720,prev=sunAt(doy,0).alt;
+  for(let m=2;m<=1440;m+=2){const a=sunAt(doy,m).alt;
+    if(prev<-0.833&&a>=-0.833&&rise===null)rise=m;
+    if(prev>=-0.833&&a<-0.833)set=m;
+    if(a>maxAlt){maxAlt=a;noon=m;} prev=a;}
+  return {rise,set,maxAlt,noon};
+}
+
+
+
+/* ---------------- Renderer / scene ---------------- */
+const canvas=document.getElementById('c');
+const small=Math.min(innerWidth,innerHeight)<700;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xbcd4e6);
+scene.fog=new THREE.Fog(0xbcd4e6,450,2000);
+const camera=new THREE.PerspectiveCamera(40,1,0.3,6000);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.08;
+controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=5; controls.maxDistance=1100;
+const mkFrame=deg=>{const g=new THREE.Group();g.position.set(FRAME_POS[0],0,FRAME_POS[1]);g.rotation.y=deg*rad;scene.add(g);return g;};
+const FR={23:mkFrame(23),12:mkFrame(12)};
+scene.updateMatrixWorld(true);
+const FW=(fr,u,v,y=0)=>FR[fr].localToWorld(new THREE.Vector3(u,y,v));
+const KW=(u,v,y=0)=>FW(23,u,v,y);
+const CENTER=KW(6,0);CENTER.y=0;
+
+const hemi=new THREE.HemisphereLight(0xdfeaf5,0x6f7f55,0.8); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff1dc,2.6);
+sun.castShadow=true; sun.shadow.mapSize.set(small?2048:4096,small?2048:4096);
+const SC=sun.shadow.camera; SC.left=-120;SC.right=120;SC.top=120;SC.bottom=-120;SC.near=1;SC.far=900;
+sun.shadow.bias=-0.0003; sun.shadow.normalBias=0.04;
+sun.target.position.copy(CENTER); scene.add(sun,sun.target);
+
+/* ---------------- Materials ---------------- */
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.92,metalness:0},o));
+const overlay=(c,k=1,o={})=>M(c,Object.assign({polygonOffset:true,polygonOffsetFactor:-k,polygonOffsetUnits:-k*2},o));
+const C={plaster:0xebe6dc,plaster2:0xdcd8d0,plaster3:0xe5dac6,brick:0xae6a4c,roof:0x4a4e54};
+const mat={
+  grass:M(0x86a35f), field:overlay(0xb5a46e,1), field2:overlay(0x8ea65a,1), park:overlay(0x7fa257,1),
+  road:overlay(0x55585a,2), walk:overlay(0xbab5aa,3), paving:overlay(0xc3beb3,4), lawn:overlay(0x7fac57,4),
+  deck:overlay(0xa98f72,5), water:overlay(0x5d8798,3,{roughness:.25,metalness:.1}),
+  roof:M(C.roof,{roughness:.7,metalness:.2}), glass:M(0x3e4c58,{roughness:.12,metalness:.45}), hedge:M(0x56783e), timber:M(0xb99e7c),
+  ctx:M(0xebe8e1), ctxRoof:M(0x8f9296), shed:M(0x9c8f80),
+  trunk:M(0x6b5440), crown:M(0x5a7f44), car:M(0xd9dbdc,{roughness:.35,metalness:.5}), carD:M(0x5b6670,{roughness:.15,metalness:.5}),
+  oak:M(0xe2d6c0,{roughness:.8}), tile:M(0xc9c6bf,{roughness:.6}), stair:M(0x8a7a66), iwall:M(0xf7f6f3), slab:M(0xdedad2),
+};
+
+/* ---------------- Helpers ---------------- */
+function flatPoly(pts,y,m,parent=scene){     // pts in world [x,z]
+  const s=new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],-p[1])));
+  const g=new THREE.ShapeGeometry(s);g.rotateX(-Math.PI/2);
+  const o=new THREE.Mesh(g,m);o.position.y=y;o.receiveShadow=true;parent.add(o);return o;
+}
+const EN=(p)=>[p[0],-p[1]];                   // (öst, norr) -> world [x,z]
+function rectK(x0,x1,z0,z1,y,m){const o=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0).rotateX(-Math.PI/2),m);o.position.set((x0+x1)/2,y,(z0+z1)/2);o.receiveShadow=true;K.add(o);return o;}
+function ribbon(P,w,y,m,parent=scene){        // P in world [x,z]
+  const pos=[],nor=[],idx=[];
+  for(let i=0;i<P.length;i++){
+    const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)];
+    let dx=b[0]-a[0],dz=b[1]-a[1];const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;const nx=-dz,nz=dx;
+    pos.push(P[i][0]+nx*w/2,y,P[i][1]+nz*w/2, P[i][0]-nx*w/2,y,P[i][1]-nz*w/2);nor.push(0,1,0,0,1,0);
+    if(i<P.length-1){const k=i*2;idx.push(k,k+2,k+1,k+1,k+2,k+3);}
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));g.setIndex(idx);
+  const o=new THREE.Mesh(g,m);o.receiveShadow=true;m.side=THREE.DoubleSide;parent.add(o);
+  for(let i=1;i<P.length-1;i++){const c=new THREE.Mesh(new THREE.CircleGeometry(w/2,12).rotateX(-Math.PI/2),m);c.position.set(P[i][0],y,P[i][1]);c.receiveShadow=true;parent.add(c);}
+  return o;
+}
+function textSprite(text,{size=6,color='#22252a',bg='rgba(255,255,255,.9)',font='600 54px "Figtree", sans-serif',pad=22}={}){
+  const c=document.createElement('canvas'),x=c.getContext('2d');
+  x.font=font;const w=Math.ceil(x.measureText(text).width)+pad*2,h=88;
+  c.width=w;c.height=h;x.font=font;
+  if(bg){x.fillStyle=bg;x.beginPath();x.roundRect(0,0,w,h,h/2);x.fill();}
+  x.fillStyle=color;x.textBaseline='middle';x.textAlign='center';x.fillText(text,w/2,h/2+3);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthWrite:false,fog:false}));
+  s.scale.set(size*w/h,size,1);return s;
+}
+const _o=new THREE.Object3D();
+function boxG(w,h,d,x,y,z,ry=0){
+  const g=new THREE.BoxGeometry(w,h,d);_o.position.set(x,y,z);_o.rotation.set(0,ry,0);_o.updateMatrix();g.applyMatrix4(_o.matrix);return g.toNonIndexed();
+}
+function meshOf(geos,m,{cast=true,recv=true}={}){
+  const gs=geos.map(g=>{g=g.index?g.toNonIndexed():g;if(g.attributes.uv)g.deleteAttribute('uv');return g;});
+  const g=BGU.mergeGeometries(gs);gs.forEach(x=>x.dispose());const o=new THREE.Mesh(g,m);o.castShadow=cast;o.receiveShadow=recv;return o;
+}
+// Prism: profile [[a,y],...] across the axis, extruded along it. ax 'z': a = x, length along z. ax 'x': a = z, length along x.
+function prism(profile,ax,l0,l1){
+  const g=new THREE.ExtrudeGeometry(new THREE.Shape(profile.map(p=>new THREE.Vector2(p[0],p[1]))),{depth:l1-l0,bevelEnabled:false,curveSegments:1});
+  if(ax==='z')g.translate(0,0,l0);else{g.translate(0,0,-l1);g.rotateY(-Math.PI/2);}
+  return g;
+}
+const roofProfile=(a0,a1,h0,h1,peak)=>{ // h0/h1 = eave heights at a0/a1, peak = [am, ridge] or null (mono)
+  const oh=0.35,t=0.16;
+  if(peak){const s0=(peak[1]-h0)/(peak[0]-a0),s1=(peak[1]-h1)/(a1-peak[0]);
+    const A=[a0-oh,h0-oh*s0],B=[peak[0],peak[1]],Cc=[a1+oh,h1-oh*s1];return [A,B,Cc,[Cc[0],Cc[1]+t],[B[0],B[1]+t],[A[0],A[1]+t]];}
+  const s=(h1-h0)/(a1-a0);const A=[a0-oh,h0-oh*s],B=[a1+oh,h1+oh*s];return [A,B,[B[0],B[1]+t],[A[0],A[1]+t]];
+};
+
+
+
+/* ---------------- Ground, fields, roads ---------------- */
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(6000,6000),mat.grass);
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const P=s=>{const a=s.split(',').map(Number),o=[];for(let i=0;i<a.length;i+=2)o.push([a[i],a[i+1]]);return o;};
+OSM.l.forEach(s=>{const [k,c]=s.split('|');flatPoly(P(c).map(EN),0.012,mat.field);});
+const ROADW={re:6.5,te:8,se:5,un:6,tr:3,cy:3,pa:2.2,fo:2,br:2.5};
+const ctxGroup=new THREE.Group();scene.add(ctxGroup);
+OSM.r.forEach(s=>{const [k,c]=s.split('|');const soft=['cy','pa','fo','br','tr'].includes(k);ribbon(P(c).map(EN),ROADW[k]||5,soft?0.06:0.04,soft?mat.walk:mat.road);});
+// Parkby streets from the site plan (not yet in OpenStreetMap). Image px of the plan -> world
+const IMG=(px,py)=>[(px-1608.8)/19.7,(py-1153.8)/19.7+4];
+ribbon([[-300,666],[200,560],[1400,300],[2700,25],[3300,-100]].map(p=>IMG(p[0],p[1])),7,0.045,mat.road);   // Norra Parkbygatan
+ribbon([[2585,290],[2610,400],[2780,1200],[2860,1600],[2900,2000]].map(p=>IMG(p[0],p[1])),7,0.045,mat.road); // Slånbärsgatan
+const FR2=(fr,pts)=>pts.map(([u,v])=>{const w=FW(fr,u,v);return [w.x,w.z];});
+ribbon(FR2(23,[[-75,57],[0,57],[80,57]]),7,0.045,mat.road);     // Södra Parkbygatan
+ribbon(FR2(23,[[41,57],[41,95]]),6.5,0.045,mat.road);
+ribbon(FR2(23,[[-17.5,-44],[-17.5,57]]),6,0.046,mat.road);       // Rönnbärsgatan
+// the park with the stream west of the quarter
+flatPoly(FR2(23,[[-95,-60],[-52,-60],[-52,52],[-95,52]]),0.02,mat.park);
+ribbon(FR2(23,[[-66,-58],[-63,-30],[-67,-5],[-62,20],[-65,50]]),2.4,0.06,mat.water);
+ribbon(FR2(23,[[-58,-58],[-57,-20],[-59,10],[-56,50]]),2.2,0.062,mat.walk);
+
+/* ---------------- Context buildings (OpenStreetMap) ---------------- */
+const occluders=[], pickables=[];
+{
+  const walls=[],sheds=[];
+  OSM.b.forEach(s=>{const [c,lv,t]=s.split('|');const pts=P(c);if(pts.length<4)return;
+    const hgt=t==='s'?2.6:(lv?3*+lv:6);
+    const sh=new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],p[1])));
+    const g=new THREE.ExtrudeGeometry(sh,{depth:hgt,bevelEnabled:false});g.rotateX(-Math.PI/2);(t==='s'?sheds:walls).push(g);});
+  const mw=meshOf(walls,mat.ctx),ms=meshOf(sheds,mat.shed);ctxGroup.add(mw,ms);occluders.push(mw,ms);
+}
+
+/* ---------------- Site surfaces (frame coordinates) ---------------- */
+function rectF(fr,x0,x1,z0,z1,y,m){const o=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0).rotateX(-Math.PI/2),m);o.position.set((x0+x1)/2,y,(z0+z1)/2);o.receiveShadow=true;FR[fr].add(o);return o;}
+rectF(23,-50,28,-52,52,0.022,mat.lawn);rectF(12,12,63,-44,20,0.024,mat.lawn);
+rectF(23,-14.4,13.4,-10.4,-0.5,0.03,mat.paving);      // parking court with miljöhus
+rectF(23,14.5,27.5,-2,50.5,0.03,mat.paving);          // east parking court
+rectF(23,-13,13.4,23,30.3,0.03,mat.walk);             // cykelställ strip
+rectF(12,33,62,-21,-8.5,0.031,mat.paving);            // north-east court
+rectF(23,-26.5,-21,-50,40,0.03,mat.paving);           // driveways of 29–37
+rectF(23,-14.4,13.4,-35,-29.2,0.03,mat.walk);rectF(23,-14.4,13.4,46.9,50.5,0.03,mat.walk);rectF(23,28.2,53,46.6,50.5,0.03,mat.walk);
+rectF(12,13.5,63,-45,-41,0.03,mat.walk);rectF(12,60.8,64,-8.2,16.6,0.03,mat.walk);rectF(23,-14.4,-11.4,1.9,22.9,0.03,mat.walk);
+// diagonal path through the courtyard
+ribbon(FR2(23,[[1,-1],[8,8],[14,24]]),2,0.05,mat.walk);
+
+/* ---------------- Houses ---------------- */
+const FL=2.8;
+const houseGroup=new THREE.Group();scene.add(houseGroup);
+const FOOT={23:[],12:[]};
+function volumes(h){
+  const [x0,x1,z0,z1]=h.r;
+  if(h.t==='T'){ // main body with gable (ridge along the entrance axis) + low wing by the entrance
+    const zw=z1-4.2;
+    return [{x0:x0,x1:x1-2.9,z0,z1,roof:{t:'gable',ax:'x',e:3.0,r:5.5}},{x0:x1-2.9,x1,z0:zw,z1,roof:{t:'flat',h:3.0}}];
+  }
+  if(h.t==='B')return [{x0,x1,z0,z1,roof:{t:'gable',ax:'x',e:3.0,r:5.0}}];
+  const ax=(h.ent==='N'||h.ent==='S')?'x':'z';const span=ax==='x'?(z1-z0):(x1-x0);
+  return [{x0,x1,z0,z1,roof:{t:'gable',ax,e:5.7,r:5.7+span/2*Math.tan(27*rad)},split:FL}];
+}
+H.forEach(h=>{h.vols=volumes(h);h.vols.forEach(v=>FOOT[h.fr].push([v.x0,v.x1,v.z0,v.z1]));});
+const insideAny=(fr,x,z)=>FOOT[fr].some(f=>x>f[0]+0.02&&x<f[1]-0.02&&z>f[2]+0.02&&z<f[3]-0.02);
+// drawing (a across, t from the entrance) -> frame
+function planXZ(h,a,t){
+  const [x0,x1,z0,z1]=h.r,W=x1-x0,D=z1-z0;
+  switch(h.ent){case 'N':return [x0+a*W,z0+t*D];case 'S':return [x1-a*W,z1-t*D];case 'E':return [x1-t*W,z0+a*D];default:return [x0+t*W,z1-a*D];}
+}
+function roomRect(h,r){const [n,a,a0,a1,t0,t1]=r;const p=planXZ(h,a0,t0),q=planXZ(h,a1,t1);
+  return [n,a,Math.min(p[0],q[0]),Math.max(p[0],q[0]),Math.min(p[1],q[1]),Math.max(p[1],q[1])];}
+// outward unit vector of the garden side, in frame coordinates
+const GARDEN={N:[0,1],S:[0,-1],E:[-1,0],W:[1,0]};
+function buildHouse(h){
+  const T=TYPES[h.t];
+  const g=new THREE.Group();FR[h.fr].add(g);h.group=g;
+  const [x0,x1,z0,z1]=h.r;const gd=GARDEN[h.ent];
+  h.base=T.fac==='Tegel'?C.brick:(h.n<=5?C.plaster:h.n<=12?C.plaster2:h.n<=20?C.plaster3:C.plaster);h.mat=M(h.base);
+  // uteplats (3 m deep strip on the garden side), garden and förråd
+  const fx=gd[0],fz=gd[1];
+  const face=fx?(fx>0?x1:x0):(fz>0?z1:z0);
+  const pd=h.t==='T'?2.6:3.2, gdepth=h.t==='T'?10:(h.t==='B'?6.2:6.4);
+  const strip=(d0,d1)=>fx?[Math.min(face+fx*d0,face+fx*d1),Math.max(face+fx*d0,face+fx*d1),z0+0.1,z1-0.1]:[x0+0.1,x1-0.1,Math.min(face+fz*d0,face+fz*d1),Math.max(face+fz*d0,face+fz*d1)];
+  const pr=strip(0,pd),gr=strip(pd,gdepth);
+  const deck=new THREE.Mesh(new THREE.PlaneGeometry(pr[1]-pr[0],pr[3]-pr[2]).rotateX(-Math.PI/2),mat.deck);deck.position.set((pr[0]+pr[1])/2,0.06,(pr[2]+pr[3])/2);deck.receiveShadow=true;g.add(deck);
+  const lawn=new THREE.Mesh(new THREE.PlaneGeometry(gr[1]-gr[0],gr[3]-gr[2]).rotateX(-Math.PI/2),mat.lawn);lawn.position.set((gr[0]+gr[1])/2,0.05,(gr[2]+gr[3])/2);lawn.receiveShadow=true;g.add(lawn);
+  h.deckF=[(pr[0]+pr[1])/2,(pr[2]+pr[3])/2];
+  // förråd at the far end of the garden
+  const sd=h.t==='T'?[gdepth-0.3,gdepth-3.0]:[gdepth-0.1,gdepth-2.8];const fs=strip(sd[1],sd[0]);
+  if(fx){h.shed=[fs[0],fs[1],z0+0.2,z0+2.6];}else{h.shed=[x1-2.6,x1-0.2,fs[2],fs[3]];}
+  const lo=[],up=[],roofs=[],flat=[],gl=[],glUp=[];let top=0;
+  h.vols.forEach(v=>{
+    const R=v.roof,w=v.x1-v.x0,d=v.z1-v.z0,cx=(v.x0+v.x1)/2,cz=(v.z0+v.z1)/2;
+    if(R.t==='flat'){lo.push(boxG(w,R.h,d,cx,R.h/2,cz));flat.push(boxG(w+0.3,0.2,d+0.3,cx,R.h+0.1,cz));top=Math.max(top,R.h);return;}
+    const ax=R.ax, a0=ax==='z'?v.x0:v.z0, a1=ax==='z'?v.x1:v.z1, l0=ax==='z'?v.z0:v.x0, l1=ax==='z'?v.z1:v.x1;
+    const peak=[(a0+a1)/2,R.r];top=Math.max(top,R.r);
+    if(v.split){lo.push(prism([[a0,0],[a1,0],[a1,v.split],[a0,v.split]],ax,l0,l1));up.push(prism([[a0,v.split],[a1,v.split],[a1,R.e],peak,[a0,R.e]],ax,l0,l1));}
+    else lo.push(prism([[a0,0],[a1,0],[a1,R.e],peak,[a0,R.e]],ax,l0,l1));
+    roofs.push(prism(roofProfile(a0,a1,R.e,R.e,peak),ax,l0-0.3,l1+0.3));
+  });
+  // windows on the free facades
+  h.vols.forEach(v=>{
+    const faces=[[v.x0,v.z0,v.x1,v.z0,0,-1],[v.x1,v.z0,v.x1,v.z1,1,0],[v.x0,v.z1,v.x1,v.z1,0,1],[v.x0,v.z0,v.x0,v.z1,-1,0]];
+    faces.forEach(([ax,az,bx,bz,nx,nz])=>{
+      const L=Math.hypot(bx-ax,bz-az);const n=Math.max(1,Math.floor(L/2.9));
+      const garden=(nx===gd[0]&&nz===gd[1]);
+      for(let i=0;i<n;i++){
+        const t=(i+0.5)/n,px=ax+(bx-ax)*t,pz=az+(bz-az)*t;
+        if(insideAny(h.fr,px+nx*0.4,pz+nz*0.4))continue;
+        const ry=nx?Math.PI/2:0,ox=px+nx*0.04,oz=pz+nz*0.04;
+        const big=garden&&(i%2===0||n<3);
+        if(v.roof.t==='flat')gl.push(boxG(0.9,0.9,0.06,ox,1.7,oz,ry));
+        else gl.push(boxG(big?2.2:1.1,big?2.15:1.3,0.06,ox,big?1.1:1.5,oz,ry));
+        if(v.split)glUp.push(boxG(1.1,1.2,0.06,ox,FL+1.45,oz,ry));
+      }
+    });
+  });
+  const lower=meshOf(lo,h.mat);g.add(lower);h.lower=lower;
+  h.upper=up.length?meshOf(up,h.mat):new THREE.Group();g.add(h.upper);
+  h.roof=meshOf(roofs.concat(flat),mat.roof);g.add(h.roof);
+  h.win=meshOf(gl,mat.glass,{cast:false});g.add(h.win);
+  h.winUp=glUp.length?meshOf(glUp,mat.glass,{cast:false}):new THREE.Group();g.add(h.winUp);
+  h.plans={G:buildFloor(h,'G',0)};if(T.floors===2)h.plans.U=buildFloor(h,'U',FL);
+  h.top=top;
+  g.traverse(o=>{if(o.isMesh){o.userData.house=h;pickables.push(o);}});
+  [lower,h.upper,h.roof].forEach(o=>{if(o.isMesh)occluders.push(o);});
+  scene.updateMatrixWorld(true);
+  h.deck=FW(h.fr,h.deckF[0],h.deckF[1],1.1);
+  h.cF=[(x0+x1)/2,(z0+z1)/2];h.size=Math.max(x1-x0,z1-z0);
+  h.centerW=FW(h.fr,h.cF[0],h.cF[1]);
+  const dv=FW(h.fr,h.cF[0]+gd[0],h.cF[1]+gd[1]).sub(h.centerW);h.az=(Math.atan2(dv.x,-dv.z)/rad+360)%360;
+  h.gardenDir=new THREE.Vector3(dv.x,0,dv.z).normalize();
+  const lab=textSprite(String(h.n),{size:2.2,font:'600 56px "JetBrains Mono", monospace'});
+  lab.position.set(h.centerW.x,top+1.8,h.centerW.z);lab.renderOrder=10;lab.userData.base=lab.scale.clone();h.label=lab;scene.add(lab);
+}
+function buildFloor(h,key,y0){
+  const rooms=PLAN[h.t][key].map(r=>roomRect(h,r));
+  const grp=new THREE.Group();grp.visible=false;h.group.add(grp);
+  const fl=[],tl=[],st=[],wl=[],sl=[];
+  const Hh=1.15,Tt=0.1;
+  if(y0>0)h.vols.forEach(v=>sl.push(boxG(v.x1-v.x0,0.14,v.z1-v.z0,(v.x0+v.x1)/2,y0+0.02,(v.z0+v.z1)/2)));
+  h.vols.forEach(v=>{const w=v.x1-v.x0,d=v.z1-v.z0,cx=(v.x0+v.x1)/2,cz=(v.z0+v.z1)/2;
+    wl.push(boxG(w,Hh,0.25,cx,y0+Hh/2,v.z0+0.125),boxG(w,Hh,0.25,cx,y0+Hh/2,v.z1-0.125),boxG(0.25,Hh,d,v.x0+0.125,y0+Hh/2,cz),boxG(0.25,Hh,d,v.x1-0.125,y0+Hh/2,cz));});
+  rooms.forEach(([n,a,x0,x1,z0,z1])=>{
+    const cx=(x0+x1)/2,cz=(z0+z1)/2,rw=x1-x0,rd=z1-z0;
+    const bag=n==='Trappa'?st:/bad|tvätt|wc|förråd/i.test(n)?tl:fl;
+    bag.push(boxG(rw-0.04,0.06,rd-0.04,cx,y0+0.12,cz));
+    wl.push(boxG(rw,Hh,Tt,cx,y0+Hh/2,z0),boxG(rw,Hh,Tt,cx,y0+Hh/2,z1),boxG(Tt,Hh,rd,x0,y0+Hh/2,cz),boxG(Tt,Hh,rd,x1,y0+Hh/2,cz));
+    if(n==='Trappa'){const alongX=rw>rd;for(let k=0;k<9;k++)st.push(alongX?boxG(0.04,0.05,rd-0.1,x0+rw*(k+0.5)/9,y0+0.16,cz):boxG(rw-0.1,0.05,0.04,cx,y0+0.16,z0+rd*(k+0.5)/9));}
+    if(n){const lab=textSprite(a?`${n} · ${a} m²`:n,{size:0.55,bg:'rgba(255,255,255,.93)',font:'600 46px "Figtree", sans-serif',pad:18});
+      lab.position.set(cx,y0+1.6,cz);grp.add(lab);}
+  });
+  if(fl.length)grp.add(meshOf(fl,mat.oak,{cast:false}));
+  if(tl.length)grp.add(meshOf(tl,mat.tile,{cast:false}));
+  if(st.length)grp.add(meshOf(st,mat.stair,{cast:false}));
+  if(sl.length)grp.add(meshOf(sl,mat.slab));
+  grp.add(meshOf(wl,mat.iwall));
+  return grp;
+}
+H.forEach(buildHouse);
+
+/* ---------------- Förråd, miljöhus, hedges, cars ---------------- */
+{
+  const S={23:[],12:[]},R={23:[],12:[]};
+  const add=(fr,[x0,x1,z0,z1],h=2.3)=>{S[fr].push(boxG(x1-x0,h,z1-z0,(x0+x1)/2,h/2,(z0+z1)/2));R[fr].push(boxG(x1-x0+0.25,0.16,z1-z0+0.25,(x0+x1)/2,h+0.08,(z0+z1)/2));};
+  H.forEach(h=>add(h.fr,h.shed));
+  add(23,[-8.4,-4.2,-9.9,-5.3],2.8);add(23,[16.3,21.2,42.8,47],2.8);add(12,[42.6,46.3,-18.3,-14.2],2.8);
+  [23,12].forEach(fr=>{if(!S[fr].length)return;const a=meshOf(S[fr],mat.timber),b=meshOf(R[fr],mat.roof);FR[fr].add(a,b);occluders.push(a,b);});
+  // hedges along the outer plot lines
+  const hg=[boxG(0.7,1.1,90,-49.8,0.55,-4.5),boxG(0.7,1.1,90,-21,0.55,-4.5),boxG(27.5,1.1,0.7,-35.5,0.55,-20.2),boxG(27.5,1.1,0.7,-35.5,0.55,10.1)];
+  const hm=meshOf(hg,mat.hedge);FR[23].add(hm);occluders.push(hm);
+  const cb={23:[],12:[]},ct={23:[],12:[]};const car=(fr,x,z,ry=0)=>{cb[fr].push(boxG(1.8,0.8,4.4,x,0.55,z,ry));ct[fr].push(boxG(1.55,0.55,2.3,x,1.2,z,ry));};
+  [-47.9,-39.5,-31.1,-17.5,-9.1,-0.7,12.9,21.3,29.7].forEach(v=>car(23,-24,v+2.1,Math.PI/2));
+  [-11.5,-1.5,4.5].forEach(u=>car(23,u,-7.5));[17,21,25].forEach(v=>car(23,24.5,v,Math.PI/2));
+  [36,41,55].forEach(u=>car(12,u,-15));
+  [23,12].forEach(fr=>FR[fr].add(meshOf(cb[fr],mat.car),meshOf(ct[fr],mat.carD)));
+}
+
+/* ---------------- Trees ---------------- */
+{
+  const T=[];const rnd=(()=>{let s=29;return()=>(s=(s*16807)%2147483647)/2147483647;})();
+  const addF=(fr,u,v,hh)=>{const w=FW(fr,u,v);T.push([w.x,w.z,hh]);};
+  [4,11,18,23,30,38,45,-5,-20,-35].forEach(v=>addF(23,-15.5,v,5+rnd()*2));
+  [[3,-12],[16,-8],[7,3],[20,6],[12,14],[3,18],[22,19],[10,26],[26,26]].forEach(p=>addF(23,p[0],p[1],5+rnd()*2.5));
+  [-40,-34,-27,-22].forEach(v=>addF(12,35,v,5));
+  for(let i=0;i<120;i++){const u=-95+rnd()*42,v=-60+rnd()*112;if(Math.abs(u+63)<3)continue;addF(23,u,v,6+rnd()*6);}   // the grove (dungen)
+  H.forEach(h=>{if(rnd()<.5){const [x0,x1,z0,z1]=h.shed;addF(h.fr,(x0+x1)/2+(rnd()-.5)*2,(z0+z1)/2+(rnd()-.5)*2,3.5+rnd()*1.5);}});
+  const tg=new THREE.CylinderGeometry(.16,.22,1,6);tg.translate(0,.5,0);const cg=new THREE.IcosahedronGeometry(1,1);
+  const trunks=new THREE.InstancedMesh(tg,mat.trunk,T.length),crowns=new THREE.InstancedMesh(cg,mat.crown,T.length);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(),p=new THREE.Vector3(),col=new THREE.Color();
+  T.forEach((t,i)=>{const hh=t[2];p.set(t[0],0,t[1]);s.set(1,hh*.45,1);m4.compose(p,q,s);trunks.setMatrixAt(i,m4);
+    p.y=hh*.62;const r=hh*.3;s.set(r,r*1.1,r);m4.compose(p,q,s);crowns.setMatrixAt(i,m4);
+    crowns.setColorAt(i,rnd()<.25?col.setHSL(.08+rnd()*.04,.5,.42):col.setHSL(.25+rnd()*.05,.33,.3+rnd()*.08));});
+  trunks.castShadow=crowns.castShadow=true;crowns.receiveShadow=true;scene.add(trunks,crowns);occluders.push(crowns);
+}
+
+/* ---------------- Labels ---------------- */
+{
+  const lab=(t,w,sz=4)=>{const s=textSprite(t,{size:sz,bg:'rgba(255,255,255,.84)',font:'600 50px "Figtree", sans-serif'});s.position.set(w[0],5,w[1]);ctxGroup.add(s);};
+  lab('Norra Parkbygatan',IMG(1900,180),3.4);lab('Slånbärsgatan',IMG(2780,900),3.4);
+  const sp=FW(23,-30,59);lab('Södra Parkbygatan',[sp.x,sp.z],3.4);const rb=FW(23,-17.5,52);lab('Rönnbärsgatan',[rb.x,rb.z],3.2);
+  const pk=FW(23,-75,0);lab('Parken',[pk.x,pk.z],4);
+  lab('Hököpingevägen',[-80,-60],4.5);lab('Södra Åkarps kyrkoväg',[150,96],4.5);lab('Vellinge centrum ↓',[-60,-320],5);
+}
+const compassLabels=new THREE.Group();scene.add(compassLabels);
+[['N',0,-1],['S',0,1],['Ö',1,0],['V',-1,0]].forEach(([t,x,z])=>{const s=textSprite(t,{size:7,color:t==='N'?'#ffffff':'#22252a',bg:t==='N'?'rgba(200,69,47,.92)':'rgba(255,255,255,.85)',font:'700 56px "JetBrains Mono", monospace',pad:26});s.position.set(CENTER.x+x*145,4,CENTER.z+z*145);compassLabels.add(s);});
+
+/* ---------------- Selection ring ---------------- */
+const ring=new THREE.Mesh(new THREE.RingGeometry(1,1.1,64),new THREE.MeshBasicMaterial({color:0x4f6a5a,transparent:true,opacity:.95,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-8,polygonOffsetUnits:-16}));
+ring.rotation.x=-Math.PI/2;ring.position.y=0.1;ring.visible=false;scene.add(ring);
+
+/* ---------------- Sun paths ---------------- */
+const DOME_R=140;
+const pathGroup=new THREE.Group();scene.add(pathGroup);
+const sunBall=new THREE.Mesh(new THREE.SphereGeometry(4.5,24,16),new THREE.MeshBasicMaterial({color:0xffd257,fog:false}));
+const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,220,120,.9)');g.addColorStop(.35,'rgba(255,200,90,.35)');g.addColorStop(1,'rgba(255,200,90,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);})(),depthWrite:false,fog:false,blending:THREE.AdditiveBlending}));
+sunGlow.scale.set(34,34,1);sunBall.add(sunGlow);pathGroup.add(sunBall);
+function pathPoints(doy,step=6){const pts=[];for(let m=0;m<=1440;m+=step){const s=sunAt(doy,m);if(s.alt>-1.5)pts.push(sunDir(Math.max(s.alt,-1.5),s.az).multiplyScalar(DOME_R).add(CENTER));}return pts;}
+function pathLine(doy,color,opacity,dashed){
+  const g=new THREE.BufferGeometry().setFromPoints(pathPoints(doy));
+  const m=dashed?new THREE.LineDashedMaterial({color,dashSize:5,gapSize:4,transparent:true,opacity,fog:false}):new THREE.LineBasicMaterial({color,transparent:true,opacity,fog:false});
+  const l=new THREE.Line(g,m);if(dashed)l.computeLineDistances();return l;
+}
+const refPaths=new THREE.Group();pathGroup.add(refPaths);
+[[172,'21 jun'],[79,'20 mar · 23 sep'],[355,'21 dec']].forEach(([d,t])=>{
+  refPaths.add(pathLine(d,0xffffff,.55,true));
+  const info=dayInfo(d),s=sunAt(d,info.noon);const lab=textSprite(t,{size:4.2,bg:'rgba(20,24,30,.55)',color:'#ffffff',font:'500 46px "JetBrains Mono", monospace'});
+  lab.position.copy(sunDir(s.alt,s.az).multiplyScalar(DOME_R+8).add(CENTER));refPaths.add(lab);
+});
+{const pts=[];for(let a=0;a<=360;a+=3)pts.push(new THREE.Vector3(CENTER.x+Math.sin(a*rad)*DOME_R,0.3,CENTER.z-Math.cos(a*rad)*DOME_R));
+ refPaths.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.35})));}
+let curPath=null;const hourGroup=new THREE.Group();pathGroup.add(hourGroup);
+const hourTex={};
+function hourSprite(h){const k=String(h).padStart(2,'0');if(!hourTex[k])hourTex[k]=textSprite(k,{size:3.2,bg:'rgba(255,210,90,.95)',color:'#3a2a05',font:'600 52px "JetBrains Mono", monospace',pad:16});return hourTex[k].clone();}
+function buildCurrentPath(doy){
+  if(curPath){pathGroup.remove(curPath);curPath.geometry.dispose();}
+  curPath=pathLine(doy,0xffc83d,1,false);curPath.visible=document.getElementById('tPath').checked;pathGroup.add(curPath);
+  hourGroup.clear();
+  for(let h=0;h<24;h++){const s=sunAt(doy,h*60);if(s.alt>0.5){const p=sunDir(s.alt,s.az).multiplyScalar(DOME_R).add(CENTER);
+    const dot=new THREE.Mesh(new THREE.SphereGeometry(1.2,10,8),new THREE.MeshBasicMaterial({color:0xffc83d,fog:false}));dot.position.copy(p);hourGroup.add(dot);
+    const sp=hourSprite(h);sp.position.copy(p).add(new THREE.Vector3(0,4,0));hourGroup.add(sp);}}
+}
+
+/* ---------------- Sky + light ---------------- */
+const skyDay=new THREE.Color(0xa9cbe6),skyLow=new THREE.Color(0xf0c9a0),skyNight=new THREE.Color(0x1b2638),skyTw=new THREE.Color(0x56607e);
+const sunWarm=new THREE.Color(0xffb26b),sunWhite=new THREE.Color(0xfff4e2);
+const SS=x=>Math.min(1,Math.max(0,x));
+let state={doy:172,min:780};
+function applySun(){
+  const s=sunAt(state.doy,state.min);state.sun=s;const d=sunDir(s.alt,s.az);state.dir=d.clone();
+  sun.position.copy(CENTER).addScaledVector(d,420);
+  const day=SS(s.alt/10),tw=SS((s.alt+8)/8);
+  sun.intensity=s.alt>0?3.4*SS(s.alt/6)*(0.55+0.45*SS(s.alt/25)):0;sun.visible=s.alt>0;
+  sun.color.copy(sunWarm).lerp(sunWhite,SS(s.alt/18));
+  hemi.intensity=0.1+0.42*tw*(0.75+0.25*day);
+  const sky=skyNight.clone().lerp(skyTw,tw).lerp(skyLow,SS(s.alt/2+1)*(1-day)).lerp(skyDay,day);
+  if(s.alt<-1)sky.copy(skyNight).lerp(skyTw,tw);
+  scene.background.copy(sky);scene.fog.color.copy(sky);hemi.color.copy(sky).lerp(new THREE.Color(0xffffff),.4);
+  renderer.toneMappingExposure=0.9+0.25*(1-day)*tw;
+  sunBall.position.copy(d).multiplyScalar(DOME_R).add(CENTER);sunBall.visible=s.alt>-1.5&&document.getElementById('tPath').checked;
+  document.getElementById('rAlt').textContent=s.alt>-0.833?s.alt.toFixed(1).replace('.',',')+'°':'Under horisonten';
+  document.getElementById('rAz').textContent=Math.round(s.az)+'° '+DIRS_S[Math.round(s.az/22.5)%16];
+  updateCardNow();requestRender();
+}
+function applyDay(){
+  const [m,d]=doyToMD(state.doy);document.getElementById('dayOut').textContent=d+' '+MONTHS[m];
+  const info=dayInfo(state.doy);state.info=info;
+  document.getElementById('rRise').textContent=info.rise!=null?fmt(info.rise):'–';
+  document.getElementById('rSet').textContent=info.set!=null?fmt(info.set):'–';
+  const len=(info.set??0)-(info.rise??0);
+  document.getElementById('rLen').textContent=Math.floor(len/60)+' h '+String(len%60).padStart(2,'0')+' min';
+  document.getElementById('rNoon').textContent=fmt(info.noon)+' · '+info.maxAlt.toFixed(0)+'°';
+  buildCurrentPath(state.doy);
+  document.querySelectorAll('.seg button').forEach(b=>{const v=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;b.setAttribute('aria-pressed',String(v===state.doy));});
+  computeDeck();applySun();
+}
+
+/* ---------------- Sun on the uteplats (ray test) ---------------- */
+const ray=new THREE.Raycaster();
+function shown(o){while(o){if(!o.visible)return false;o=o.parent;}return true;}
+// a house opened in plan mode still casts its shadow on the uteplats
+function counts(o){return o.userData.house?true:shown(o);}
+function sunlit(origin,dir){ray.set(origin,dir);ray.far=600;return !ray.intersectObjects(occluders,false).some(h=>counts(h.object));}
+let selected=null,deckSamples=null;
+function computeDeck(){
+  if(!selected){deckSamples=null;return;}
+  scene.updateMatrixWorld(true);const out=[];const dv=new THREE.Vector3();
+  for(let m=0;m<1440;m+=10){const s=sunAt(state.doy,m+5);if(s.alt<=0){out.push(0);continue;}sunDir(s.alt,s.az,dv);out.push(sunlit(selected.deck,dv)?2:1);}
+  deckSamples=out;drawDeck();
+}
+function drawDeck(){
+  const cv=document.getElementById('deckBar'),x=cv.getContext('2d'),w=cv.width,h=cv.height;
+  x.clearRect(0,0,w,h);if(!deckSamples)return;
+  const cw=w/deckSamples.length;const cols=['#26334a','#7f8f9a','#f1b52e'];
+  deckSamples.forEach((v,i)=>{x.fillStyle=cols[v];x.fillRect(Math.floor(i*cw),0,Math.ceil(cw)+1,h);});
+  x.fillStyle='rgba(255,255,255,.35)';for(let k=1;k<4;k++)x.fillRect(Math.round(w*k/4)-1,0,2,h);
+  const nx=state.min/1440*w;x.fillStyle='#111';x.fillRect(nx-2,0,4,h);x.fillStyle='#fff';x.fillRect(nx-1,0,2,h);
+  const sunMin=deckSamples.filter(v=>v===2).length*10;
+  document.getElementById('cSunH').textContent=sunMin?`ca ${Math.floor(sunMin/60)} h ${String(sunMin%60).padStart(2,'0')} min`:'Ingen direkt sol';
+  const [m,d]=doyToMD(state.doy);document.getElementById('cDate').textContent=`${d} ${MONTHS[m].slice(0,3)}`;
+}
+function updateCardNow(){
+  if(!selected)return;drawDeck();const s=state.sun;
+  document.getElementById('cNow').textContent=s.alt<=0?`Kl. ${fmt(state.min)}: solen är nere`:`Kl. ${fmt(state.min)}: uteplatsen ligger i `+(sunlit(selected.deck,state.dir)?'sol':'skugga');
+}
+
+
+/* ---------------- House card + plan ---------------- */
+const nf=new Intl.NumberFormat('sv-SE');
+const fmtA=a=>String(a.toFixed(1)).replace('.',',');
+function setPlan(h,floor){ // null | 'G' | 'U'
+  if(!h)return;h.plan=floor;
+  const on=!!floor;
+  h.roof.visible=!on;
+  h.upper.visible=h.winUp.visible=!on;
+  h.lower.visible=h.win.visible=floor!=='G';
+  h.plans.G.visible=floor==='G';if(h.plans.U)h.plans.U.visible=floor==='U';
+  h.label.visible=!on&&document.getElementById('tNums').checked;
+  document.getElementById('planG').setAttribute('aria-pressed',String(floor==='G'));
+  document.getElementById('planU').setAttribute('aria-pressed',String(floor==='U'));
+  renderRooms(h);
+  if(on){track('planlosning-'+h.n+'-'+floor,`Planlösning hus ${h.n}`);const c=h.centerW,F=h.gardenDir.clone().negate();
+    flyTo(c.clone().addScaledVector(F,5).add(new THREE.Vector3(F.z*2,24,-F.x*2)),c.clone().add(new THREE.Vector3(0,floor==='U'?FL:0,0)),1100);}
+  computeDeck();updateCardNow();requestRender();
+}
+function renderRooms(h){
+  const Pl=PLAN[h.t],f=h.plan;const rows=[];const two=!!Pl.U;
+  const list=(k,t)=>{if(two)rows.push(`<li class="h">${t}</li>`);Pl[k].filter(r=>r[0]&&r[0]!=='Trappa').forEach(r=>rows.push(`<li><span>${r[0]}</span><span>${r[1]?r[1]+' m²':''}</span></li>`));};
+  if(!f||f==='G')list('G','Plan 1');
+  if(two&&(!f||f==='U'))list('U','Plan 2');
+  if(!f)Pl.extra.forEach(r=>rows.push(`<li><span>${r[0]}</span><span>${r[1]} m²</span></li>`));
+  document.getElementById('cRooms').innerHTML=rows.join('');
+  document.getElementById('cPlanNote').textContent=f?'Väggarna är kapade i brösthöjd. Rummens lägen är förenklade från planritningen.':(two?'Välj en våning för att se planlösningen i huset.':'Visa planlösningen för att lyfta av taket.');
+}
+function selectHouse(h,fly=true){
+  if(selected&&selected!==h&&selected.plan)setPlan(selected,null);
+  selected=h;
+  document.querySelectorAll('#chips button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===h?.n)));
+  H.forEach(x=>x.mat.emissive.setHex(0x000000));
+  if(!h){document.getElementById('card').hidden=true;ring.visible=false;requestRender();return;}
+  h.mat.emissive.setHex(0x6a8a74);h.mat.emissiveIntensity=0.22;track('hus-'+h.n,'Hus '+h.n);
+  ring.position.set(h.centerW.x,0.1,h.centerW.z);ring.scale.setScalar(h.size*0.72+1.5);ring.visible=true;
+  document.getElementById('card').hidden=false;
+  const T=TYPES[h.t];
+  document.getElementById('cTitle').textContent='Hus '+h.n;
+  document.getElementById('cType').textContent=`${T.name} · ${T.sub.toLowerCase()} · ${T.rooms} · ${T.area} m²`;
+  const pill=document.getElementById('cPill');pill.textContent=STATUS[h.s];pill.style.setProperty('--st',`var(--${h.s})`);
+  const rows=[['Boarea',T.area+' m²'],['Rum',T.rooms],['Tomt',h.tomt+' m²'],['Pris',h.s==='sale'?nf.format(h.p)+' kr':STATUS[h.s]],['Månadsavgift',nf.format(h.f)+' kr'],
+    ['Uteplats mot',DIRS[Math.round(h.az/22.5)%16]+` (${Math.round(h.az)}°)`],['Fasad',T.fac],['Upplåtelse','Bostadsrätt'],['Inflytt','Våren 2028']];
+  document.getElementById('cKv').innerHTML=rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+  document.getElementById('planG').textContent=T.floors===2?'Plan 1':'Visa planlösning';
+  document.getElementById('planU').hidden=T.floors!==2;
+  document.getElementById('planBtns').style.gridTemplateColumns=T.floors===2?'1fr 1fr':'1fr';
+  renderRooms(h);
+  document.getElementById('planG').setAttribute('aria-pressed',String(h.plan==='G'));
+  document.getElementById('planU').setAttribute('aria-pressed',String(h.plan==='U'));
+  computeDeck();updateCardNow();
+  if(fly){const c=h.centerW,G=h.deck.clone().sub(c).setY(0).normalize();
+    flyTo(c.clone().addScaledVector(G,38).add(new THREE.Vector3(-G.z*16,28,G.x*16)),c.clone().add(new THREE.Vector3(0,2,0)));}
+  requestRender();
+}
+document.getElementById('planG').onclick=()=>{if(selected)setPlan(selected,selected.plan==='G'?null:'G');};
+document.getElementById('planU').onclick=()=>{if(selected)setPlan(selected,selected.plan==='U'?null:'U');};
+document.getElementById('closeCard').onclick=()=>selectHouse(null);
+
+/* ---------------- Toggles, chips, facts ---------------- */
+function applyColours(){const on=document.getElementById('tStatus').checked;H.forEach(h=>h.mat.color.setHex(on?STATUS_HEX[h.s]:h.base));requestRender();}
+document.getElementById('tStatus').onchange=applyColours;
+document.getElementById('tNums').onchange=e=>{H.forEach(h=>h.label.visible=e.target.checked&&!h.plan);requestRender();};
+document.getElementById('tPath').onchange=e=>{refPaths.visible=curPath.visible=hourGroup.visible=e.target.checked;applySun();};
+document.getElementById('tCtx').onchange=e=>{ctxGroup.visible=e.target.checked;computeDeck();updateCardNow();requestRender();};
+const chips=document.getElementById('chips');
+H.forEach(h=>{const b=document.createElement('button');b.textContent=h.n;b.dataset.n=h.n;
+  b.style.setProperty('--st',`var(--${h.s})`);b.title=`Hus ${h.n} – ${TYPES[h.t].name}, ${STATUS[h.s].toLowerCase()}`+(h.s==='sale'?`, ${nf.format(h.p)} kr`:'');b.setAttribute('aria-pressed','false');
+  b.onclick=()=>selectHouse(selected===h?null:h);chips.appendChild(b);});
+{
+  const cnt=k=>H.filter(h=>h.s===k).length;
+  document.getElementById('facts').innerHTML=['37 radhus','Ett och två plan','78–122 m²',`${cnt('sale')} till salu`,`${cnt('soon')} kommer till försäljning`,'Bostadsrätt','Inflytt våren 2028'].map(t=>`<span>${t}</span>`).join('');
+}
+
+/* ---------------- Camera, views ---------------- */
+let tween=null;
+function flyTo(pos,target,dur=1100){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){camera.position.copy(pos);controls.target.copy(target);requestRender();return;}
+  tween={t0:performance.now(),dur,p0:camera.position.clone(),t0v:controls.target.clone(),p1:pos,t1:target};requestRender();
+}
+const VIEWS={
+  overview:[small?KW(40,200,215):KW(66,122,105),small?KW(10,30):KW(-14,4)],
+  top:[KW(6,0.01,190),KW(6,0)],
+  street:[KW(-17.5,52,1.7),KW(-17.5,-30,2.5)],
+  court:[KW(26,24,1.7),KW(4,-8,3)],
+};
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{track('vy-'+b.dataset.view,'Vy: '+b.textContent.trim());const v=VIEWS[b.dataset.view];flyTo(v[0].clone(),v[1].clone());});
+camera.position.copy(VIEWS.overview[0]);controls.target.copy(VIEWS.overview[1]);
+const compassEl=document.getElementById('compass');
+const toNorth=()=>{const t=controls.target.clone();const d=camera.position.distanceTo(t);const pol=controls.getPolarAngle();flyTo(new THREE.Vector3(t.x,t.y+Math.cos(pol)*d,t.z+Math.sin(pol)*d),t,700);};
+compassEl.onclick=toNorth;compassEl.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toNorth();}};
+
+
+/* ---------------- Picking ---------------- */
+const ndc=new THREE.Vector2();let down=null;
+canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];});
+canvas.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
+  const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);ray.far=3000;const hit=ray.intersectObjects(pickables,false).find(x=>shown(x.object));
+  selectHouse(hit?hit.object.userData.house:null,!!hit);
+});
+canvas.addEventListener('pointermove',e=>{
+  if(e.buttons)return;const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,camera);ray.far=3000;canvas.style.cursor=ray.intersectObjects(pickables,false).length?'pointer':'grab';
+});
+
+/* ---------------- Controls wiring ---------------- */
+const dayEl=document.getElementById('day'),timeEl=document.getElementById('time');
+const nowSthlm=()=>{const p=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Stockholm',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+  const g=k=>+p.find(x=>x.type===k).value;const doy=Math.round((Date.UTC(YEAR,g('month')-1,g('day'))-Date.UTC(YEAR,0,0))/86400000);return {doy:Math.min(365,Math.max(1,doy)),min:g('hour')*60+g('minute')};};
+const todayDoy=nowSthlm().doy;
+{const [m,d]=doyToMD(todayDoy);document.getElementById('todayLbl').textContent=d+' '+MONTHS[m].slice(0,3);}
+state.doy=todayDoy;dayEl.value=todayDoy;
+let dayTimer=null;
+dayEl.oninput=()=>{state.doy=+dayEl.value;const [m,d]=doyToMD(state.doy);document.getElementById('dayOut').textContent=d+' '+MONTHS[m];clearTimeout(dayTimer);dayTimer=setTimeout(applyDay,60);};
+timeEl.oninput=()=>{state.min=+timeEl.value;document.getElementById('timeOut').textContent=fmt(state.min);applySun();};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{track('sol-'+b.dataset.doy,'Solstudie: '+b.firstChild.textContent.trim());state.doy=b.dataset.doy==='today'?todayDoy:+b.dataset.doy;dayEl.value=state.doy;applyDay();});
+document.getElementById('nowBtn').onclick=()=>{const n=nowSthlm();state.doy=n.doy;state.min=Math.round(n.min/5)*5;dayEl.value=state.doy;timeEl.value=state.min;document.getElementById('timeOut').textContent=fmt(state.min);applyDay();};
+let playing=false,lastStep=0;const playBtn=document.getElementById('play');
+playBtn.onclick=()=>{playing=!playing;if(playing)track('spela-dag','Spela upp dagen');playBtn.setAttribute('aria-pressed',String(playing));document.getElementById('playIcon').textContent=playing?'❚❚':'▶';document.getElementById('playTxt').textContent=playing?'Pausa':'Spela upp dagen';
+  if(playing){const i=state.info;if(i.rise!=null&&(state.min<i.rise-30||state.min>i.set+20))state.min=Math.max(0,Math.floor((i.rise-30)/5)*5);}requestRender();};
+document.getElementById('toggleSheet').onclick=()=>document.getElementById('panel').classList.toggle('collapsed');
+
+/* ---------------- Render loop ---------------- */
+let need=true;function requestRender(){need=true;}
+controls.addEventListener('change',requestRender);
+const compassSvg=document.getElementById('compassSvg');
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();requestRender();}
+addEventListener('resize',resize);
+function loop(t){
+  requestAnimationFrame(loop);
+  if(playing&&t-lastStep>45){lastStep=t;state.min+=5;const i=state.info;
+    if(state.min>=1440||(i.set!=null&&state.min>i.set+25))state.min=i.rise!=null?Math.max(0,Math.floor((i.rise-30)/5)*5):0;
+    timeEl.value=state.min;document.getElementById('timeOut').textContent=fmt(state.min);applySun();}
+  if(tween){const k=Math.min(1,(t-tween.t0)/tween.dur),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    camera.position.lerpVectors(tween.p0,tween.p1,e);controls.target.lerpVectors(tween.t0v,tween.t1,e);if(k>=1)tween=null;need=true;}
+  if(controls.update())need=true;
+  if(!need)return;need=false;
+  H.forEach(h=>{const d=camera.position.distanceTo(h.label.position);h.label.scale.copy(h.label.userData.base).multiplyScalar(Math.min(1.6,Math.max(0.2,d/80)));});
+  compassSvg.style.transform=`rotate(${controls.getAzimuthalAngle()*180/Math.PI}deg)`;
+  renderer.render(scene,camera);
+}
+resize();applyColours();state.min=780;timeEl.value=780;applyDay();
+document.getElementById('loading').remove();
+requestAnimationFrame(loop);
+window.__k={state,applyDay,applySun,selectHouse,setPlan,H,camera,controls,flyTo,requestRender,KW,VIEWS};
+</script>
+
+</body></html>
