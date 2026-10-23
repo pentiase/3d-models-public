@@ -1,0 +1,807 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Radhus Nr 02 i 3D (Copy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D model, one floating control sheet (left on desktop, bottom on phones). */
+:root {
+  --bg: #e7ebe6;
+  --sky: #dde4e2;
+  --ground: #d3d7cf;
+  --gridline: #b9bfb6;
+  --edge: #3a403b;
+  --panel: #f8f9f6;
+  --ink: #1c211e;
+  --muted: #5b635d;
+  --line: #d2d7cf;
+  --chip: #edf0eb;
+  --accent: #b24e2b;
+  --accent-ink: #ffffff;
+  --f-ui: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --sky: #182024; --ground: #1e2427; --gridline: #2c3438; --edge: #c9d0cb;
+    --panel: #1a1f1d; --ink: #e5e9e4; --muted: #98a19a; --line: #2d3431; --chip: #222826;
+    --accent: #de7a50; --accent-ink: #1a0f0a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --sky: #182024; --ground: #1e2427; --gridline: #2c3438; --edge: #c9d0cb;
+  --panel: #1a1f1d; --ink: #e5e9e4; --muted: #98a19a; --line: #2d3431; --chip: #222826;
+  --accent: #de7a50; --accent-ink: #1a0f0a; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px; overflow: hidden; }
+.app { position: relative; height: 100%; }
+.stage { position: absolute; inset: 0; }
+.stage canvas { display: block; }
+.labels { position: absolute; inset: 0; }
+.labels > div { pointer-events: none; }
+
+.tag { font: 500 12px/1 var(--f-ui); color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+  padding: 5px 9px; border-radius: 999px; white-space: nowrap; letter-spacing: .01em; }
+.tag.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+.tag.room { font-size: 11px; padding: 3px 7px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
+.tag.quiet { background: transparent; border-color: transparent; color: var(--muted); font-weight: 500; }
+.tag.north { font-family: var(--f-mono); font-weight: 500; }
+
+.panel { position: absolute; left: 16px; top: 16px; width: 316px; max-height: calc(100% - 32px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 16px; }
+.eyebrow { margin: 0; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 2px 0 0; font-size: 40px; line-height: 1; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+.spec { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); }
+.spec span + span::before { content: "|"; color: var(--muted); margin-right: 12px; }
+.lede { margin: 10px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+h2 { margin: 0 0 8px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.views { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.views button:nth-child(-n+2) { grid-column: span 3; }
+.views button:nth-child(n+3) { grid-column: span 2; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+button.opt { font: 500 13px var(--f-ui); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 6px; cursor: pointer; transition: background .15s, border-color .15s; }
+button.opt:hover { border-color: var(--muted); }
+button.opt[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+button.opt:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { margin: 8px 0 0; font-size: 13px; line-height: 1.45; color: var(--muted); min-height: 2.9em; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.val { font-family: var(--f-mono); font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--ink); }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 6px 0 0; }
+input[type="range"]:disabled { opacity: .4; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.foot { border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.foot a { color: var(--ink); }
+.hint { position: absolute; right: 16px; bottom: 16px; font-size: 12px; color: var(--muted); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 720px) {
+  .panel { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; max-height: 46%; padding: 14px; gap: 12px; }
+  h1 { font-size: 30px; }
+  .lede, .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { button.opt { transition: none; } }
+</style>
+
+<div class="app">
+  <div id="stage" class="stage" aria-label="3D-modell av radhus Nr 02 på taket av Hall 259"></div>
+  <div class="loading" id="loading">Laddar modellen …</div>
+
+  <aside class="panel" id="panel">
+    <header>
+      <p class="eyebrow">Varvsstaden · Husen på Taket</p>
+      <h1>Nr. 02</h1>
+      <p class="spec"><span>Typ D1</span><span>145 m²</span><span>3 plan</span><span>västläge</span></p>
+      <p class="lede">Radhuset ligger i ovalens västra ände, ovanpå gamla Hall 259. Uteplats och balkonger vetter mot väster. Entrén och fler balkonger vetter mot innergården.</p>
+    </header>
+
+    <section>
+      <h2>Vy</h2>
+      <div class="views" id="views">
+        <button class="opt" id="v-site" data-view="site" aria-pressed="true">Kvarteret</button>
+        <button class="opt" id="v-house" data-view="house" aria-pressed="false">Huset</button>
+        <button class="opt" id="v-f0" data-view="floor" data-floor="0" aria-pressed="false">Botten</button>
+        <button class="opt" id="v-f1" data-view="floor" data-floor="1" aria-pressed="false">Plan 2</button>
+        <button class="opt" id="v-f2" data-view="floor" data-floor="2" aria-pressed="false">Plan 3</button>
+      </div>
+      <p class="note" id="note"></p>
+    </section>
+
+    <section>
+      <div class="row"><h2 style="margin:0">Sprängvy</h2><span class="val" id="explodeVal">0,0 m</span></div>
+      <input type="range" id="explode" min="0" max="6" step="0.1" value="0" aria-label="Avstånd mellan våningsplanen">
+    </section>
+
+    <section>
+      <h2>Grannhus</h2>
+      <div class="seg" id="nb">
+        <button class="opt" id="nb-model" data-nb="model" aria-pressed="true">Vit modell</button>
+        <button class="opt" id="nb-brick" data-nb="brick" aria-pressed="false">Tegel</button>
+        <button class="opt" id="nb-hidden" data-nb="hidden" aria-pressed="false">Dolda</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="row"><h2 style="margin:0">Sol över Malmö</h2><span class="val" id="sunVal">18:00</span></div>
+      <div class="seg" id="date" style="margin-top:8px">
+        <button class="opt" id="d-mar" data-date="mar" aria-pressed="false">21 mars</button>
+        <button class="opt" id="d-jun" data-date="jun" aria-pressed="true">21 juni</button>
+        <button class="opt" id="d-dec" data-date="dec" aria-pressed="false">21 dec</button>
+      </div>
+      <input type="range" id="time" min="5" max="22" step="0.25" value="18" aria-label="Klockslag">
+    </section>
+
+    <div class="legend">
+      <span><i style="background:#a24c34"></i>Nr 02</span>
+      <span><i style="background:var(--chip);border:1px solid var(--line)"></i>Övriga 23 radhus</span>
+      <span><i style="background:#cdbfa9"></i>Hall 259</span>
+    </div>
+
+    <p class="foot">Modellen bygger på planritningarna i <a href="https://www.varvsstaden.se/sites/default/files/nya%20prospekt/Hus%202.pdf" target="_blank" rel="noopener">prospektet för hus 2</a>, som är generella för hustypen. Hallens höjd, grannhusens utformning och fördelningen av husen runt ovalen är uppskattade.</p>
+  </aside>
+
+  <div class="hint">Dra för att rotera · scrolla för att zooma · högerklick för att panorera</div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const DEG = Math.PI / 180;
+
+/* ---------- Dimensions in metres ----------
+   Plan scale measured from the prospectus scale bar (1 m ≈ 53 px on the plan sheet).
+   The D1 wedge is a 30° slice of a ring: façade polygon vertices at r = 19.5 m (outer) and 11.4 m (inner). */
+const HALL = { L: 103, W: 52, H: 13 };          // Hall 259 footprint read off the key plan; height assumed
+const SITE_ROT = 9 * DEG;                         // oval tilt relative to north in the key plan
+const R_OUT = 19.5, R_IN = 11.4, HALF = 15 * DEG, T15 = Math.tan(HALF);
+const STRAIGHT = 48.3, N_STRAIGHT = 7, SEG = STRAIGHT / N_STRAIGHT, S2 = STRAIGHT / 2;
+const PLINTH = 0.6, FLOOR_H = 3.1, SLAB = 0.3, CLEAR = FLOOR_H - SLAB;
+const BASE = HALL.H + PLINTH;
+const levelY = i => BASE + i * FLOOR_H;
+const TOP = levelY(3);
+const PATIO = 21.9;
+
+let tween = null;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- Renderer ---------- */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.localClippingEnabled = true;
+stage.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.className = 'labels';
+stage.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.3, 3000);
+const controls = new OrbitControls(camera, labelRenderer.domElement);
+controls.enableDamping = true;
+controls.maxPolarAngle = 87 * DEG;
+controls.minDistance = 3;
+controls.maxDistance = 520;
+controls.addEventListener('start', () => { tween = null; });
+
+/* ---------- Textures ---------- */
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+function canvasTex(w, h, draw, rep) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  if (rep) t.repeat.set(rep[0], rep[1]);
+  return t;
+}
+// 1.2 m × 0.6 m of running-bond brick
+const brickTex = canvasTex(512, 256, (g, w, h) => {
+  const r = rng(7); g.fillStyle = '#c9bba8'; g.fillRect(0, 0, w, h);
+  const rows = 10, cols = 5, bh = h / rows, bw = w / cols;
+  const tones = ['#9a4631', '#a5513a', '#8e412e', '#ad5b3f', '#97503a', '#a04a36', '#8a3f2c'];
+  for (let y = 0; y < rows; y++) {
+    const off = (y % 2) * bw / 2;
+    for (let x = -1; x <= cols; x++) { g.fillStyle = tones[(r() * tones.length) | 0]; g.fillRect(x * bw + off + 2, y * bh + 2, bw - 4, bh - 4); }
+  }
+  for (let i = 0; i < 5000; i++) { g.fillStyle = `rgba(0,0,0,${r() * 0.09})`; g.fillRect(r() * w, r() * h, 2, 2); }
+}, [1 / 1.2, 1 / 0.6]);
+// 2 m × 2 m of oak boards
+const plankTex = canvasTex(256, 256, (g, w, h) => {
+  const r = rng(3); const n = 10, pw = w / n;
+  for (let i = 0; i < n; i++) {
+    let y = -r() * 120;
+    while (y < h) { const len = 90 + r() * 140; const l = 76 + r() * 8;
+      g.fillStyle = `hsl(33, 42%, ${l}%)`; g.fillRect(i * pw, y, pw - 1, len - 1); y += len; }
+  }
+  g.fillStyle = 'rgba(120,90,60,.18)'; for (let i = 0; i <= n; i++) g.fillRect(i * pw - 1, 0, 1, h);
+}, [1 / 2, 1 / 2]);
+// One 6 m bay of the hall façade, full 13 m height
+const hallTex = canvasTex(256, 512, (g, w, h) => {
+  const m = h / HALL.H, px = w / 6, r = rng(11);
+  g.fillStyle = '#cdbfa9'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 3000; i++) { g.fillStyle = `rgba(90,60,40,${r() * 0.07})`; g.fillRect(r() * w, r() * h, 2, 2); }
+  g.fillStyle = '#b8a890'; g.fillRect(0, 0, 0.45 * px, h); g.fillRect(w - 0.45 * px, 0, 0.45 * px, h);
+  g.fillRect(0, h - 1.0 * m, w, 1.0 * m); g.fillRect(0, 0, w, 0.5 * m);
+  const x0 = 1.1 * px, x1 = 4.9 * px, y0 = h - 11.3 * m, y1 = h - 2.0 * m;
+  g.fillStyle = '#56656a'; g.fillRect(x0, y0, x1 - x0, y1 - y0);
+  g.fillStyle = '#a5aca6';
+  for (let x = x0; x <= x1 + 1; x += (x1 - x0) / 6) g.fillRect(x - 1.5, y0, 3, y1 - y0);
+  for (let y = y0; y <= y1 + 1; y += (y1 - y0) / 12) g.fillRect(x0, y - 1.5, x1 - x0, 3);
+}, [1 / 6, 1 / HALL.H]);
+
+/* ---------- Materials ---------- */
+const std = (o) => new THREE.MeshStandardMaterial(Object.assign({ roughness: 0.85, metalness: 0 }, o));
+const M = {
+  brick: std({ map: brickTex, roughness: 0.92 }),
+  coping: std({ color: '#c0592c', roughness: 0.45, metalness: 0.35 }),
+  glass: std({ color: '#a9c3cb', roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.26, depthWrite: false }),
+  frame: std({ color: '#b98a4b', roughness: 0.55 }),
+  slab: std({ color: '#cbc7bf' }),
+  floor: std({ map: plankTex, roughness: 0.7 }),
+  roof: std({ color: '#6c6961', roughness: 1 }),
+  wall: std({ color: '#f3f1ec', roughness: 0.95 }),
+  stair: std({ color: '#d7b991', roughness: 0.7 }),
+  rail: std({ color: '#3b3f3c', roughness: 0.5, metalness: 0.5 }),
+  fence: std({ color: '#8f7356', roughness: 0.9 }),
+  deck: std({ color: '#a8875f', roughness: 0.9 }),
+  cabinet: std({ color: '#e9e6df', roughness: 0.6 }),
+  counter: std({ color: '#5d605d', roughness: 0.4 }),
+  wood: std({ color: '#c9a777', roughness: 0.7 }),
+  woodDark: std({ color: '#7d6347', roughness: 0.7 }),
+  fabric: std({ color: '#8b9a8e', roughness: 1 }),
+  fabric2: std({ color: '#d8c7a8', roughness: 1 }),
+  white: std({ color: '#fbfbf9', roughness: 0.3 }),
+  blanket: std({ color: '#b7c4c8', roughness: 1 }),
+  water: std({ color: '#c9dde0', roughness: 0.1 }),
+  // neighbours: own materials so they can be swapped and section-clipped on their own
+  nWall: std({ color: '#f2f0ea', roughness: 0.95, side: THREE.DoubleSide }),
+  nBrick: std({ map: brickTex, roughness: 0.92, side: THREE.DoubleSide }),
+  nRoof: std({ color: '#e6e3dc', roughness: 1, side: THREE.DoubleSide }),
+  nGlass: std({ color: '#4d5c63', roughness: 0.15, metalness: 0.4 }),
+  nBal: std({ color: '#d9d6cf', roughness: 0.9 }),
+  nRail: std({ color: '#3b3f3c', roughness: 0.5, metalness: 0.4, transparent: true, opacity: 0.55 }),
+  nCoping: std({ color: '#c0592c', roughness: 0.45, metalness: 0.35 }),
+  nDeck: std({ color: '#b39572', roughness: 0.9 }),
+  hall: std({ map: hallTex, roughness: 0.95 }),
+  gravel: std({ color: '#a9a69d', roughness: 1 }),
+  paving: std({ color: '#cfc8ba', roughness: 1 }),
+  grass: std({ color: '#7f9a5b', roughness: 1 }),
+  leaf: std({ color: '#6f8f4e', roughness: 1, flatShading: true }),
+  trunk: std({ color: '#6b5843', roughness: 1 }),
+  ground: std({ color: '#d3d7cf', roughness: 1 }),
+};
+M.edge = new THREE.LineBasicMaterial({ color: '#3a403b', transparent: true, opacity: 0.22 });
+M.accentLine = new THREE.LineBasicMaterial({ color: '#b24e2b' });
+const sectionPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1000);
+const NB_MATS = [M.nWall, M.nBrick, M.nRoof, M.nGlass, M.nBal, M.nRail, M.nCoping, M.edge];
+
+/* ---------- Geometry helpers. Plan points are [X, Rp]; local 3D is (X, y, -Rp). ---------- */
+function boxGeo(w, h, d) {
+  const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+  const dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+  for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0], uv.getY(i) * dims[f][1]); }
+  return g;
+}
+const lerp2 = (a, b, s) => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s];
+const dist2 = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+function shapeFrom(pts) { const s = new THREE.Shape(); pts.forEach((p, i) => i ? s.lineTo(p[0], p[1]) : s.moveTo(p[0], p[1])); s.closePath(); return s; }
+function extrude(shape, y0, h, mats, g) {
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false });
+  geo.rotateX(-Math.PI / 2); geo.translate(0, y0, 0);
+  const m = new THREE.Mesh(geo, mats); m.castShadow = m.receiveShadow = true; if (g) g.add(m); return m;
+}
+function segBox(g, p1, p2, y0, y1, t, off, mat, shadow = true) {
+  const dx = p2[0] - p1[0], dr = p2[1] - p1[1], len = Math.hypot(dx, dr);
+  if (len < 1e-3 || y1 - y0 < 1e-3) return null;
+  const nx = -dr / len, nr = dx / len;
+  const m = new THREE.Mesh(boxGeo(len, y1 - y0, t), mat);
+  m.position.set((p1[0] + p2[0]) / 2 + nx * off, (y0 + y1) / 2, -((p1[1] + p2[1]) / 2 + nr * off));
+  m.rotation.y = Math.atan2(dr, dx);
+  m.castShadow = shadow; m.receiveShadow = true; g.add(m); return m;
+}
+function sideOf(p1, p2, pt) {
+  const dx = p2[0] - p1[0], dr = p2[1] - p1[1];
+  return Math.sign((pt[0] - p1[0]) * -dr + (pt[1] - p1[1]) * dx) || 1;
+}
+function glazing(g, a, b, y0, y1, off, pitch = 1.25) {
+  const L = dist2(a, b), n = Math.max(1, Math.round(L / pitch));
+  segBox(g, a, b, y0, y1, 0.03, off, M.glass, false);
+  segBox(g, a, b, y0, y0 + 0.07, 0.1, off, M.frame); segBox(g, a, b, y1 - 0.07, y1, 0.1, off, M.frame);
+  const h = 0.035 / L;
+  for (let k = 0; k <= n; k++) { const s = k / n; segBox(g, lerp2(a, b, Math.max(0, s - h)), lerp2(a, b, Math.min(1, s + h)), y0, y1, 0.1, off, M.frame); }
+}
+// Wall from p1 to p2 with openings {a, b (metres from p1), y0, y1, glass}
+function wall(g, p1, p2, o) {
+  const { y0, y1, t = 0.12, mat = M.wall, inside = null, openings = [] } = o;
+  const L = dist2(p1, p2), off = inside ? sideOf(p1, p2, inside) * t / 2 : 0, at = s => lerp2(p1, p2, s / L);
+  let cur = 0;
+  for (const op of [...openings].sort((a, b) => a.a - b.a)) {
+    if (op.a > cur) segBox(g, at(cur), at(op.a), y0, y1, t, off, mat);
+    if (op.y0 > y0) segBox(g, at(op.a), at(op.b), y0, op.y0, t, off, mat);
+    if (op.y1 < y1) segBox(g, at(op.a), at(op.b), op.y1, y1, t, off, mat);
+    if (op.glass) glazing(g, at(op.a), at(op.b), op.y0, op.y1, off, op.pitch);
+    cur = op.b;
+  }
+  if (cur < L) segBox(g, at(cur), p2, y0, y1, t, off, mat);
+}
+const door = (a, b, y) => ({ a, b, y0: y, y1: y + 2.1 });
+function railPolyline(g, pts, y0, h = 1.05, mat = M.rail) {
+  for (let i = 0; i < pts.length - 1; i++) segBox(g, pts[i], pts[i + 1], y0 + h - 0.04, y0 + h, 0.05, 0, mat);
+  const pos = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const L = dist2(pts[i], pts[i + 1]), n = Math.max(1, Math.round(L / 0.12));
+    for (let k = 0; k < n; k++) pos.push(lerp2(pts[i], pts[i + 1], k / n));
+  }
+  pos.push(pts[pts.length - 1]);
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(0.02, h, 0.02), mat, pos.length);
+  const mtx = new THREE.Matrix4();
+  pos.forEach((p, i) => { mtx.makeTranslation(p[0], y0 + h / 2, -p[1]); im.setMatrixAt(i, mtx); });
+  im.castShadow = true; g.add(im);
+}
+const pol = (r, a) => [r * Math.sin(a), r * Math.cos(a)];
+// point on the kinked façade polygon (vertices at 0° and ±15°) in direction a
+const facadeAt = (R, a) => pol(R * Math.cos(HALF / 2) / Math.cos(Math.abs(a) - HALF / 2), a);
+const arcPts = (r, a0, a1, n = 24) => Array.from({ length: n + 1 }, (_, k) => pol(r, a0 + (a1 - a0) * k / n));
+
+/* ---------- Furniture (local x = width, z = depth; rot in degrees, CCW in plan) ---------- */
+function furn(g, X, Rp, y0, rot, build) { const s = new THREE.Group(); s.position.set(X, y0, -Rp); s.rotation.y = rot * DEG; build(s); g.add(s); return s; }
+function bx(s, x, z, w, d, h, mat, y = 0) { const m = new THREE.Mesh(boxGeo(w, h, d), mat); m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; s.add(m); return m; }
+const table = (g, X, Rp, y, w, d, rot = 0) => furn(g, X, Rp, y, rot, s => {
+  bx(s, 0, 0, w, d, 0.04, M.wood, 0.7);
+  for (const [i, j] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bx(s, i * (w / 2 - 0.05), j * (d / 2 - 0.05), 0.04, 0.04, 0.7, M.woodDark);
+});
+const chair = (g, X, Rp, y, rot = 0) => furn(g, X, Rp, y, rot, s => {
+  bx(s, 0, 0, 0.44, 0.44, 0.05, M.wood, 0.42); bx(s, 0, 0.2, 0.44, 0.04, 0.42, M.wood, 0.47);
+  for (const [i, j] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bx(s, i * 0.19, j * 0.19, 0.03, 0.03, 0.42, M.woodDark);
+});
+const sofa = (g, X, Rp, y, L, D, rot, mat = M.fabric) => furn(g, X, Rp, y, rot, s => {
+  bx(s, 0, 0, L, D, 0.42, mat); bx(s, 0, D / 2 - 0.1, L, 0.2, 0.82, mat);
+  bx(s, -L / 2 + 0.09, 0, 0.18, D, 0.62, mat); bx(s, L / 2 - 0.09, 0, 0.18, D, 0.62, mat);
+});
+const bed = (g, X, Rp, y, L, W, rot) => furn(g, X, Rp, y, rot, s => {
+  bx(s, 0, 0, L, W, 0.3, M.wood); bx(s, 0, 0, L - 0.06, W - 0.06, 0.2, M.white, 0.3);
+  bx(s, L / 2 - 0.25, 0, 0.36, W - 0.2, 0.1, M.white, 0.5); bx(s, -0.27, 0, L - 0.56, W - 0.02, 0.05, M.blanket, 0.48);
+  bx(s, L / 2 + 0.03, 0, 0.06, W, 0.9, M.wood);
+});
+const roundTable = (g, X, Rp, y, r) => furn(g, X, Rp, y, 0, s => {
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.04, 32), M.wood); top.position.y = 0.45; top.castShadow = true; s.add(top);
+  const st = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), M.woodDark); st.position.y = 0.225; s.add(st);
+});
+const wc = (g, X, Rp, y, rot) => furn(g, X, Rp, y, rot, s => { bx(s, 0, 0, 0.38, 0.55, 0.42, M.white); bx(s, 0, 0.22, 0.38, 0.14, 0.8, M.white); });
+const sink = (g, X, Rp, y, rot) => furn(g, X, Rp, y, rot, s => { bx(s, 0, 0, 0.55, 0.42, 0.85, M.white); });
+const tub = (g, X, Rp, y, rot) => furn(g, X, Rp, y, rot, s => { bx(s, 0, 0, 0.78, 1.65, 0.55, M.white); bx(s, 0, 0, 0.6, 1.45, 0.02, M.water, 0.54); });
+const block = (g, X, Rp, y, w, d, h, rot, mat) => furn(g, X, Rp, y, rot, s => bx(s, 0, 0, w, d, h, mat));
+
+/* ---------- Site ---------- */
+const site = new THREE.Group(); site.rotation.y = SITE_ROT; scene.add(site);
+const Cw = [-S2, 0], Ce = [S2, 0];
+const P = (C, r, deg) => [C[0] + r * Math.cos(deg * DEG), C[1] + r * Math.sin(deg * DEG)];
+
+// Hall 259
+{
+  const hall = new THREE.Mesh(boxGeo(HALL.L, HALL.H, HALL.W), [M.hall, M.hall, M.gravel, M.gravel, M.hall, M.hall]);
+  hall.position.y = HALL.H / 2; hall.castShadow = hall.receiveShadow = true; site.add(hall);
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(hall.geometry), M.edge); e.position.copy(hall.position); site.add(e);
+  const parapet = [[-HALL.L / 2, -HALL.W / 2], [HALL.L / 2, -HALL.W / 2], [HALL.L / 2, HALL.W / 2], [-HALL.L / 2, HALL.W / 2], [-HALL.L / 2, -HALL.W / 2]];
+  for (let i = 0; i < 4; i++) segBox(site, parapet[i], parapet[i + 1], HALL.H, HALL.H + 0.5, 0.35, 0.175, M.slab);
+}
+function stadium(r, n = 28) {
+  const pts = [];
+  for (let k = 0; k <= n; k++) pts.push(P(Ce, r, -90 + 180 * k / n));
+  for (let k = 0; k <= n; k++) pts.push(P(Cw, r, 90 + 180 * k / n));
+  return pts;
+}
+// Courtyard on the roof
+extrude(shapeFrom(stadium(R_IN - 0.15)), HALL.H, PLINTH, [M.paving, M.slab], site);
+extrude(shapeFrom(stadium(8.3)), BASE, 0.05, [M.grass, M.grass], site);
+{
+  const trees = [[-18, 2.5], [-9, -3], [0, 3], [9, -2.5], [18, 3], [-26, -1], [26, 1], [-4, -4.5], [13, 4.5]];
+  const r = rng(5);
+  for (const [x, n] of trees) {
+    const h = 3 + r() * 2.5;
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, h, 8), M.trunk); tr.position.set(x, BASE + h / 2, -n); tr.castShadow = true; site.add(tr);
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4 + r() * 0.8, 1), M.leaf); c.position.set(x, BASE + h + 0.6, -n); c.scale.y = 1.15; c.castShadow = true; site.add(c);
+  }
+}
+
+/* ---------- The ring of 24 townhouses ---------- */
+const houses = [];
+for (const tc of [120, 150, 180, 210, 240]) houses.push({ outer: [P(Cw, R_OUT, tc + 15), P(Cw, R_OUT, tc), P(Cw, R_OUT, tc - 15)], inner: [P(Cw, R_IN, tc + 15), P(Cw, R_IN, tc), P(Cw, R_IN, tc - 15)], wedge: [Cw, tc], d1: tc === 180 });
+for (const tc of [-60, -30, 0, 30, 60]) houses.push({ outer: [P(Ce, R_OUT, tc + 15), P(Ce, R_OUT, tc), P(Ce, R_OUT, tc - 15)], inner: [P(Ce, R_IN, tc + 15), P(Ce, R_IN, tc), P(Ce, R_IN, tc - 15)], wedge: [Ce, tc] });
+for (let k = 0; k < N_STRAIGHT; k++) {
+  const x0 = -S2 + k * SEG, x1 = x0 + SEG;
+  for (const sgn of [1, -1]) {
+    const o = [[x0, sgn * R_OUT], [x1, sgn * R_OUT]], i = [[x0, sgn * R_IN], [x1, sgn * R_IN]];
+    if (k === 0) { o.unshift(P(Cw, R_OUT, sgn > 0 ? 105 : 255)); i.unshift(P(Cw, R_IN, sgn > 0 ? 105 : 255)); }
+    if (k === N_STRAIGHT - 1) { o.push(P(Ce, R_OUT, sgn > 0 ? 75 : 285)); i.push(P(Ce, R_IN, sgn > 0 ? 75 : 285)); }
+    houses.push({ outer: o, inner: i });
+  }
+}
+
+const NB = new THREE.Group(); site.add(NB);
+const nbBodies = [];
+const nbParts = new Map(); // material -> geometries, merged at the end
+function bake(mesh) { mesh.updateMatrix(); const g = mesh.geometry.clone().applyMatrix4(mesh.matrix); const n = g.index ? g.toNonIndexed() : g; return n; }
+const scratch = new THREE.Group();
+function partBox(p1, p2, y0, y1, t, off, mat) {
+  const m = segBox(scratch, p1, p2, y0, y1, t, off, mat); if (!m) return;
+  scratch.remove(m); if (!nbParts.has(mat)) nbParts.set(mat, []); nbParts.get(mat).push(bake(m));
+}
+function partShape(pts, y0, h, mat) {
+  const m = extrude(shapeFrom(pts), y0, h, mat); if (!nbParts.has(mat)) nbParts.set(mat, []);
+  const g = m.geometry; g.clearGroups(); nbParts.get(mat).push(g.index ? g.toNonIndexed() : g);
+}
+for (const h of houses) {
+  if (h.d1) continue;
+  const foot = [...h.outer, ...[...h.inner].reverse()];
+  const c = foot.reduce((a, p) => [a[0] + p[0] / foot.length, a[1] + p[1] / foot.length], [0, 0]);
+  const inset = foot.map(p => lerp2(p, c, 0.004));
+  const body = extrude(shapeFrom(inset), HALL.H + 0.01, TOP + 0.5 - HALL.H - 0.01, [M.nRoof, M.nWall], NB);
+  nbBodies.push(body);
+  NB.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 25), M.edge));
+  for (const [line, depth] of [[h.outer, 0.9], [h.inner, 1.5]]) {
+    for (let s = 0; s < line.length - 1; s++) {
+      const p = line[s], q = line[s + 1], L = dist2(p, q), out = -sideOf(p, q, c);
+      const a = lerp2(p, q, 0.75 / L), b = lerp2(p, q, 1 - 0.75 / L);
+      for (let i = 0; i < 3; i++) partBox(a, b, levelY(i) + 0.05, levelY(i) + 2.45, 0.05, out * 0.01, M.nGlass);
+      for (let i = 1; i < 3; i++) {
+        partBox(p, q, levelY(i) - 0.2, levelY(i) - 0.02, depth, out * depth / 2, M.nBal);
+        partBox(p, q, levelY(i) - 0.02, levelY(i) + 1.05, 0.03, out * (depth - 0.02), M.nRail);
+      }
+      partBox(p, q, TOP + 0.5, TOP + 0.58, 0.45, out * 0.08, M.nCoping);
+      if (line === h.outer && !h.wedge) partBox(p, q, HALL.H, BASE, 2.4, out * 1.2, M.nDeck);
+    }
+  }
+  if (h.wedge) {
+    const [C, tc] = h.wedge, rr = PATIO / Math.cos(HALF);
+    partShape([...h.outer, P(C, rr, tc - 15), P(C, rr, tc + 15)], HALL.H, PLINTH, M.nDeck);
+  }
+}
+for (const [mat, geos] of nbParts) {
+  const m = new THREE.Mesh(mergeGeometries(geos), mat); m.castShadow = mat !== M.nRail; m.receiveShadow = true; NB.add(m);
+}
+
+/* ---------- Nr 02 (type D1), built from the plan drawings ---------- */
+const d1 = new THREE.Group(); d1.position.set(Cw[0], 0, -Cw[1]); d1.rotation.y = Math.PI / 2; site.add(d1);
+const OL = pol(R_OUT, -HALF), OC = [0, R_OUT], OR = pol(R_OUT, HALF);
+const IL = pol(R_IN, -HALF), IC = [0, R_IN], IR = pol(R_IN, HALF);
+const FOOT = [IL, IC, IR, OR, OC, OL];
+const INSIDE = [0, 15.5];
+const Lx = R => -T15 * R + 0.31, Rx = R => T15 * R - 0.31;   // inner faces of the party walls
+const footInset = FOOT.map(p => lerp2(p, INSIDE, 0.004));
+
+const floors = [0, 1, 2].map(() => { const g = new THREE.Group(); d1.add(g); return g; });
+const roof = new THREE.Group(); d1.add(roof);
+const roomLabels = [[], [], []];
+
+function slab(g, y0, h, holes, mats) {
+  const s = shapeFrom(footInset);
+  for (const hp of holes) { const p = new THREE.Path(); hp.forEach((q, i) => i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])); p.closePath(); s.holes.push(p); }
+  extrude(s, y0, h, mats, g);
+}
+function facadeHalf(g, center, corner, open, y0w, y1w, fy) {
+  wall(g, center, corner, { y0: y0w, y1: y1w, t: 0.3, mat: M.brick, inside: INSIDE, openings: [{ a: open[0], b: open[1], y0: fy + open[2], y1: fy + open[3], glass: true }] });
+}
+function balcony(g, y, rFacade, rEdge) {
+  const a = 14.2 * DEG;
+  const arc = arcPts(rEdge, -a, a);
+  const pts = [...arc, facadeAt(rFacade, a), [0, rFacade], facadeAt(rFacade, -a)];
+  extrude(shapeFrom(pts), y - 0.22, 0.2, [M.slab, M.slab], g);
+  const inset = arcPts(rEdge + (rEdge > rFacade ? -0.04 : 0.04), -a, a);
+  railPolyline(g, [facadeAt(rFacade, -a), ...inset, facadeAt(rFacade, a)], y - 0.02);
+}
+function stairFlight(g, y0) {
+  const r = FLOOR_H / 18;
+  for (let k = 0; k < 8; k++) block(g, 2.85, 13.85 + (k + 0.5) * 0.144, y0, 0.95, 0.144, (k + 1) * r, 0, M.stair);
+  block(g, 2.5, 15.27, y0, 2.2, 0.55, 9 * r, 0, M.stair);
+  for (let k = 0; k < 8; k++) block(g, 1.85, 15.0 - (k + 0.5) * 0.144, y0, 0.9, 0.144, (10 + k) * r, 0, M.stair);
+}
+function addLabel(parent, text, X, Rp, y, cls = 'room') {
+  const el = document.createElement('div'); el.className = 'tag ' + cls; el.textContent = text;
+  const o = new CSS2DObject(el); o.position.set(X, y, -Rp); parent.add(o); return o;
+}
+
+// Shared per-floor shell: slab, party walls, façades
+const FACADE = [
+  { outer: [0.12, 4.15, 0, 2.5], innerL: [0.9, 1.9, 1.0, 2.2], innerR: [0.15, 1.9, 0, 2.4] },
+  { outer: [0.12, 4.15, 0, 2.5], innerL: [0.12, 2.0, 0, 2.4], innerR: [0.12, 2.0, 0, 2.4] },
+  { outer: [0.12, 4.15, 0, 2.5], innerL: [0.12, 2.0, 0, 2.4], innerR: [0.12, 2.0, 0, 2.4] },
+];
+const STAIR_HOLE = [[1.35, 13.8], [Rx(13.8) - 0.02, 13.8], [Rx(15.55) - 0.02, 15.55], [1.35, 15.55]];
+const VOID_HOLE = [[0.06, 15.65], [Rx(15.65) - 0.02, 15.65], [4.9, 18.55], [0.06, 19.3]];
+for (let i = 0; i < 3; i++) {
+  const g = floors[i], fy = levelY(i);
+  const yb = i === 0 ? HALL.H : fy - SLAB, yt = fy + CLEAR;
+  if (i === 0) slab(g, HALL.H, PLINTH, [], [M.floor, M.slab]);
+  else slab(g, fy - SLAB, SLAB, i === 1 ? [VOID_HOLE, STAIR_HOLE] : [STAIR_HOLE], [M.floor, M.slab]);
+  wall(g, IL, OL, { y0: yb, y1: yt, t: 0.3, mat: M.brick, inside: INSIDE });
+  wall(g, IR, OR, { y0: yb, y1: yt, t: 0.3, mat: M.brick, inside: INSIDE });
+  const f = FACADE[i];
+  facadeHalf(g, OC, OL, f.outer, yb, yt, fy);
+  facadeHalf(g, OC, OR, f.outer, yb, yt, fy);
+  facadeHalf(g, IC, IL, f.innerL, yb, yt, fy);
+  facadeHalf(g, IC, IR, f.innerR, yb, yt, fy);
+  if (i > 0) { balcony(g, fy, R_OUT, 20.4); balcony(g, fy, R_IN, 9.9); }
+}
+
+// Bottenvåning
+{
+  const g = floors[0], y = levelY(0), y1 = y + CLEAR;
+  // patio towards the west, stepping down to the hall roof
+  const pr = [-PATIO * T15, PATIO], pl = [PATIO * T15, PATIO];
+  extrude(shapeFrom([OL, OC, OR, pl, pr]), HALL.H, PLINTH, [M.deck, M.slab], g);
+  segBox(g, OL, pr, y, y + 1.3, 0.05, 0.025, M.fence); segBox(g, OR, pl, y, y + 1.3, 0.05, -0.025, M.fence);
+  railPolyline(g, [[pr[0] + 0.05, PATIO - 0.03], [4.4, PATIO - 0.03]], y);
+  for (let k = 0; k < 4; k++) block(g, 5.1, PATIO + (k + 0.5) * 0.375, HALL.H, 1.2, 0.375, PLINTH - (k + 1) * 0.15 + 0.001, 0, M.deck);
+  // interior walls
+  wall(g, [-1.9, 15.78], [0.05, 15.9], { y0: y, y1 });
+  wall(g, [1.3, 15.62], [Rx(15.5), 15.5], { y0: y, y1 });
+  wall(g, [1.3, 13.75], [1.3, 15.62], { y0: y, y1 });
+  wall(g, [1.3, 13.75], [2.3, 13.75], { y0: y, y1 });
+  wall(g, [Lx(13.9), 13.9], [0.24, 13.9], { y0: y, y1, t: 0.18 });
+  wall(g, [0.08, 11.45], [0.08, 13.9], { y0: y, y1, openings: [door(0.6, 1.5, y)] });
+  // kitchen and living
+  segBox(g, [Lx(16) + 0.33, 16], [Lx(18.55) + 0.33, 18.55], y, y + 0.88, 0.62, 0, M.cabinet);
+  segBox(g, [Lx(16) + 0.33, 16], [Lx(18.55) + 0.33, 18.55], y + 0.88, y + 0.92, 0.64, 0, M.counter);
+  segBox(g, [Lx(14.15) + 0.33, 14.15], [Lx(15.5) + 0.33, 15.5], y, y + 2.1, 0.62, 0, M.cabinet);
+  table(g, -1.27, 17.6, y, 1.0, 2.0);
+  for (const r of [17.0, 17.6, 18.2]) { chair(g, -2.0, r, y, -90); chair(g, -0.55, r, y, 90); }
+  sofa(g, 3.2, 16.9, y, 2.1, 0.9, 75);
+  sofa(g, 2.0, 18.35, y, 0.85, 0.8, 200, M.fabric2);
+  roundTable(g, 2.05, 17.25, y, 0.4);
+  // wc / laundry / hall
+  wc(g, -2.4, 12.1, y, -90); sink(g, -1.4, 11.75, y, 0);
+  block(g, -0.5, 13.45, y, 0.6, 0.6, 0.85, 0, M.white);
+  block(g, -0.45, 11.85, y, 0.6, 0.6, 2.1, 0, M.cabinet);
+  segBox(g, [Rx(12.2) - 0.28, 12.2], [Rx(13.4) - 0.28, 13.4], y, y + 2.0, 0.5, 0, M.cabinet);
+  stairFlight(g, y);
+  roomLabels[0].push(
+    addLabel(g, 'Kök & matplats', -1.8, 17.3, y + 1.4), addLabel(g, 'Vardagsrum · dubbel takhöjd', 2.3, 17.9, y + 1.4),
+    addLabel(g, 'Hall', 1.0, 12.4, y + 1.4), addLabel(g, 'WC / tvätt', -1.6, 12.8, y + 1.4),
+    addLabel(g, 'Uteplats', -1.5, 20.9, y + 1.0), addLabel(g, 'Entré · innergården', 0.9, 9.9, y + 0.6));
+}
+// Plan 2
+{
+  const g = floors[1], y = levelY(1), y1 = y + CLEAR;
+  wall(g, [0, 15.65], [0, 19.4], { y0: y, y1, openings: [{ a: 1.15, b: 2.95, y0: y, y1, glass: true, pitch: 0.9 }] });
+  const x0 = Lx(15.65);
+  wall(g, [x0, 15.65], [Rx(15.65), 15.65], { y0: y, y1, openings: [{ a: -1.0 - x0, b: -0.05 - x0, y0: y, y1: y + 2.1, glass: true }] });
+  wall(g, [-1.08, 13.65], [-1.08, 15.65], { y0: y, y1, openings: [door(0.9, 1.7, y)] });
+  const x1 = Lx(13.65);
+  wall(g, [x1, 13.65], [1.35, 13.65], { y0: y, y1, openings: [door(0.4 - x1, 1.25 - x1, y)] });
+  wall(g, [1.35, 13.6], [Rx(13.6), 13.6], { y0: y, y1 });
+  segBox(g, [1.4, 13.28], [Rx(13.28) - 0.02, 13.28], y, y + 2.2, 0.55, 0, M.cabinet);
+  railPolyline(g, [[1.38, 14.5], [1.38, 15.5]], y);
+  sofa(g, -3.05, 17.3, y, 2.0, 0.85, -36);
+  sofa(g, -1.25, 18.45, y, 0.85, 0.8, 170, M.fabric2);
+  sofa(g, -1.35, 16.75, y, 0.85, 0.8, 20, M.fabric2);
+  roundTable(g, -2.15, 17.6, y, 0.38);
+  bed(g, -1.6, 12.7, y, 2.0, 0.9, 180);
+  table(g, 1.8, 11.85, y, 1.5, 0.6, -6); chair(g, 1.8, 12.5, y, 180);
+  block(g, -2.2, 14.6, y, 1.2, 0.4, 1.9, 0, M.cabinet);
+  stairFlight(g, y);
+  roomLabels[1].push(
+    addLabel(g, 'Allrum', -2.2, 18.3, y + 1.4), addLabel(g, 'Luftrum över vardagsrummet', 2.5, 17.4, y + 0.3),
+    addLabel(g, 'Förråd', -2.2, 14.6, y + 2.2), addLabel(g, 'Sovrum', -0.4, 12.4, y + 1.4),
+    addLabel(g, 'Balkong', 0, 20.05, y + 0.8), addLabel(g, 'Balkong', 0, 10.5, y + 0.8));
+}
+// Plan 3
+{
+  const g = floors[2], y = levelY(2), y1 = y + CLEAR;
+  wall(g, [0, 15.65], [0, 19.4], { y0: y, y1 });
+  const x0 = Lx(15.65);
+  wall(g, [x0, 15.65], [Rx(15.65), 15.65], { y0: y, y1, openings: [door(-1.2 - x0, -0.55 - x0, y), door(0.66 - x0, 1.3 - x0, y)] });
+  wall(g, [-1.88, 13.6], [-1.88, 15.65], { y0: y, y1, openings: [door(1.0, 1.8, y)] });
+  const x1 = Lx(13.6);
+  wall(g, [x1, 13.6], [Rx(13.6), 13.6], { y0: y, y1, openings: [door(-1.7 - x1, -0.85 - x1, y), door(0.3 - x1, 1.1 - x1, y)] });
+  wall(g, [0.15, 11.45], [0.15, 13.6], { y0: y, y1 });
+  railPolyline(g, [[1.38, 14.5], [1.38, 15.5]], y);
+  bed(g, -3.1, 17.25, y, 2.05, 1.8, 195);
+  block(g, -3.62, 16.0, y, 0.45, 0.4, 0.5, 15, M.wood); block(g, -4.12, 18.1, y, 0.45, 0.4, 0.5, 15, M.wood);
+  sofa(g, 0.85, 18.5, y, 0.85, 0.8, 160, M.fabric2);
+  roundTable(g, 1.8, 17.5, y, 0.42);
+  table(g, 3.55, 17.9, y, 0.7, 1.3, -15); chair(g, 2.95, 17.85, y, -105);
+  segBox(g, [Rx(16.0) - 0.2, 16.0], [Rx(16.9) - 0.2, 16.9], y, y + 2.0, 0.36, 0, M.wood);
+  tub(g, -0.5, 12.65, y, 0); wc(g, -2.3, 12.2, y, -90); sink(g, -1.6, 12.95, y, 180);
+  table(g, 2.55, 12.6, y, 0.6, 1.4, -15); chair(g, 1.95, 12.7, y, -105);
+  roomLabels[2].push(
+    addLabel(g, 'Sovrum', -2.2, 18.6, y + 1.4), addLabel(g, 'Arbetsrum / allrum', 1.6, 16.6, y + 1.4),
+    addLabel(g, 'Förråd', -2.6, 14.6, y + 1.4), addLabel(g, 'Badrum', -1.4, 11.9, y + 1.4),
+    addLabel(g, 'Sovrum / kontor', 1.8, 11.9, y + 1.4), addLabel(g, 'Balkong', 0, 20.05, y + 0.8), addLabel(g, 'Balkong', 0, 10.5, y + 0.8));
+}
+// Roof
+{
+  slab(roof, TOP - SLAB, SLAB, [], [M.roof, M.slab]);
+  for (const [a, b] of [[OL, OC], [OC, OR], [IL, IC], [IC, IR]]) {
+    segBox(roof, a, b, TOP - SLAB, TOP + 0.5, 0.3, sideOf(a, b, INSIDE) * 0.15, M.brick);
+    segBox(roof, a, b, TOP + 0.5, TOP + 0.58, 0.45, -sideOf(a, b, INSIDE) * 0.08, M.coping);
+  }
+  segBox(roof, IL, OL, TOP, TOP + 0.5, 0.3, sideOf(IL, OL, INSIDE) * 0.15, M.brick);
+  segBox(roof, IR, OR, TOP, TOP + 0.5, 0.3, sideOf(IR, OR, INSIDE) * 0.15, M.brick);
+  const outline = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(FOOT.map(p => new THREE.Vector3(p[0], TOP + 0.62, -p[1]))), M.accentLine);
+  roof.add(outline);
+}
+
+/* ---------- Context: ground, compass, labels ---------- */
+const ground = new THREE.Mesh(new THREE.CircleGeometry(700, 64), M.ground);
+ground.rotation.x = -Math.PI / 2; ground.position.y = -0.02; ground.receiveShadow = true; scene.add(ground);
+const grid = new THREE.GridHelper(700, 140, 0xb9bfb6, 0xb9bfb6);
+grid.material.transparent = true; grid.material.opacity = 0.35; scene.add(grid);
+{
+  const s = new THREE.Shape(); s.moveTo(0, 7); s.lineTo(2.4, -3); s.lineTo(0, -1.2); s.lineTo(-2.4, -3); s.closePath();
+  const arrow = new THREE.Mesh(new THREE.ShapeGeometry(s), new THREE.MeshBasicMaterial({ color: 0xb24e2b }));
+  arrow.rotation.x = -Math.PI / 2; arrow.position.set(-70, 0.05, 55); scene.add(arrow);
+  const el = document.createElement('div'); el.className = 'tag north'; el.textContent = 'N';
+  const o = new CSS2DObject(el); o.position.set(-70, 0.5, 45); scene.add(o);
+}
+const mkTag = (text, cls) => { const el = document.createElement('div'); el.className = 'tag ' + cls; el.textContent = text; return new CSS2DObject(el); };
+const tagD1 = mkTag('Nr 02 · Typ D1 · 145 m²', 'primary'); tagD1.position.set(0, TOP + 3, -15.5); roof.add(tagD1);
+const tagHall = mkTag('Hall 259 · f.d. svets- och pannverkstad', ''); tagHall.position.set(10, HALL.H * 0.55, -(-HALL.W / 2 - 0.4)); site.add(tagHall);
+const tagYard = mkTag('Innergård', 'quiet'); tagYard.position.set(0, BASE + 1, 0); site.add(tagYard);
+const tagWest = mkTag('Väster · utsikt mot Öresund', 'quiet'); tagWest.position.set(0, BASE + 2, -34); d1.add(tagWest);
+const siteTags = [tagD1, tagHall, tagYard, tagWest];
+
+/* ---------- Light & sun ---------- */
+const hemi = new THREE.HemisphereLight(0xe3ebf2, 0x8c7c68, 0.9); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -75, right: 75, top: 75, bottom: -75, near: 1, far: 420 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04;
+scene.add(sun); scene.add(sun.target); sun.target.position.set(0, HALL.H, 0);
+const fill = new THREE.DirectionalLight(0xdfe8f5, 0.35); fill.position.set(60, 80, 90); scene.add(fill);
+
+function setSun(dateKey, clock) {
+  const lat = 55.6 * DEG, lon = 13.0;
+  const decl = { mar: 0, jun: 23.44, dec: -23.44 }[dateKey] * DEG;
+  const tz = dateKey === 'jun' ? 2 : 1;
+  const H = ((clock - tz + lon / 15) - 12) * 15 * DEG;
+  const sinAlt = Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(H);
+  const alt = Math.asin(sinAlt);
+  const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(lat) - Math.tan(decl) * Math.cos(lat)) + Math.PI;
+  const dir = new THREE.Vector3(Math.sin(az) * Math.cos(alt), Math.sin(alt), -Math.cos(az) * Math.cos(alt));
+  sun.position.copy(sun.target.position).addScaledVector(dir, 200);
+  const k = THREE.MathUtils.smoothstep(sinAlt, -0.02, 0.18);
+  sun.intensity = 2.8 * k;
+  sun.color.setHSL(0.09, 0.9 - 0.75 * k, 0.75 + 0.18 * k);
+  hemi.intensity = 0.35 + 0.6 * k;
+  renderer.toneMappingExposure = 0.85 + 0.2 * k;
+}
+
+/* ---------- Theme ---------- */
+function applyTheme() {
+  const sky = new THREE.Color(tok('--sky') || '#dde4e2');
+  scene.background = sky; scene.fog = new THREE.Fog(sky, 260, 900);
+  M.ground.color.set(tok('--ground') || '#d3d7cf');
+  grid.material.color.set(tok('--gridline') || '#b9bfb6');
+  M.edge.color.set(tok('--edge') || '#3a403b');
+  M.accentLine.color.set(tok('--accent') || '#b24e2b');
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ---------- State & views ---------- */
+const state = { view: 'site', floor: 0, explode: 0, nb: 'model', date: 'jun', time: 18 };
+const NOTES = {
+  site: 'Ett av 24 radhus i en oval ring på hallens tak. Nr 02 sitter mitt i den västra rundningen, så huset blir kilformat: cirka 10 m brett mot väster och 6 m mot gården.',
+  house: 'Tre våningar i tegel med stora glaspartier åt båda håll. Mot väster finns uteplats på bottenvåningen och balkonger på plan 2 och 3.',
+  floor: [
+    'Kök och matplats längs norra väggen. Vardagsrummet har dubbel takhöjd och glasparti mot uteplatsen. Mot innergården finns hall, WC/tvätt och entré.',
+    'Allrum mot väster med glasvägg mot luftrummet. Förråd, sovrum och balkonger åt båda håll.',
+    'Sovrum och arbetsrum mot väster. Badrum med badkar, förråd och ytterligare ett rum mot gården. Balkonger åt båda håll.',
+  ],
+};
+const world = (X, y, Rp) => d1.localToWorld(new THREE.Vector3(X, y, -Rp));
+function flyTo(pos, target) {
+  if (reduceMotion) { camera.position.copy(pos); controls.target.copy(target); return; }
+  tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: target, start: performance.now(), dur: 1200 };
+}
+function frame(view, floor) {
+  scene.updateMatrixWorld(true);
+  const ex = view === 'floor' ? 0 : state.explode;
+  if (view === 'site') return [new THREE.Vector3(-88, 78, 100), new THREE.Vector3(-6, HALL.H, 0)];
+  if (view === 'house') return [world(-14, BASE + 9 + ex * 1.2, 46), world(0, BASE + 4.5 + ex * 1.5, 16)];
+  const fy = levelY(floor);
+  return [world(0, fy + 21, 8.5), world(0, fy, 15.6)];
+}
+function apply(fly = true) {
+  const { view, floor, nb } = state;
+  const ex = view === 'floor' ? 0 : state.explode;
+  floors.forEach((g, i) => { g.visible = view !== 'floor' || i <= floor; g.position.y = i * ex; });
+  roof.visible = view !== 'floor'; roof.position.y = 3 * ex;
+  roomLabels.forEach((arr, i) => arr.forEach(l => (l.visible = view === 'floor' && i === floor)));
+  siteTags.forEach(t => (t.visible = view !== 'floor'));
+  tagWest.visible = view === 'house'; tagYard.visible = view === 'site';
+  // horizontal section through the neighbours at the same height as the visible floor
+  sectionPlane.constant = view === 'floor' ? levelY(floor) + CLEAR : 1e4;
+  NB_MATS.forEach(m => { m.clippingPlanes = view === 'floor' ? [sectionPlane] : null; m.needsUpdate = true; });
+  NB.visible = nb !== 'hidden';
+  nbBodies.forEach(b => (b.material = [M.nRoof, nb === 'brick' ? M.nBrick : M.nWall]));
+  document.querySelectorAll('#views button').forEach(b => {
+    const on = b.dataset.view === view && (view !== 'floor' || +b.dataset.floor === floor);
+    b.setAttribute('aria-pressed', on);
+  });
+  document.querySelectorAll('#nb button').forEach(b => b.setAttribute('aria-pressed', b.dataset.nb === nb));
+  document.getElementById('note').textContent = view === 'floor' ? NOTES.floor[floor] : NOTES[view];
+  const exEl = document.getElementById('explode');
+  exEl.disabled = view === 'floor';
+  document.getElementById('explodeVal').textContent = view === 'floor' ? 'av i planvy' : state.explode.toFixed(1).replace('.', ',') + ' m';
+  if (fly) { const [p, t] = frame(view, floor); flyTo(p, t); }
+}
+function applySun() {
+  setSun(state.date, state.time);
+  const h = Math.floor(state.time), m = Math.round((state.time - h) * 60);
+  document.getElementById('sunVal').textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  document.querySelectorAll('#date button').forEach(b => b.setAttribute('aria-pressed', b.dataset.date === state.date));
+}
+
+document.getElementById('views').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.view = b.dataset.view; if (b.dataset.floor) state.floor = +b.dataset.floor; apply();
+});
+document.getElementById('nb').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.nb = b.dataset.nb; apply(false); });
+document.getElementById('date').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.date = b.dataset.date; applySun(); });
+document.getElementById('time').addEventListener('input', e => { state.time = +e.target.value; applySun(); });
+document.getElementById('explode').addEventListener('input', e => {
+  state.explode = +e.target.value; apply(false);
+});
+
+/* ---------- Loop ---------- */
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h); labelRenderer.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize(); applyTheme(); applySun();
+apply(false);
+{ const [p, t] = frame('site'); camera.position.copy(p); controls.target.copy(t); }
+document.getElementById('loading').hidden = true;
+
+const ease = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+renderer.setAnimationLoop(() => {
+  if (tween) {
+    const k = Math.min(1, (performance.now() - tween.start) / tween.dur), e = ease(k);
+    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
+    if (k === 1) tween = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+});
+</script>
+
+<script>
+/* GoatCounter (pentia3d): inline pixel instead of gc.zgo.at/count.js, which the artifact viewer blocks. */
+(() => {
+  try {
+    const q = new URLSearchParams({
+      p: 'radhus-nr02', t: document.title, r: document.referrer || '',
+      s: `${screen.width},${screen.height},${devicePixelRatio || 1}`, b: '0', rnd: Math.random().toString(36).slice(2)
+    });
+    const url = 'https://pentia3d.goatcounter.com/count?' + q;
+    new Image().src = url;
+  } catch (e) {}
+})();
+</script>
+
+</body></html>
