@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Silokonfigurator – konceptdemo för MAFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --sky:#DCE3E7; --surface:#EEF2F4; --panel:#FFFFFF; --ink:#1E2A31; --muted:#56646C;
+  --line:#CDD5DA; --ground:#C3CCB2; --raps:#E3BE1B; --raps-ink:#1E2A31;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --sky:#1B242A; --surface:#161E23; --panel:#202B31; --ink:#E5EBEE; --muted:#9BA9B1;
+    --line:#35434B; --ground:#2A332A; --raps:#E8C42A; --raps-ink:#1B242A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --sky:#1B242A; --surface:#161E23; --panel:#202B31; --ink:#E5EBEE; --muted:#9BA9B1;
+  --line:#35434B; --ground:#2A332A; --raps:#E8C42A; --raps-ink:#1B242A;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;height:100%;background:var(--surface);color:var(--ink);
+  font-family:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.45;
+}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:100%}
+.stage{position:relative;min-height:0;min-width:0;background:var(--sky);overflow:hidden}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline:none}
+.stage canvas:active{cursor:grabbing}
+.stage canvas:focus-visible{box-shadow:inset 0 0 0 3px var(--raps)}
+.intro{position:absolute;left:28px;top:24px;max-width:28rem;pointer-events:none}
+.intro h1{
+  font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600;
+  font-size:clamp(1.9rem,3.2vw,2.75rem);line-height:1.02;margin:0 0 .4rem;letter-spacing:-.01em;
+}
+.intro p{margin:0;color:var(--muted);font-size:.98rem;max-width:24rem}
+.hint{position:absolute;left:28px;bottom:18px;margin:0;color:var(--muted);font-size:.85rem;pointer-events:none}
+.panel{
+  background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;
+  padding:26px 26px 30px;display:flex;flex-direction:column;gap:22px;
+}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend,.ctl-label{
+  display:flex;justify-content:space-between;align-items:baseline;width:100%;
+  padding:0;margin:0 0 8px;font-weight:600;font-size:.97rem;
+}
+.ctl-label output{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.seg label{padding:9px 6px;text-align:center;font-size:.93rem;cursor:pointer;border-left:1px solid var(--line);user-select:none}
+.seg label:first-of-type{border-left:0}
+.seg input:checked + label{background:var(--ink);color:var(--panel);font-weight:500}
+.seg input:focus-visible + label{outline:3px solid var(--raps);outline-offset:-3px}
+.note{margin:8px 0 0;color:var(--muted);font-size:.88rem}
+input[type=range]{width:100%;accent-color:var(--ink);margin:0}
+input[type=range]:focus-visible{outline:3px solid var(--raps);outline-offset:3px;border-radius:4px}
+.stepper{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stepper button{height:40px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:1.25rem;cursor:pointer}
+.stepper button:disabled{color:var(--line);cursor:default}
+.stepper button:focus-visible{outline:3px solid var(--raps);outline-offset:-3px}
+.stepper output{text-align:center;font-weight:600;font-variant-numeric:tabular-nums;border-left:1px solid var(--line);border-right:1px solid var(--line);line-height:40px}
+.checks{display:flex;flex-direction:column;gap:9px}
+.checks label{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;cursor:pointer;font-size:.95rem}
+.checks input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--ink)}
+.checks input:focus-visible{outline:3px solid var(--raps);outline-offset:2px}
+.checks small{display:block;color:var(--muted);font-size:.84rem}
+.checks label.off{color:var(--muted);cursor:default}
+.spec{border-top:1px solid var(--line);padding-top:16px}
+.spec dl{display:grid;grid-template-columns:1fr auto;gap:6px 16px;margin:0}
+.spec dt{color:var(--muted);font-size:.93rem}
+.spec dd{margin:0;text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+.spec dd.soft{color:var(--muted);font-weight:400;font-size:.9rem;max-width:13rem}
+.lang .seg label{font-size:.86rem;padding:8px 4px}
+.spec dd.big{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-size:1.5rem;font-weight:600;line-height:1.1}
+.cta{
+  width:100%;border:0;border-radius:8px;padding:14px 16px;cursor:pointer;
+  background:var(--raps);color:var(--raps-ink);font:inherit;font-weight:600;font-size:1.02rem;
+}
+.cta:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.fine{margin:0;color:var(--muted);font-size:.82rem}
+dialog{
+  width:min(30rem,calc(100% - 32px));border:1px solid var(--line);border-radius:12px;
+  background:var(--panel);color:var(--ink);padding:24px;
+}
+dialog::backdrop{background:rgba(20,28,33,.45)}
+dialog h2{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600;font-size:1.7rem;margin:0 0 4px}
+dialog p{margin:0 0 14px;color:var(--muted);font-size:.93rem}
+dialog dl{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;margin:0 0 18px;font-size:.95rem}
+dialog dt{color:var(--muted)}
+dialog dd{margin:0;font-weight:500}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions button{flex:1;min-width:9rem;border-radius:8px;padding:11px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn-copy{border:0;background:var(--raps);color:var(--raps-ink)}
+.btn-close{border:1px solid var(--line);background:transparent;color:var(--ink)}
+.actions button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--muted)}
+@media (max-width:860px){
+  body{height:auto}
+  .app{display:block;height:auto}
+  .stage{height:58vh;height:58svh;min-height:340px}
+  .panel{border-left:0;border-top:1px solid var(--line)}
+  .intro{left:18px;top:16px;right:18px}
+  .intro p{display:none}
+  .hint{left:18px;bottom:12px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage" id="stage">
+    <div class="intro">
+      <h1 data-i18n="h1">Konfigurera din siloanläggning</h1>
+      <p data-i18n="intro">Välj vad som ska lagras, silotyp, storlek och tillbehör. Modellen och kapaciteten uppdateras direkt.</p>
+    </div>
+    <p class="hint" data-i18n="hint">Dra för att rotera. Scrolla eller nyp för att zooma.</p>
+    <div class="fallback" id="fallback" data-i18n="fallback">3D-vyn kunde inte laddas i den här webbläsaren. Konfigurationen till höger fungerar ändå.</div>
+  </main>
+
+  <aside class="panel" aria-label="Konfiguration">
+    <fieldset class="lang">
+      <legend data-i18n="langLegend">Språk</legend>
+      <div class="seg">
+        <input type="radio" name="lang" id="l-sv" value="sv" checked><label for="l-sv" lang="sv">Svenska</label>
+        <input type="radio" name="lang" id="l-en" value="en"><label for="l-en" lang="en">English</label>
+        <input type="radio" name="lang" id="l-de" value="de"><label for="l-de" lang="de">Deutsch</label>
+        <input type="radio" name="lang" id="l-da" value="da"><label for="l-da" lang="da">Dansk</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend data-i18n="useLegend">Vad ska lagras?</legend>
+      <div class="seg">
+        <input type="radio" name="use" id="u-grain" value="grain" checked><label for="u-grain" data-i18n="use_grain">Spannmål</label>
+        <input type="radio" name="use" id="u-pellets" value="pellets"><label for="u-pellets" data-i18n="use_pellets">Träpellets</label>
+        <input type="radio" name="use" id="u-feed" value="feed"><label for="u-feed" data-i18n="use_feed">Foder</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend data-i18n="typeLegend">Silotyp</legend>
+      <div class="seg">
+        <input type="radio" name="type" id="t-flat" value="flat" checked><label for="t-flat" data-i18n="type_flat">Plan botten</label>
+        <input type="radio" name="type" id="t-hopper" value="hopper"><label for="t-hopper" data-i18n="type_hopper">Konisk botten</label>
+      </div>
+      <p class="note" id="typeNote"></p>
+    </fieldset>
+
+    <div>
+      <label class="ctl-label" for="d"><span data-i18n="diameter">Diameter</span> <output id="dOut" for="d"></output></label>
+      <input type="range" id="d" min="2.5" max="8" step="0.5" value="5">
+    </div>
+
+    <div>
+      <label class="ctl-label" for="rings"><span data-i18n="cylH">Cylinderhöjd</span> <output id="hOut" for="rings"></output></label>
+      <input type="range" id="rings" min="3" max="14" step="1" value="8">
+    </div>
+
+    <div>
+      <span class="ctl-label" id="countLbl" data-i18n="count">Antal silos</span>
+      <div class="stepper" role="group" aria-labelledby="countLbl">
+        <button type="button" id="minus" aria-label="Färre silos">−</button>
+        <output id="countOut" aria-live="polite">1</output>
+        <button type="button" id="plus" aria-label="Fler silos">+</button>
+      </div>
+    </div>
+
+    <fieldset>
+      <legend data-i18n="accLegend">Tillbehör</legend>
+      <div class="checks">
+        <label><input type="checkbox" id="ladder" checked><span data-i18n="acc_ladder">Lejdare med skyddsbur</span></label>
+        <label><input type="checkbox" id="screw" checked><span data-i18n="acc_screw">Uttagsskruv</span></label>
+        <label><input type="checkbox" id="sensor"><span data-i18n="acc_sensor">Nivågivare</span></label>
+        <label id="fansLbl"><input type="checkbox" id="fans"><span><span data-i18n="acc_fans">Luftningsfläkt</span><small id="fansNote"></small></span></label>
+        <label id="walkLbl"><input type="checkbox" id="walkway"><span><span data-i18n="acc_walkway">Gångbrygga mellan silos</span><small id="walkNote"></small></span></label>
+      </div>
+    </fieldset>
+
+    <section class="spec" aria-label="Sammanfattning">
+      <dl id="spec"></dl>
+    </section>
+
+    <button type="button" class="cta" id="cta" data-i18n="cta">Skapa förfrågan</button>
+    <p class="fine" data-i18n="fine">Konceptdemo från Pentia för MAFA i Ängelholm. Mått och kapacitet är ungefärliga och bygger inte på MAFA:s produktdata.</p>
+  </aside>
+</div>
+
+<dialog id="req" aria-labelledby="reqTitle">
+  <h2 id="reqTitle" data-i18n="reqTitle">Din förfrågan</h2>
+  <p data-i18n="reqText">I en skarp version skickas förfrågan direkt till rätt säljare, med konfigurationen och 3D-bilden bifogade.</p>
+  <dl id="reqList"></dl>
+  <div class="actions">
+    <button type="button" class="btn-copy" id="copy" data-i18n="copy">Kopiera specifikationen</button>
+    <button type="button" class="btn-close" id="close" data-i18n="close">Stäng</button>
+  </div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var RING_H = 1.1;
+  var DENSITY = {grain:0.78, pellets:0.65, feed:0.6};
+  var LOCALES = {sv:"sv-SE", en:"en-GB", de:"de-DE", da:"da-DK"};
+
+  var T = {
+    sv:{
+      title:"Silokonfigurator – konceptdemo för MAFA",
+      h1:"Konfigurera din siloanläggning",
+      intro:"Välj vad som ska lagras, silotyp, storlek och tillbehör. Modellen och kapaciteten uppdateras direkt.",
+      hint:"Dra för att rotera. Scrolla eller nyp för att zooma.",
+      fallback:"3D-vyn kunde inte laddas i den här webbläsaren. Konfigurationen fungerar ändå.",
+      canvas:"3D-vy av den konfigurerade siloanläggningen. Använd piltangenterna för att rotera.",
+      langLegend:"Språk", panel:"Konfiguration",
+      useLegend:"Vad ska lagras?", use_grain:"Spannmål", use_pellets:"Träpellets", use_feed:"Foder",
+      noun_grain:"spannmål", noun_pellets:"träpellets", noun_feed:"foder",
+      typeLegend:"Silotyp", type_flat:"Plan botten", type_hopper:"Konisk botten",
+      note_flat:"För stora volymer. Töms med svepskruv i botten.",
+      note_hopper:"Självtömmande genom konen. Diameter upp till 5 m.",
+      diameter:"Diameter", cylH:"Cylinderhöjd", count:"Antal silos", fewer:"Färre silos", more:"Fler silos",
+      accLegend:"Tillbehör", acc_ladder:"Lejdare med skyddsbur", acc_screw:"Uttagsskruv", acc_sensor:"Nivågivare",
+      acc_fans:"Luftningsfläkt", acc_walkway:"Gångbrygga mellan silos",
+      fansOff:"Gäller silos med plan botten", walkOff:"Kräver minst två silos",
+      totalVol:"Total volym", capacity:"Kapacitet", volPer:"Volym per silo", totalH:"Totalhöjd",
+      price:"Prisindikation", priceVal:"Visas när prislistan är kopplad",
+      use:"Användning", silotype:"Silotyp", rings:"ringar", accessories:"Tillbehör", none:"Inga",
+      approx:"ca", ton:"ton", cta:"Skapa förfrågan",
+      fine:"Konceptdemo från Pentia för MAFA i Ängelholm. Mått och kapacitet är ungefärliga och bygger inte på MAFA:s produktdata.",
+      reqTitle:"Din förfrågan",
+      reqText:"I en skarp version skickas förfrågan direkt till rätt säljare, med konfigurationen och 3D-bilden bifogade.",
+      copy:"Kopiera specifikationen", copied:"Kopierad", copyFail:"Kunde inte kopiera", close:"Stäng",
+      header:"Förfrågan om siloanläggning", summary:"Sammanfattning"
+    },
+    en:{
+      title:"Silo configurator – concept demo for MAFA",
+      h1:"Configure your silo installation",
+      intro:"Choose what to store, silo type, size and accessories. The model and capacity update instantly.",
+      hint:"Drag to rotate. Scroll or pinch to zoom.",
+      fallback:"The 3D view could not load in this browser. The configuration still works.",
+      canvas:"3D view of the configured silo installation. Use the arrow keys to rotate.",
+      langLegend:"Language", panel:"Configuration",
+      useLegend:"What will you store?", use_grain:"Grain", use_pellets:"Wood pellets", use_feed:"Feed",
+      noun_grain:"grain", noun_pellets:"wood pellets", noun_feed:"feed",
+      typeLegend:"Silo type", type_flat:"Flat bottom", type_hopper:"Hopper bottom",
+      note_flat:"For large volumes. Emptied with a sweep auger at the base.",
+      note_hopper:"Self-emptying through the cone. Diameter up to 5 m.",
+      diameter:"Diameter", cylH:"Cylinder height", count:"Number of silos", fewer:"Fewer silos", more:"More silos",
+      accLegend:"Accessories", acc_ladder:"Ladder with safety cage", acc_screw:"Discharge auger", acc_sensor:"Level sensor",
+      acc_fans:"Aeration fan", acc_walkway:"Walkway between silos",
+      fansOff:"Applies to flat-bottom silos", walkOff:"Requires at least two silos",
+      totalVol:"Total volume", capacity:"Capacity", volPer:"Volume per silo", totalH:"Overall height",
+      price:"Price indication", priceVal:"Shown once the price list is connected",
+      use:"Stored material", silotype:"Silo type", rings:"rings", accessories:"Accessories", none:"None",
+      approx:"approx.", ton:"t", cta:"Create enquiry",
+      fine:"Concept demo by Pentia for MAFA i Ängelholm. Dimensions and capacity are approximate and not based on MAFA product data.",
+      reqTitle:"Your enquiry",
+      reqText:"In a live version the enquiry goes straight to the right sales rep, with the configuration and 3D image attached.",
+      copy:"Copy specification", copied:"Copied", copyFail:"Could not copy", close:"Close",
+      header:"Silo installation enquiry", summary:"Summary"
+    },
+    de:{
+      title:"Silokonfigurator – Konzeptdemo für MAFA",
+      h1:"Konfigurieren Sie Ihre Siloanlage",
+      intro:"Wählen Sie Lagergut, Silotyp, Größe und Zubehör. Modell und Kapazität werden sofort aktualisiert.",
+      hint:"Ziehen zum Drehen. Scrollen oder mit zwei Fingern zoomen.",
+      fallback:"Die 3D-Ansicht konnte in diesem Browser nicht geladen werden. Die Konfiguration funktioniert trotzdem.",
+      canvas:"3D-Ansicht der konfigurierten Siloanlage. Mit den Pfeiltasten drehen.",
+      langLegend:"Sprache", panel:"Konfiguration",
+      useLegend:"Was soll gelagert werden?", use_grain:"Getreide", use_pellets:"Holzpellets", use_feed:"Futtermittel",
+      noun_grain:"Getreide", noun_pellets:"Holzpellets", noun_feed:"Futtermittel",
+      typeLegend:"Silotyp", type_flat:"Flachboden", type_hopper:"Konusboden",
+      note_flat:"Für große Mengen. Entleerung mit Bodenräumschnecke.",
+      note_hopper:"Selbstentleerend über den Konus. Durchmesser bis 5 m.",
+      diameter:"Durchmesser", cylH:"Zylinderhöhe", count:"Anzahl Silos", fewer:"Weniger Silos", more:"Mehr Silos",
+      accLegend:"Zubehör", acc_ladder:"Steigleiter mit Rückenschutz", acc_screw:"Austragsschnecke", acc_sensor:"Füllstandsmelder",
+      acc_fans:"Belüftungsgebläse", acc_walkway:"Laufsteg zwischen den Silos",
+      fansOff:"Nur für Flachbodensilos", walkOff:"Erfordert mindestens zwei Silos",
+      totalVol:"Gesamtvolumen", capacity:"Kapazität", volPer:"Volumen pro Silo", totalH:"Gesamthöhe",
+      price:"Preisindikation", priceVal:"Wird angezeigt, sobald die Preisliste angebunden ist",
+      use:"Lagergut", silotype:"Silotyp", rings:"Ringe", accessories:"Zubehör", none:"Keines",
+      approx:"ca.", ton:"t", cta:"Anfrage erstellen",
+      fine:"Konzeptdemo von Pentia für MAFA i Ängelholm. Maße und Kapazität sind Näherungswerte und basieren nicht auf Produktdaten von MAFA.",
+      reqTitle:"Ihre Anfrage",
+      reqText:"In einer Live-Version geht die Anfrage direkt an den zuständigen Vertrieb, mit Konfiguration und 3D-Bild im Anhang.",
+      copy:"Spezifikation kopieren", copied:"Kopiert", copyFail:"Kopieren nicht möglich", close:"Schließen",
+      header:"Anfrage Siloanlage", summary:"Zusammenfassung"
+    },
+    da:{
+      title:"Silokonfigurator – konceptdemo til MAFA",
+      h1:"Konfigurer dit siloanlæg",
+      intro:"Vælg lagervare, silotype, størrelse og tilbehør. Model og kapacitet opdateres med det samme.",
+      hint:"Træk for at rotere. Scroll eller knib for at zoome.",
+      fallback:"3D-visningen kunne ikke indlæses i denne browser. Konfigurationen virker stadig.",
+      canvas:"3D-visning af det konfigurerede siloanlæg. Brug piletasterne til at rotere.",
+      langLegend:"Sprog", panel:"Konfiguration",
+      useLegend:"Hvad skal opbevares?", use_grain:"Korn", use_pellets:"Træpiller", use_feed:"Foder",
+      noun_grain:"korn", noun_pellets:"træpiller", noun_feed:"foder",
+      typeLegend:"Silotype", type_flat:"Flad bund", type_hopper:"Konisk bund",
+      note_flat:"Til store mængder. Tømmes med bundsnegl.",
+      note_hopper:"Selvtømmende gennem konussen. Diameter op til 5 m.",
+      diameter:"Diameter", cylH:"Cylinderhøjde", count:"Antal siloer", fewer:"Færre siloer", more:"Flere siloer",
+      accLegend:"Tilbehør", acc_ladder:"Stige med rygbøjler", acc_screw:"Udtagningssnegl", acc_sensor:"Niveaumåler",
+      acc_fans:"Beluftningsblæser", acc_walkway:"Gangbro mellem siloer",
+      fansOff:"Gælder siloer med flad bund", walkOff:"Kræver mindst to siloer",
+      totalVol:"Samlet volumen", capacity:"Kapacitet", volPer:"Volumen pr. silo", totalH:"Samlet højde",
+      price:"Prisindikation", priceVal:"Vises, når prislisten er koblet på",
+      use:"Lagervare", silotype:"Silotype", rings:"ringe", accessories:"Tilbehør", none:"Intet",
+      approx:"ca.", ton:"ton", cta:"Opret forespørgsel",
+      fine:"Konceptdemo fra Pentia til MAFA i Ängelholm. Mål og kapacitet er omtrentlige og bygger ikke på MAFAs produktdata.",
+      reqTitle:"Din forespørgsel",
+      reqText:"I en rigtig version går forespørgslen direkte til den rette sælger, med konfigurationen og 3D-billedet vedhæftet.",
+      copy:"Kopiér specifikationen", copied:"Kopieret", copyFail:"Kunne ikke kopiere", close:"Luk",
+      header:"Forespørgsel om siloanlæg", summary:"Sammenfatning"
+    }
+  };
+
+  var S = {lang:"sv",use:"grain",type:"flat",d:5,rings:8,count:1,ladder:true,screw:true,sensor:false,fans:false,walkway:false};
+
+  function initialLang(){
+    var h = (location.hash || "").replace("#","").toLowerCase();
+    if(T[h]) return h;
+    var n = ((navigator.language || "sv").slice(0,2)).toLowerCase();
+    return T[n] ? n : "sv";
+  }
+  S.lang = initialLang();
+
+  function t(k){ return T[S.lang][k]; }
+  function nf(min,max){ return new Intl.NumberFormat(LOCALES[S.lang],{minimumFractionDigits:min,maximumFractionDigits:max}); }
+  function f0(v){ return nf(0,0).format(v); }
+  function f1(v){ return nf(1,1).format(v); }
+
+  function $(id){return document.getElementById(id);}
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+  function dims(){
+    var r = S.d/2, cyl = S.rings*RING_H, roofH = r*Math.tan(Math.PI/6);
+    var hopper = S.type === "hopper";
+    var clearance = hopper ? 1.4 : 0;
+    var hopperH = hopper ? r*Math.tan(50*Math.PI/180) : 0;
+    var base = hopper ? clearance + hopperH : 0.3;
+    var total = base + cyl + roofH;
+    var vol = Math.PI*r*r*cyl + (hopper ? Math.PI*r*r*hopperH/3 : 0) + Math.PI*r*r*roofH/3;
+    return {r:r,cyl:cyl,roofH:roofH,hopper:hopper,clearance:clearance,hopperH:hopperH,base:base,total:total,vol:vol,spacing:S.d+1.6};
+  }
+
+  function accessories(){
+    var a = [];
+    if(S.ladder) a.push(t("acc_ladder"));
+    if(S.screw) a.push(t("acc_screw"));
+    if(S.sensor) a.push(t("acc_sensor"));
+    if(S.fans && S.type === "flat") a.push(t("acc_fans"));
+    if(S.walkway && S.count > 1) a.push(t("acc_walkway"));
+    return a;
+  }
+
+  function specRows(){
+    var D = dims(), ap = t("approx") + " ";
+    return [
+      [t("use"), t("use_" + S.use)],
+      [t("silotype"), t("type_" + S.type)],
+      [t("count"), String(S.count)],
+      [t("diameter"), f1(S.d) + " m"],
+      [t("cylH"), f1(D.cyl) + " m (" + S.rings + " " + t("rings") + ")"],
+      [t("totalH"), ap + f1(D.total) + " m"],
+      [t("volPer"), ap + f0(D.vol) + " m³"],
+      [t("totalVol"), ap + f0(D.vol*S.count) + " m³"],
+      [t("capacity"), ap + f0(D.vol*S.count*DENSITY[S.use]) + " " + t("ton") + " " + t("noun_" + S.use)],
+      [t("accessories"), accessories().join(", ") || t("none")]
+    ];
+  }
+
+  function applyLang(){
+    document.documentElement.lang = S.lang;
+    document.title = t("title");
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var v = t(el.getAttribute("data-i18n"));
+      if(v != null) el.textContent = v;
+    });
+    $("minus").setAttribute("aria-label", t("fewer"));
+    $("plus").setAttribute("aria-label", t("more"));
+    document.querySelector(".panel").setAttribute("aria-label", t("panel"));
+    document.querySelector(".spec").setAttribute("aria-label", t("summary"));
+    var c = document.querySelector(".stage canvas");
+    if(c) c.setAttribute("aria-label", t("canvas"));
+    $("l-" + S.lang).checked = true;
+  }
+
+  /* ---------- UI ---------- */
+  function syncUI(){
+    var dIn = $("d");
+    dIn.max = S.type === "hopper" ? "5" : "8";
+    if(S.d > Number(dIn.max)){ S.d = Number(dIn.max); }
+    var D = dims();
+    dIn.value = S.d;
+    $("dOut").textContent = f1(S.d) + " m";
+    $("hOut").textContent = f1(D.cyl) + " m";
+    $("countOut").textContent = S.count;
+    $("minus").disabled = S.count <= 1;
+    $("plus").disabled = S.count >= 4;
+    $("typeNote").textContent = t("note_" + S.type);
+
+    var fansOff = S.type !== "flat";
+    $("fans").disabled = fansOff;
+    $("fansLbl").classList.toggle("off", fansOff);
+    $("fansNote").textContent = fansOff ? t("fansOff") : "";
+
+    var walkOff = S.count < 2;
+    $("walkway").disabled = walkOff;
+    $("walkLbl").classList.toggle("off", walkOff);
+    $("walkNote").textContent = walkOff ? t("walkOff") : "";
+
+    var ap = t("approx") + " ";
+    var spec = $("spec");
+    spec.innerHTML = "";
+    var rows = [
+      [t("totalVol"), ap + f0(D.vol*S.count) + " m³", "big"],
+      [t("capacity") + " (" + t("noun_" + S.use) + ")", ap + f0(D.vol*S.count*DENSITY[S.use]) + " " + t("ton"), "big"],
+      [t("volPer"), ap + f0(D.vol) + " m³"],
+      [t("totalH"), ap + f1(D.total) + " m"],
+      [t("price"), t("priceVal"), "soft"]
+    ];
+    rows.forEach(function(r){
+      var dt = document.createElement("dt"); dt.textContent = r[0];
+      var dd = document.createElement("dd"); dd.textContent = r[1];
+      if(r[2]) dd.className = r[2];
+      spec.appendChild(dt); spec.appendChild(dd);
+    });
+  }
+
+  document.querySelectorAll('input[name="lang"]').forEach(function(el){
+    el.addEventListener("change", function(){
+      S.lang = el.value;
+      try{ history.replaceState(null, "", "#" + S.lang); }catch(err){}
+      applyLang(); syncUI();
+    });
+  });
+  document.querySelectorAll('input[name="use"]').forEach(function(el){
+    el.addEventListener("change", function(){ S.use = el.value; update(false); });
+  });
+  document.querySelectorAll('input[name="type"]').forEach(function(el){
+    el.addEventListener("change", function(){ S.type = el.value; update(true); });
+  });
+  $("d").addEventListener("input", function(e){ S.d = Number(e.target.value); update(true); });
+  $("rings").addEventListener("input", function(e){ S.rings = Number(e.target.value); update(true); });
+  $("minus").addEventListener("click", function(){ S.count = Math.max(1,S.count-1); update(true); });
+  $("plus").addEventListener("click", function(){ S.count = Math.min(4,S.count+1); update(true); });
+  ["ladder","screw","sensor","fans","walkway"].forEach(function(k){
+    $(k).addEventListener("change", function(e){ S[k] = e.target.checked; update(false); });
+  });
+
+  var dlg = $("req");
+  $("cta").addEventListener("click", function(){
+    var list = $("reqList"); list.innerHTML = "";
+    specRows().forEach(function(r){
+      var dt = document.createElement("dt"); dt.textContent = r[0];
+      var dd = document.createElement("dd"); dd.textContent = r[1];
+      list.appendChild(dt); list.appendChild(dd);
+    });
+    $("copy").textContent = t("copy");
+    if(typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open","");
+  });
+  $("close").addEventListener("click", function(){ if(dlg.close) dlg.close(); else dlg.removeAttribute("open"); });
+  $("copy").addEventListener("click", function(){
+    var text = t("header") + "\n" + specRows().map(function(r){return r[0] + ": " + r[1];}).join("\n");
+    var btn = $("copy");
+    try{
+      navigator.clipboard.writeText(text).then(function(){ btn.textContent = t("copied"); }, function(){ btn.textContent = t("copyFail"); });
+    }catch(err){ btn.textContent = t("copyFail"); }
+  });
+
+  /* ---------- 3D ---------- */
+  var stage = $("stage");
+  var has3D = typeof THREE !== "undefined";
+  var renderer, scene, camera, world, M, sun, orbit, interacted = false;
+
+  if(has3D){
+    try{
+      renderer = new THREE.WebGLRenderer({antialias:true});
+    }catch(err){ has3D = false; }
+  }
+  if(!has3D){
+    $("fallback").style.display = "flex";
+  } else {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    var canvas = renderer.domElement;
+    canvas.setAttribute("role","img");
+    canvas.setAttribute("aria-label","3D-vy av den konfigurerade siloanläggningen. Använd piltangenterna för att rotera.");
+    canvas.tabIndex = 0;
+    stage.insertBefore(canvas, stage.firstChild);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(35, 1, 0.1, 900);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f80, 0.75));
+    sun = new THREE.DirectionalLight(0xffffff, 1.15);
+    sun.position.set(20, 34, 16);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0005;
+    scene.add(sun); scene.add(sun.target);
+
+    var makeCorrugation = function(){
+      var c = document.createElement("canvas"); c.width = 4; c.height = 64;
+      var g = c.getContext("2d");
+      for(var y = 0; y < 64; y++){
+        var v = 0.5 + 0.5*Math.sin(y/64*Math.PI*2);
+        var s = Math.round(150 + v*72);
+        g.fillStyle = "rgb(" + s + "," + (s+4) + "," + (s+8) + ")";
+        g.fillRect(0, y, 4, 1);
+      }
+      var t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      return t;
+    };
+    var corrMap = makeCorrugation(); corrMap.encoding = THREE.sRGBEncoding;
+    var corrBump = makeCorrugation();
+
+    M = {
+      steel: new THREE.MeshStandardMaterial({color:0xe6ebef, map:corrMap, bumpMap:corrBump, bumpScale:0.05, metalness:0.55, roughness:0.4}),
+      roof: new THREE.MeshStandardMaterial({color:0xcfd6db, metalness:0.5, roughness:0.45, flatShading:true}),
+      cone: new THREE.MeshStandardMaterial({color:0xc2cad0, metalness:0.5, roughness:0.5, side:THREE.DoubleSide}),
+      frame: new THREE.MeshStandardMaterial({color:0x7f8b93, metalness:0.6, roughness:0.45}),
+      dark: new THREE.MeshStandardMaterial({color:0x3a4448, metalness:0.3, roughness:0.6}),
+      concrete: new THREE.MeshStandardMaterial({color:0xb8b5ad, roughness:0.95}),
+      safety: new THREE.MeshStandardMaterial({color:0xe3be1b, metalness:0.2, roughness:0.5}),
+      ground: new THREE.MeshStandardMaterial({color:0xc3ccb2, roughness:1})
+    };
+    Object.keys(M).forEach(function(k){ M[k].color.convertSRGBToLinear(); });
+
+    var ground = new THREE.Mesh(new THREE.CircleGeometry(320, 64), M.ground);
+    ground.rotation.x = -Math.PI/2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    world = new THREE.Group();
+    scene.add(world);
+
+    orbit = {
+      theta:0.75, phi:1.18, radius:30, target:new THREE.Vector3(0,4,0),
+      tTheta:0.75, tPhi:1.18, tRadius:30, tTarget:new THREE.Vector3(0,4,0)
+    };
+  }
+
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function applyTheme(){
+    if(!has3D) return;
+    var skyHex = cssVar("--sky") || "#DCE3E7";
+    scene.background = new THREE.Color(skyHex);
+    scene.fog = new THREE.Fog(new THREE.Color(skyHex).convertSRGBToLinear(), 70, 300);
+    M.ground.color.set(cssVar("--ground") || "#C3CCB2").convertSRGBToLinear();
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    sun.intensity = dark ? 0.95 : 1.15;
+  }
+
+  var UP = has3D ? new THREE.Vector3(0,1,0) : null;
+  function mesh(geo, mat, cast){
+    var m = new THREE.Mesh(geo, mat);
+    m.castShadow = cast !== false; m.receiveShadow = true;
+    return m;
+  }
+  function rod(a, b, rad, mat, seg){
+    var dir = new THREE.Vector3().subVectors(b, a);
+    var len = dir.length();
+    var m = mesh(new THREE.CylinderGeometry(rad, rad, len, seg || 10), mat);
+    m.position.copy(a).addScaledVector(dir, 0.5);
+    m.quaternion.setFromUnitVectors(UP, dir.normalize());
+    return m;
+  }
+
+  function buildLadder(D){
+    var th = Math.PI/4, off = D.r + 0.28;
+    var g = new THREE.Group();
+    g.position.set(Math.cos(th)*off, 0, Math.sin(th)*off);
+    g.rotation.y = Math.PI/2 - th;
+    var bottom = D.hopper ? 0 : 0.3;
+    var top = D.base + D.cyl + 0.9;
+    var h = top - bottom;
+    [-0.22, 0.22].forEach(function(x){
+      var rail = mesh(new THREE.BoxGeometry(0.05, h, 0.05), M.frame);
+      rail.position.set(x, bottom + h/2, 0); g.add(rail);
+    });
+    for(var y = bottom + 0.3; y < top - 0.15; y += 0.3){
+      var rung = mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.44, 6), M.frame, false);
+      rung.rotation.z = Math.PI/2; rung.position.set(0, y, 0); g.add(rung);
+    }
+    var cageFrom = bottom + 2.4;
+    if(top > cageFrom + 0.5){
+      for(var cy = cageFrom; cy <= top; cy += 0.9){
+        var hoop = mesh(new THREE.TorusGeometry(0.36, 0.022, 4, 14, Math.PI), M.safety, false);
+        hoop.rotation.x = Math.PI/2; hoop.position.set(0, cy, 0.08); g.add(hoop);
+      }
+      [[0.36,0.08],[0,0.44],[-0.36,0.08]].forEach(function(p){
+        var bar = mesh(new THREE.BoxGeometry(0.03, top - cageFrom, 0.03), M.safety, false);
+        bar.position.set(p[0], cageFrom + (top - cageFrom)/2, p[1]); g.add(bar);
+      });
+    }
+    return g;
+  }
+
+  function buildScrew(D){
+    var g = new THREE.Group();
+    var a = 2.1, dx = Math.cos(a), dz = Math.sin(a), r = D.r;
+    var A, B;
+    if(D.hopper){
+      A = new THREE.Vector3(0, D.clearance - 0.3, 0);
+      B = new THREE.Vector3(dx*(r + 3.2), D.clearance + 2.4, dz*(r + 3.2));
+    } else {
+      A = new THREE.Vector3(dx*(r + 0.2), 0.55, dz*(r + 0.2));
+      B = new THREE.Vector3(dx*(r + 4.6), 3.3, dz*(r + 4.6));
+    }
+    g.add(rod(A, B, 0.13, M.frame, 14));
+    var motor = mesh(new THREE.BoxGeometry(0.46, 0.42, 0.46), M.dark);
+    motor.position.set(B.x, B.y + 0.18, B.z); g.add(motor);
+    var s0 = new THREE.Vector3(B.x - dx*0.15, B.y - 0.1, B.z - dz*0.15);
+    var s1 = new THREE.Vector3(B.x - dx*0.15, B.y - 1.0, B.z - dz*0.15);
+    g.add(rod(s0, s1, 0.1, M.frame));
+    var lx = B.x - dx*0.7, lz = B.z - dz*0.7;
+    var ly = A.y + (B.y - A.y) * (1 - 0.7/ Math.max(0.1, Math.hypot(B.x - A.x, B.z - A.z)));
+    g.add(rod(new THREE.Vector3(lx, 0, lz), new THREE.Vector3(lx, ly - 0.1, lz), 0.05, M.frame, 8));
+    return g;
+  }
+
+  function buildFan(D){
+    var a = 2.75;
+    var g = new THREE.Group();
+    g.position.set(Math.cos(a)*(D.r + 0.45), 0, Math.sin(a)*(D.r + 0.45));
+    g.rotation.y = -a;
+    var duct = mesh(new THREE.BoxGeometry(0.7, 0.55, 0.7), M.frame);
+    duct.position.set(0, 0.6, 0); g.add(duct);
+    var fan = mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.45, 20), M.dark);
+    fan.rotation.z = Math.PI/2; fan.position.set(0.55, 0.6, 0); g.add(fan);
+    return g;
+  }
+
+  function buildSilo(D, cx){
+    var g = new THREE.Group(); g.position.x = cx;
+    var r = D.r, i;
+    if(D.hopper){
+      var cone = mesh(new THREE.CylinderGeometry(r, 0.22, D.hopperH, 48, 1, true), M.cone);
+      cone.position.y = D.clearance + D.hopperH/2; g.add(cone);
+      var outlet = mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.35, 16), M.frame);
+      outlet.position.y = D.clearance - 0.12; g.add(outlet);
+      var n = S.d > 3.5 ? 8 : 6;
+      for(i = 0; i < n; i++){
+        var a = i/n*Math.PI*2 + Math.PI/n;
+        var x = Math.cos(a)*(r + 0.06), z = Math.sin(a)*(r + 0.06);
+        var leg = mesh(new THREE.BoxGeometry(0.16, D.base, 0.16), M.frame);
+        leg.position.set(x, D.base/2, z); g.add(leg);
+        var pad = mesh(new THREE.BoxGeometry(0.6, 0.15, 0.6), M.concrete);
+        pad.position.set(x, 0.075, z); g.add(pad);
+      }
+      var brace = mesh(new THREE.TorusGeometry(r + 0.06, 0.05, 6, 64), M.frame);
+      brace.rotation.x = Math.PI/2; brace.position.y = D.clearance*0.7; g.add(brace);
+    } else {
+      var slab = mesh(new THREE.CylinderGeometry(r + 0.4, r + 0.45, 0.3, 48), M.concrete);
+      slab.position.y = 0.15; g.add(slab);
+    }
+    var body = mesh(new THREE.CylinderGeometry(r, r, D.cyl, 72, 1, true), M.steel);
+    body.position.y = D.base + D.cyl/2; g.add(body);
+    for(i = 0; i <= S.rings; i++){
+      var seam = mesh(new THREE.TorusGeometry(r + 0.012, 0.022, 4, 72), M.frame, false);
+      seam.rotation.x = Math.PI/2; seam.position.y = D.base + i*RING_H; g.add(seam);
+    }
+    var roof = mesh(new THREE.ConeGeometry(r + 0.15, D.roofH, 28, 1), M.roof);
+    roof.position.y = D.base + D.cyl + D.roofH/2; g.add(roof);
+    var hatch = mesh(new THREE.CylinderGeometry(0.36, 0.42, 0.32, 20), M.frame);
+    hatch.position.y = D.base + D.cyl + D.roofH + 0.04; g.add(hatch);
+
+    if(S.ladder) g.add(buildLadder(D));
+    if(S.screw) g.add(buildScrew(D));
+    if(S.fans && !D.hopper) g.add(buildFan(D));
+    if(S.sensor){
+      var sa = -Math.PI*0.75, rr = r*0.55;
+      var sy = D.base + D.cyl + D.roofH*(1 - rr/(r + 0.15));
+      var sx = Math.cos(sa)*rr, sz = Math.sin(sa)*rr;
+      var post = mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.55, 12), M.dark);
+      post.position.set(sx, sy + 0.25, sz); g.add(post);
+      var cap = mesh(new THREE.SphereGeometry(0.14, 16, 12), M.safety);
+      cap.position.set(sx, sy + 0.58, sz); g.add(cap);
+    }
+    return g;
+  }
+
+  function buildWalkway(D, x0, x1){
+    var g = new THREE.Group();
+    var y = D.base + D.cyl + D.roofH + 0.25;
+    var len = x1 - x0, mid = (x0 + x1)/2;
+    var deck = mesh(new THREE.BoxGeometry(len, 0.08, 0.8), M.frame);
+    deck.position.set(mid, y, 0); g.add(deck);
+    [-0.4, 0.4].forEach(function(z){
+      var rail = mesh(new THREE.BoxGeometry(len, 0.04, 0.04), M.safety, false);
+      rail.position.set(mid, y + 1.0, z); g.add(rail);
+      var steps = Math.max(2, Math.round(len/1.4));
+      for(var k = 0; k <= steps; k++){
+        var post = mesh(new THREE.BoxGeometry(0.04, 1.0, 0.04), M.safety, false);
+        post.position.set(x0 + len*k/steps, y + 0.5, z); g.add(post);
+      }
+    });
+    return g;
+  }
+
+  function clearWorld(){
+    world.traverse(function(o){ if(o.geometry) o.geometry.dispose(); });
+    while(world.children.length) world.remove(world.children[0]);
+  }
+
+  function rebuild(refit){
+    if(!has3D) return;
+    clearWorld();
+    var D = dims();
+    corrMapRepeat(D);
+    var off = (S.count - 1)*D.spacing/2;
+    for(var i = 0; i < S.count; i++){
+      world.add(buildSilo(D, i*D.spacing - off));
+    }
+    if(S.walkway && S.count > 1){
+      for(var j = 0; j < S.count - 1; j++){
+        world.add(buildWalkway(D, j*D.spacing - off, (j + 1)*D.spacing - off));
+      }
+    }
+    var ext = Math.max(18, off + D.r + 8, D.total + 4);
+    var sc = sun.shadow.camera;
+    sc.left = -ext; sc.right = ext; sc.top = ext; sc.bottom = -ext; sc.near = 1; sc.far = 140;
+    sc.updateProjectionMatrix();
+    sun.target.position.set(0, 0, 0);
+    if(refit) fit(D);
+  }
+
+  function corrMapRepeat(D){
+    var rep = Math.round(D.cyl*6);
+    M.steel.map.repeat.set(1, rep);
+    M.steel.bumpMap.repeat.set(1, rep);
+  }
+
+  function fit(D){
+    var widthSpan = (S.count - 1)*D.spacing + S.d + (S.screw ? 8 : 3);
+    var heightSpan = D.total + 1.5;
+    var vfov = camera.fov*Math.PI/180;
+    var aspect = camera.aspect || 1.5;
+    var rH = heightSpan/(2*Math.tan(vfov/2))*1.45;
+    var rW = widthSpan/(2*Math.tan(vfov/2)*aspect)*1.25;
+    orbit.tRadius = clamp(Math.max(rH, rW, 12), 8, 170);
+    orbit.tTarget.set(0, D.total*0.42, 0);
+  }
+
+  function update(refit){
+    syncUI();
+    rebuild(refit);
+  }
+
+  if(has3D){
+    var canvasEl = renderer.domElement;
+    var pts = new Map(), lastPinch = 0;
+    canvasEl.addEventListener("pointerdown", function(e){
+      canvasEl.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      interacted = true;
+    });
+    canvasEl.addEventListener("pointermove", function(e){
+      if(!pts.has(e.pointerId)) return;
+      var p = pts.get(e.pointerId);
+      var dx = e.clientX - p.x, dy = e.clientY - p.y;
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pts.size === 1){
+        orbit.tTheta -= dx*0.006;
+        orbit.tPhi = clamp(orbit.tPhi - dy*0.005, 0.3, 1.48);
+      } else if(pts.size === 2){
+        var v = Array.from(pts.values());
+        var d = Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y);
+        if(lastPinch) orbit.tRadius = clamp(orbit.tRadius*lastPinch/d, 6, 170);
+        lastPinch = d;
+      }
+    });
+    var endPtr = function(e){ pts.delete(e.pointerId); if(pts.size < 2) lastPinch = 0; };
+    canvasEl.addEventListener("pointerup", endPtr);
+    canvasEl.addEventListener("pointercancel", endPtr);
+    canvasEl.addEventListener("wheel", function(e){
+      e.preventDefault(); interacted = true;
+      orbit.tRadius = clamp(orbit.tRadius*Math.exp(e.deltaY*0.001), 6, 170);
+    }, {passive:false});
+    canvasEl.addEventListener("keydown", function(e){
+      var used = true;
+      if(e.key === "ArrowLeft") orbit.tTheta += 0.15;
+      else if(e.key === "ArrowRight") orbit.tTheta -= 0.15;
+      else if(e.key === "ArrowUp") orbit.tPhi = clamp(orbit.tPhi - 0.1, 0.3, 1.48);
+      else if(e.key === "ArrowDown") orbit.tPhi = clamp(orbit.tPhi + 0.1, 0.3, 1.48);
+      else if(e.key === "+" || e.key === "=") orbit.tRadius = clamp(orbit.tRadius*0.9, 6, 170);
+      else if(e.key === "-") orbit.tRadius = clamp(orbit.tRadius*1.1, 6, 170);
+      else used = false;
+      if(used){ e.preventDefault(); interacted = true; }
+    });
+
+    var resize = function(){
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if(!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w/h;
+      camera.updateProjectionMatrix();
+    };
+    if("ResizeObserver" in window) new ResizeObserver(resize).observe(stage);
+    else window.addEventListener("resize", resize);
+    resize();
+
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if(mq.addEventListener) mq.addEventListener("change", applyTheme);
+    applyTheme();
+  }
+
+  applyLang();
+  syncUI();
+  if(has3D){
+    rebuild(true);
+    orbit.radius = orbit.tRadius;
+    orbit.target.copy(orbit.tTarget);
+    var tick = function(){
+      if(!interacted && !reduceMotion) orbit.tTheta += 0.0012;
+      var k = reduceMotion ? 1 : 0.12;
+      orbit.theta += (orbit.tTheta - orbit.theta)*k;
+      orbit.phi += (orbit.tPhi - orbit.phi)*k;
+      orbit.radius += (orbit.tRadius - orbit.radius)*k;
+      orbit.target.lerp(orbit.tTarget, k);
+      var sp = Math.sin(orbit.phi);
+      camera.position.set(
+        orbit.target.x + orbit.radius*sp*Math.sin(orbit.theta),
+        orbit.target.y + orbit.radius*Math.cos(orbit.phi),
+        orbit.target.z + orbit.radius*sp*Math.cos(orbit.theta)
+      );
+      camera.lookAt(orbit.target);
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+})();
+</script>
+</body>
+</html>
