@@ -654,8 +654,9 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const small = Math.min(innerWidth, innerHeight) < 700;
 const tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const stage = document.getElementById('stage');
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const DPR = Math.min(devicePixelRatio || 1, small ? 1 : 1.5);
+const renderer = new THREE.WebGLRenderer({ antialias: (devicePixelRatio || 1) < 1.5, powerPreference: 'high-performance' });
+renderer.setPixelRatio(DPR);
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -670,7 +671,9 @@ const controls = new OrbitControls(camera, labelRenderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.maxPolarAngle = 88 * DEG; controls.minDistance = 2; controls.maxDistance = 1600;
 let tween = null;
+let needsRender = true; const invalidate = () => { needsRender = true; };
 controls.addEventListener('start', () => { tween = null; });
+controls.addEventListener('change', invalidate);
 
 /* ---------- Textures ---------- */
 function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -1155,7 +1158,7 @@ for (let f = 0; f < 3; f++) {
       if (kind !== 'void') for (const [p, q] of edges) walls.add(M.pwall, segGeo(p, q, y - 0.01, y + 1.3, 0.13));
     }
   }
-  tiles.build(tileGroups[f], { cast: false }); walls.build(tileGroups[f]); furn.build(roomGroups[f]);
+  tiles.build(tileGroups[f], { cast: false }); walls.build(tileGroups[f]); furn.build(roomGroups[f], { cast: false });
 }
 let roomTags = [];
 function showRoomLabels() {
@@ -1199,7 +1202,7 @@ const ctxLabels = [];
     }
   }
   void lastW;
-  water.build(ctxGroup, { cast: false }); roads.build(ctxGroup, { cast: false }); blds.build(ctxGroup);
+  water.build(ctxGroup, { cast: false }); roads.build(ctxGroup, { cast: false }); blds.build(ctxGroup, { cast: false });
   const em = new THREE.LineSegments(mergeGeometries(edges), M.edge); ctxGroup.add(em);
   const place = (text, x, z, y = 8, cls = 'tag place') => { const t = mkTag(text, cls); t.position.set(x, y, z); ctxGroup.add(t); ctxLabels.push(t); return t; };
   place('Turning Torso', -530, -292, 186); place('Kranen', 85, -552, 20); place('Ubåtshallen', 120, -487, 16);
@@ -1222,7 +1225,7 @@ const ctxLabels = [];
 const LAT = 55.6107, LON = 12.9847, YEAR = 2026;
 const hemi = new THREE.HemisphereLight(0xe3ebf2, 0x8c7c68, 0.9); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
-sun.castShadow = true; sun.shadow.mapSize.set(small ? 2048 : 4096, small ? 2048 : 4096);
+sun.castShadow = true; sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -95, right: 95, top: 95, bottom: -95, near: 1, far: 900 });
 sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.04;
 scene.add(sun, sun.target); sun.target.position.set(0, HALL.H, 0);
@@ -1275,6 +1278,7 @@ new MutationObserver(applyTheme).observe(document.documentElement, { attributes:
 const state = { view: 'site', floor: 0, explode: 0, mode: 'status', sel: null, doy: 172, min: 1080, ctx: true, nums: true };
 const statusCol = s => s === 'res' ? '#8d908c' : '#3f9a7c';
 function colorHouses() {
+  invalidate();
   for (const h of HOUSES) {
     const c = state.mode === 'status' ? statusCol(h.status) : state.mode === 'type' ? TYPE_COL[h.type] : '#7d7f79';
     h.roofMat.color.set(c);
@@ -1318,6 +1322,7 @@ function frame0(view) {
   return [world(0, fy + 92, 26), world(0, fy, 1.5)];
 }
 function apply(fly = true) {
+  invalidate();
   const { view, floor } = state, isFloor = view === 'floor', ex = isFloor ? 0 : state.explode;
   floors.forEach((g, i) => { g.visible = !isFloor || i <= floor; g.position.y = i * ex; });
   roofGroup.visible = !isFloor; roofGroup.position.y = 3 * ex;
@@ -1399,6 +1404,7 @@ document.getElementById('tCtx').addEventListener('change', e => { state.ctx = e.
 document.getElementById('explode').addEventListener('input', e => { state.explode = +e.target.value; apply(false); });
 const dayEl = document.getElementById('day'), timeEl = document.getElementById('time');
 function updateSun() {
+  invalidate();
   const { alt, az } = setSun(state.doy, state.min), [m, d] = doyMD(state.doy), [ri, se] = riseSet(state.doy);
   document.getElementById('sunVal').textContent = `${d} ${MONTHS[m]} · ${fmtT(state.min)}`;
   document.getElementById('rAlt').textContent = alt > -0.833 ? alt.toFixed(0) + '°' : 'under horisonten';
@@ -1435,12 +1441,14 @@ labelRenderer.domElement.addEventListener('pointerup', e => {
 
 /* ---------- Loop ---------- */
 function resize() {
+  invalidate();
   const w = stage.clientWidth, h = stage.clientHeight;
   renderer.setSize(w, h); labelRenderer.setSize(w, h);
   camera.aspect = w / h;
   updateOffset();
 }
 function updateOffset() {
+  invalidate();
   const w = stage.clientWidth, h = stage.clientHeight;
   if (w > 760) camera.setViewOffset(w, h, -Math.min(180, w * 0.13), 0, w, h);
   else { const cardOpen = !card.hidden, sheetOpen = !panel.classList.contains('collapsed');
@@ -1459,8 +1467,11 @@ renderer.setAnimationLoop(now => {
     const k = Math.min(1, (now - tween.start) / tween.dur), e = ease(k);
     camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
     if (k === 1) tween = null;
+    needsRender = true;
   }
-  controls.update();
+  if (controls.update()) needsRender = true;   // true while the damping is still settling
+  if (!needsRender) return;                    // nothing changed: skip the frame
+  needsRender = false;
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 });
